@@ -1,0 +1,8 @@
+.action {
+  user-select: none;
+  color: var(--chakra-colors-blue-500);
+}
+
+.action:hover {
+  color: var(--chakra-colors-blue-600);
+}

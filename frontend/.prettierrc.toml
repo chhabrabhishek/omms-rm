@@ -1,0 +1,6 @@
+printWidth = 100
+semi = false
+quoteProps = "consistent"
+trailingComma = "es5"
+bracketSameLine = false
+arrowParens = "always"

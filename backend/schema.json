@@ -1,0 +1,1583 @@
+{
+  "openapi": "3.0.2",
+  "info": {
+    "title": "NinjaAPI",
+    "version": "1.0.0",
+    "description": ""
+  },
+  "paths": {
+    "/api/accounts/login": {
+      "post": {
+        "operationId": "accounts_api_login",
+        "summary": "Login",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginStructuredResponse"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "/api/accounts/create": {
+      "post": {
+        "operationId": "accounts_api_create_account",
+        "summary": "Create Account",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateAccountStructuredResponse"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAccountRequest"
+              }
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "/api/accounts/me": {
+      "get": {
+        "operationId": "accounts_api_me",
+        "summary": "Me",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeStructuredResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "CommonBearerTokenAuth": []
+          }
+        ]
+      }
+    },
+    "/api/accounts/pending": {
+      "get": {
+        "operationId": "accounts_api_all_pending",
+        "summary": "All Pending",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PendingStructuredResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "CommonBearerTokenAuth": []
+          }
+        ]
+      }
+    },
+    "/api/accounts/update": {
+      "post": {
+        "operationId": "accounts_api_update_account",
+        "summary": "Update Account",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AckStructuredResponse"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "title": "BodyParams",
+                "type": "object",
+                "properties": {
+                  "form": {
+                    "$ref": "#/components/schemas/UpdateAccountRequest"
+                  },
+                  "roles": {
+                    "title": "Roles",
+                    "type": "array",
+                    "items": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "required": [
+                  "form",
+                  "roles"
+                ]
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "CommonBearerTokenAuth": []
+          }
+        ]
+      }
+    },
+    "/api/accounts/manage_approval": {
+      "post": {
+        "operationId": "accounts_api_manage_approval",
+        "summary": "Manage Approval",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AckStructuredResponse"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ManageApprovalRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "CommonBearerTokenAuth": []
+          }
+        ]
+      }
+    },
+    "/api/accounts/logout": {
+      "post": {
+        "operationId": "accounts_api_logout",
+        "summary": "Logout",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LogoutStructuredResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "CommonBearerTokenAuth": []
+          }
+        ]
+      }
+    },
+    "/api/general/ping/public": {
+      "get": {
+        "operationId": "app_api_public_ping_details",
+        "summary": "Public Ping Details",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PingStructuredResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/general/ping/private": {
+      "get": {
+        "operationId": "app_api_private_ping_details",
+        "summary": "Private Ping Details",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PingStructuredResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "CommonBearerTokenAuth": []
+          }
+        ]
+      }
+    },
+    "/api/tickets/create": {
+      "post": {
+        "operationId": "tickets_api_create_ticket",
+        "summary": "Create Ticket",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateTicketStructuredResponse"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTicketRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "CommonBearerTokenAuth": []
+          }
+        ]
+      }
+    },
+    "/api/tickets/all": {
+      "get": {
+        "operationId": "tickets_api_get_all_tickets",
+        "summary": "Get All Tickets",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AllTicketsStructuredResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "CommonBearerTokenAuth": []
+          }
+        ]
+      }
+    },
+    "/api/releases/constant": {
+      "post": {
+        "operationId": "releases_api_post_constant",
+        "summary": "Post Constant",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConstantStructuredResponse"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "title": "Service Options",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "CommonBearerTokenAuth": []
+          }
+        ]
+      },
+      "get": {
+        "operationId": "releases_api_get_constant_and_users",
+        "summary": "Get Constant And Users",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConstantUserStructuredResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "CommonBearerTokenAuth": []
+          }
+        ]
+      }
+    },
+    "/api/releases/create": {
+      "post": {
+        "operationId": "releases_api_create_release",
+        "summary": "Create Release",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AckStructuredResponse"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateReleaseRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "CommonBearerTokenAuth": []
+          }
+        ]
+      }
+    },
+    "/api/releases/update": {
+      "post": {
+        "operationId": "releases_api_update_release",
+        "summary": "Update Release",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AckStructuredResponse"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateReleaseRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "CommonBearerTokenAuth": []
+          }
+        ]
+      }
+    },
+    "/api/releases/all": {
+      "get": {
+        "operationId": "releases_api_get_all_releases",
+        "summary": "Get All Releases",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AllReleaseStructuredResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "CommonBearerTokenAuth": []
+          }
+        ]
+      }
+    },
+    "/api/releases/release": {
+      "get": {
+        "operationId": "releases_api_get_release_with_uuid",
+        "summary": "Get Release With Uuid",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "uuid",
+            "schema": {
+              "title": "Uuid",
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetReleaseStructuredResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "CommonBearerTokenAuth": []
+          }
+        ]
+      }
+    },
+    "/api/releases/approve": {
+      "post": {
+        "operationId": "releases_api_approve_release",
+        "summary": "Approve Release",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "uuid",
+            "schema": {
+              "title": "Uuid",
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AckStructuredResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "CommonBearerTokenAuth": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Error": {
+        "title": "Error",
+        "type": "object",
+        "properties": {
+          "reason": {
+            "title": "Reason",
+            "type": "string"
+          },
+          "detail": {
+            "title": "Detail",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason"
+        ]
+      },
+      "SimpleRolesSchema": {
+        "title": "SimpleRolesSchema",
+        "type": "object",
+        "properties": {
+          "role": {
+            "title": "Role",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "role"
+        ]
+      },
+      "LoginResponse": {
+        "title": "LoginResponse",
+        "type": "object",
+        "properties": {
+          "token": {
+            "title": "Token",
+            "type": "string"
+          },
+          "valid_until": {
+            "title": "Valid Until",
+            "type": "integer"
+          },
+          "first_name": {
+            "title": "First Name",
+            "type": "string"
+          },
+          "last_name": {
+            "title": "Last Name",
+            "type": "string"
+          },
+          "email": {
+            "title": "Email",
+            "type": "string"
+          },
+          "roles": {
+            "title": "Roles",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SimpleRolesSchema"
+            }
+          }
+        },
+        "required": [
+          "token",
+          "valid_until",
+          "first_name",
+          "last_name",
+          "email",
+          "roles"
+        ]
+      },
+      "LoginStructuredResponse": {
+        "title": "LoginStructuredResponse",
+        "type": "object",
+        "properties": {
+          "ok": {
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "error": {
+            "$ref": "#/components/schemas/Error"
+          },
+          "result": {
+            "$ref": "#/components/schemas/LoginResponse"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      },
+      "LoginRequest": {
+        "title": "LoginRequest",
+        "type": "object",
+        "properties": {
+          "email": {
+            "title": "Email",
+            "type": "string"
+          },
+          "password": {
+            "title": "Password",
+            "type": "string"
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "CreateAccountResponse": {
+        "title": "CreateAccountResponse",
+        "type": "object",
+        "properties": {}
+      },
+      "CreateAccountStructuredResponse": {
+        "title": "CreateAccountStructuredResponse",
+        "type": "object",
+        "properties": {
+          "ok": {
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "error": {
+            "$ref": "#/components/schemas/Error"
+          },
+          "result": {
+            "$ref": "#/components/schemas/CreateAccountResponse"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      },
+      "CreateAccountRequest": {
+        "title": "CreateAccountRequest",
+        "type": "object",
+        "properties": {
+          "first_name": {
+            "title": "First Name",
+            "maxLength": 64,
+            "minLength": 2,
+            "type": "string"
+          },
+          "last_name": {
+            "title": "Last Name",
+            "maxLength": 64,
+            "minLength": 2,
+            "type": "string"
+          },
+          "email": {
+            "title": "Email",
+            "type": "string",
+            "format": "email"
+          },
+          "password": {
+            "title": "Password",
+            "maxLength": 64,
+            "type": "string"
+          }
+        },
+        "required": [
+          "first_name",
+          "last_name",
+          "email",
+          "password"
+        ]
+      },
+      "SimplePendingRolesSchema": {
+        "title": "SimplePendingRolesSchema",
+        "type": "object",
+        "properties": {
+          "requested_role": {
+            "title": "Requested Role",
+            "type": "integer"
+          },
+          "account": {
+            "title": "Account",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "requested_role",
+          "account"
+        ]
+      },
+      "MeResponse": {
+        "title": "MeResponse",
+        "type": "object",
+        "properties": {
+          "first_name": {
+            "title": "First Name",
+            "maxLength": 64,
+            "minLength": 2,
+            "type": "string"
+          },
+          "last_name": {
+            "title": "Last Name",
+            "maxLength": 64,
+            "minLength": 2,
+            "type": "string"
+          },
+          "roles": {
+            "title": "Roles",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SimpleRolesSchema"
+            }
+          },
+          "requested_roles": {
+            "title": "Requested Roles",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SimplePendingRolesSchema"
+            }
+          },
+          "email": {
+            "title": "Email",
+            "type": "string",
+            "format": "email"
+          },
+          "msid": {
+            "title": "Msid",
+            "maxLength": 8,
+            "type": "string"
+          },
+          "team_name": {
+            "title": "Team Name",
+            "maxLength": 64,
+            "type": "string"
+          }
+        },
+        "required": [
+          "first_name",
+          "last_name",
+          "roles",
+          "requested_roles",
+          "email",
+          "msid",
+          "team_name"
+        ]
+      },
+      "MeStructuredResponse": {
+        "title": "MeStructuredResponse",
+        "type": "object",
+        "properties": {
+          "ok": {
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "error": {
+            "$ref": "#/components/schemas/Error"
+          },
+          "result": {
+            "$ref": "#/components/schemas/MeResponse"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      },
+      "SimplePendingResponseSchema": {
+        "title": "SimplePendingResponseSchema",
+        "type": "object",
+        "properties": {
+          "role": {
+            "title": "Role",
+            "type": "integer"
+          },
+          "account": {
+            "title": "Account",
+            "type": "string"
+          }
+        },
+        "required": [
+          "role",
+          "account"
+        ]
+      },
+      "PendingResponse": {
+        "title": "PendingResponse",
+        "type": "object",
+        "properties": {
+          "requested_roles": {
+            "title": "Requested Roles",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SimplePendingResponseSchema"
+            }
+          }
+        },
+        "required": [
+          "requested_roles"
+        ]
+      },
+      "PendingStructuredResponse": {
+        "title": "PendingStructuredResponse",
+        "type": "object",
+        "properties": {
+          "ok": {
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "error": {
+            "$ref": "#/components/schemas/Error"
+          },
+          "result": {
+            "$ref": "#/components/schemas/PendingResponse"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      },
+      "AckResponse": {
+        "title": "AckResponse",
+        "type": "object",
+        "properties": {}
+      },
+      "AckStructuredResponse": {
+        "title": "AckStructuredResponse",
+        "type": "object",
+        "properties": {
+          "ok": {
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "error": {
+            "$ref": "#/components/schemas/Error"
+          },
+          "result": {
+            "$ref": "#/components/schemas/AckResponse"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      },
+      "UpdateAccountRequest": {
+        "title": "UpdateAccountRequest",
+        "type": "object",
+        "properties": {
+          "first_name": {
+            "title": "First Name",
+            "maxLength": 64,
+            "minLength": 2,
+            "type": "string"
+          },
+          "last_name": {
+            "title": "Last Name",
+            "maxLength": 64,
+            "minLength": 2,
+            "type": "string"
+          },
+          "msid": {
+            "title": "Msid",
+            "maxLength": 8,
+            "type": "string"
+          },
+          "team_name": {
+            "title": "Team Name",
+            "maxLength": 64,
+            "type": "string"
+          }
+        },
+        "required": [
+          "first_name",
+          "last_name",
+          "msid",
+          "team_name"
+        ]
+      },
+      "ManageApprovalRequest": {
+        "title": "ManageApprovalRequest",
+        "type": "object",
+        "properties": {
+          "role": {
+            "title": "Role",
+            "type": "integer"
+          },
+          "account": {
+            "title": "Account",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "role",
+          "account",
+          "status"
+        ]
+      },
+      "LogoutResponse": {
+        "title": "LogoutResponse",
+        "type": "object",
+        "properties": {}
+      },
+      "LogoutStructuredResponse": {
+        "title": "LogoutStructuredResponse",
+        "type": "object",
+        "properties": {
+          "ok": {
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "error": {
+            "$ref": "#/components/schemas/Error"
+          },
+          "result": {
+            "$ref": "#/components/schemas/LogoutResponse"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      },
+      "PingResponse": {
+        "title": "PingResponse",
+        "type": "object",
+        "properties": {
+          "time": {
+            "title": "Time",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "time"
+        ]
+      },
+      "PingStructuredResponse": {
+        "title": "PingStructuredResponse",
+        "type": "object",
+        "properties": {
+          "ok": {
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "error": {
+            "$ref": "#/components/schemas/Error"
+          },
+          "result": {
+            "$ref": "#/components/schemas/PingResponse"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      },
+      "CreateTicketResponse": {
+        "title": "CreateTicketResponse",
+        "type": "object",
+        "properties": {
+          "uuid": {
+            "title": "Uuid",
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "CreateTicketStructuredResponse": {
+        "title": "CreateTicketStructuredResponse",
+        "type": "object",
+        "properties": {
+          "ok": {
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "error": {
+            "$ref": "#/components/schemas/Error"
+          },
+          "result": {
+            "$ref": "#/components/schemas/CreateTicketResponse"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      },
+      "CreateTicketRequest": {
+        "title": "CreateTicketRequest",
+        "type": "object",
+        "properties": {
+          "impact": {
+            "title": "Impact",
+            "type": "integer"
+          },
+          "priority": {
+            "title": "Priority",
+            "type": "integer"
+          },
+          "name": {
+            "title": "Name",
+            "maxLength": 128,
+            "type": "string"
+          },
+          "assigned_to": {
+            "title": "Assigned To",
+            "maxLength": 64,
+            "type": "string"
+          },
+          "description": {
+            "title": "Description",
+            "type": "string"
+          }
+        },
+        "required": [
+          "impact",
+          "priority",
+          "name",
+          "assigned_to"
+        ]
+      },
+      "SimpleAccountSchema": {
+        "title": "SimpleAccountSchema",
+        "type": "object",
+        "properties": {
+          "first_name": {
+            "title": "First Name",
+            "maxLength": 64,
+            "type": "string"
+          },
+          "last_name": {
+            "title": "Last Name",
+            "maxLength": 64,
+            "type": "string"
+          },
+          "email": {
+            "title": "Email",
+            "type": "string",
+            "format": "email"
+          }
+        },
+        "required": [
+          "first_name",
+          "last_name",
+          "email"
+        ]
+      },
+      "SimpleTicketSchema": {
+        "title": "SimpleTicketSchema",
+        "type": "object",
+        "properties": {
+          "impact": {
+            "title": "Impact",
+            "type": "integer"
+          },
+          "priority": {
+            "title": "Priority",
+            "type": "integer"
+          },
+          "opened_by": {
+            "$ref": "#/components/schemas/SimpleAccountSchema"
+          },
+          "created_at": {
+            "title": "Created At",
+            "type": "string",
+            "format": "date-time"
+          },
+          "uuid": {
+            "title": "Uuid",
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "title": "Name",
+            "maxLength": 128,
+            "type": "string"
+          },
+          "assigned_to": {
+            "title": "Assigned To",
+            "maxLength": 64,
+            "type": "string"
+          },
+          "description": {
+            "title": "Description",
+            "type": "string"
+          }
+        },
+        "required": [
+          "impact",
+          "priority",
+          "opened_by",
+          "created_at",
+          "name",
+          "assigned_to"
+        ]
+      },
+      "AllTicketsResponse": {
+        "title": "AllTicketsResponse",
+        "type": "object",
+        "properties": {
+          "tickets": {
+            "title": "Tickets",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SimpleTicketSchema"
+            }
+          }
+        },
+        "required": [
+          "tickets"
+        ]
+      },
+      "AllTicketsStructuredResponse": {
+        "title": "AllTicketsStructuredResponse",
+        "type": "object",
+        "properties": {
+          "ok": {
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "error": {
+            "$ref": "#/components/schemas/Error"
+          },
+          "result": {
+            "$ref": "#/components/schemas/AllTicketsResponse"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      },
+      "SimpleConstantSchema": {
+        "title": "SimpleConstantSchema",
+        "type": "object",
+        "properties": {
+          "tags": {
+            "title": "Tags",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "branches": {
+            "title": "Branches",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "repo": {
+            "title": "Repo",
+            "minLength": 1,
+            "maxLength": 65536,
+            "format": "uri",
+            "type": "string"
+          },
+          "service": {
+            "title": "Service",
+            "maxLength": 1024,
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "maxLength": 1024,
+            "type": "string"
+          }
+        },
+        "required": [
+          "tags",
+          "branches",
+          "repo",
+          "service",
+          "name"
+        ]
+      },
+      "ConstantResponse": {
+        "title": "ConstantResponse",
+        "type": "object",
+        "properties": {
+          "constants": {
+            "title": "Constants",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SimpleConstantSchema"
+            }
+          }
+        },
+        "required": [
+          "constants"
+        ]
+      },
+      "ConstantStructuredResponse": {
+        "title": "ConstantStructuredResponse",
+        "type": "object",
+        "properties": {
+          "ok": {
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "error": {
+            "$ref": "#/components/schemas/Error"
+          },
+          "result": {
+            "$ref": "#/components/schemas/ConstantResponse"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      },
+      "SimpleUserSchema": {
+        "title": "SimpleUserSchema",
+        "type": "object",
+        "properties": {
+          "first_name": {
+            "title": "First Name",
+            "maxLength": 64,
+            "type": "string"
+          },
+          "last_name": {
+            "title": "Last Name",
+            "maxLength": 64,
+            "type": "string"
+          },
+          "email": {
+            "title": "Email",
+            "type": "string",
+            "format": "email"
+          }
+        },
+        "required": [
+          "first_name",
+          "last_name",
+          "email"
+        ]
+      },
+      "ConstantUserResponse": {
+        "title": "ConstantUserResponse",
+        "type": "object",
+        "properties": {
+          "constants": {
+            "title": "Constants",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SimpleConstantSchema"
+            }
+          },
+          "users": {
+            "title": "Users",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SimpleUserSchema"
+            }
+          }
+        },
+        "required": [
+          "constants",
+          "users"
+        ]
+      },
+      "ConstantUserStructuredResponse": {
+        "title": "ConstantUserStructuredResponse",
+        "type": "object",
+        "properties": {
+          "ok": {
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "error": {
+            "$ref": "#/components/schemas/Error"
+          },
+          "result": {
+            "$ref": "#/components/schemas/ConstantUserResponse"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      },
+      "SimpleReleaseItemModelSchema": {
+        "title": "SimpleReleaseItemModelSchema",
+        "type": "object",
+        "properties": {
+          "repo": {
+            "title": "Repo",
+            "minLength": 1,
+            "maxLength": 65536,
+            "format": "uri",
+            "type": "string"
+          },
+          "service": {
+            "title": "Service",
+            "maxLength": 1024,
+            "type": "string"
+          },
+          "release_branch": {
+            "title": "Release Branch",
+            "maxLength": 1024,
+            "type": "string"
+          },
+          "hotfix_branch": {
+            "title": "Hotfix Branch",
+            "maxLength": 1024,
+            "type": "string"
+          },
+          "tag": {
+            "title": "Tag",
+            "maxLength": 1024,
+            "type": "string"
+          },
+          "special_notes": {
+            "title": "Special Notes",
+            "type": "string"
+          }
+        },
+        "required": [
+          "repo",
+          "service"
+        ]
+      },
+      "SimpleReleaseModelSchema": {
+        "title": "SimpleReleaseModelSchema",
+        "type": "object",
+        "properties": {
+          "items": {
+            "title": "Items",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SimpleReleaseItemModelSchema"
+            }
+          },
+          "name": {
+            "title": "Name",
+            "maxLength": 1024,
+            "type": "string"
+          }
+        },
+        "required": [
+          "items",
+          "name"
+        ]
+      },
+      "CreateReleaseRequest": {
+        "title": "CreateReleaseRequest",
+        "type": "object",
+        "properties": {
+          "release": {
+            "$ref": "#/components/schemas/SimpleReleaseModelSchema"
+          },
+          "approvers": {
+            "title": "Approvers",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "release",
+          "approvers"
+        ]
+      },
+      "UpdateReleaseRequest": {
+        "title": "UpdateReleaseRequest",
+        "type": "object",
+        "properties": {
+          "release": {
+            "$ref": "#/components/schemas/SimpleReleaseModelSchema"
+          },
+          "uuid": {
+            "title": "Uuid",
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "release",
+          "uuid"
+        ]
+      },
+      "SimpleAllReleaseModelSchema": {
+        "title": "SimpleAllReleaseModelSchema",
+        "type": "object",
+        "properties": {
+          "created_at": {
+            "title": "Created At",
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "title": "Updated At",
+            "type": "string",
+            "format": "date-time"
+          },
+          "uuid": {
+            "title": "Uuid",
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "title": "Name",
+            "maxLength": 1024,
+            "type": "string"
+          }
+        },
+        "required": [
+          "created_at",
+          "updated_at",
+          "name"
+        ]
+      },
+      "AllReleaseResponse": {
+        "title": "AllReleaseResponse",
+        "type": "object",
+        "properties": {
+          "release_list": {
+            "title": "Release List",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SimpleAllReleaseModelSchema"
+            }
+          }
+        },
+        "required": [
+          "release_list"
+        ]
+      },
+      "AllReleaseStructuredResponse": {
+        "title": "AllReleaseStructuredResponse",
+        "type": "object",
+        "properties": {
+          "ok": {
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "error": {
+            "$ref": "#/components/schemas/Error"
+          },
+          "result": {
+            "$ref": "#/components/schemas/AllReleaseResponse"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      },
+      "SimpleApproverModelSchema": {
+        "title": "SimpleApproverModelSchema",
+        "type": "object",
+        "properties": {
+          "user": {
+            "$ref": "#/components/schemas/SimpleUserSchema"
+          },
+          "approved": {
+            "title": "Approved",
+            "default": false,
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "user"
+        ]
+      },
+      "SimpleGetReleaseModelSchema": {
+        "title": "SimpleGetReleaseModelSchema",
+        "type": "object",
+        "properties": {
+          "items": {
+            "title": "Items",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SimpleReleaseItemModelSchema"
+            }
+          },
+          "approvers": {
+            "title": "Approvers",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SimpleApproverModelSchema"
+            }
+          },
+          "name": {
+            "title": "Name",
+            "maxLength": 1024,
+            "type": "string"
+          }
+        },
+        "required": [
+          "items",
+          "approvers",
+          "name"
+        ]
+      },
+      "GetReleaseResponse": {
+        "title": "GetReleaseResponse",
+        "type": "object",
+        "properties": {
+          "release_data": {
+            "$ref": "#/components/schemas/SimpleGetReleaseModelSchema"
+          },
+          "constants": {
+            "title": "Constants",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SimpleConstantSchema"
+            }
+          }
+        },
+        "required": [
+          "release_data",
+          "constants"
+        ]
+      },
+      "GetReleaseStructuredResponse": {
+        "title": "GetReleaseStructuredResponse",
+        "type": "object",
+        "properties": {
+          "ok": {
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "error": {
+            "$ref": "#/components/schemas/Error"
+          },
+          "result": {
+            "$ref": "#/components/schemas/GetReleaseResponse"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    "securitySchemes": {
+      "CommonBearerTokenAuth": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  },
+  "servers": null
+}
