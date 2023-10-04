@@ -543,6 +543,50 @@
           }
         ]
       }
+    },
+    "/api/releases/revoke": {
+      "post": {
+        "operationId": "releases_api_revoke_approval",
+        "summary": "Revoke Approval",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "uuid",
+            "schema": {
+              "title": "Uuid",
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "reason",
+            "schema": {
+              "title": "Reason",
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AckStructuredResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "CommonBearerTokenAuth": []
+          }
+        ]
+      }
     }
   },
   "components": {
@@ -1419,10 +1463,40 @@
           "uuid"
         ]
       },
+      "SimpleApproverModelSchema": {
+        "title": "SimpleApproverModelSchema",
+        "type": "object",
+        "properties": {
+          "user": {
+            "$ref": "#/components/schemas/SimpleUserSchema"
+          },
+          "approved": {
+            "title": "Approved",
+            "default": false,
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "user"
+        ]
+      },
       "SimpleAllReleaseModelSchema": {
         "title": "SimpleAllReleaseModelSchema",
         "type": "object",
         "properties": {
+          "approvers": {
+            "title": "Approvers",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SimpleApproverModelSchema"
+            }
+          },
+          "created_by": {
+            "$ref": "#/components/schemas/SimpleUserSchema"
+          },
+          "updated_by": {
+            "$ref": "#/components/schemas/SimpleUserSchema"
+          },
           "created_at": {
             "title": "Created At",
             "type": "string",
@@ -1445,6 +1519,9 @@
           }
         },
         "required": [
+          "approvers",
+          "created_by",
+          "updated_by",
           "created_at",
           "updated_at",
           "name"
@@ -1483,23 +1560,6 @@
         },
         "required": [
           "ok"
-        ]
-      },
-      "SimpleApproverModelSchema": {
-        "title": "SimpleApproverModelSchema",
-        "type": "object",
-        "properties": {
-          "user": {
-            "$ref": "#/components/schemas/SimpleUserSchema"
-          },
-          "approved": {
-            "title": "Approved",
-            "default": false,
-            "type": "boolean"
-          }
-        },
-        "required": [
-          "user"
         ]
       },
       "SimpleGetReleaseModelSchema": {

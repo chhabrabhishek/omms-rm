@@ -20,6 +20,12 @@ class Release(AppModel):
 
     uuid = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
     name = models.CharField(max_length=1024)
+    created_by = models.OneToOneField(
+        "accounts.Account", on_delete=models.PROTECT, related_name="release_created_by"
+    )
+    updated_by = models.OneToOneField(
+        "accounts.Account", on_delete=models.PROTECT, related_name="release_updated_by"
+    )
 
 
 class ReleaseItem(AppModel):
@@ -51,4 +57,18 @@ class Approver(AppModel):
     )
     release = models.ForeignKey(
         Release, on_delete=models.PROTECT, related_name="approvers"
+    )
+
+
+class RevokeApproval(AppModel):
+    """
+    Represents a record created when approval needs to be revoked
+    """
+
+    reason = models.TextField()
+    user = models.ForeignKey(
+        "accounts.Account", on_delete=models.PROTECT, related_name="revoke_approver"
+    )
+    release = models.ForeignKey(
+        Release, on_delete=models.PROTECT, related_name="revoke_approvers"
     )

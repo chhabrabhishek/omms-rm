@@ -8,7 +8,7 @@ import { useAppQuery } from "@/hooks/useAppQuery"
 import { Access } from "@/types/Page"
 import { fromDjangoISO, toDateTimeString } from "@/utils/date"
 import { reverse } from "@/utils/reverse"
-import { Box, Card, CardBody, Icon, Text, VStack } from "@chakra-ui/react"
+import { Box, Card, CardBody, Icon, Tag, Text, VStack } from "@chakra-ui/react"
 import { IconPlus } from "@tabler/icons-react"
 import { useRouter } from "next/router"
 import { Planet } from "react-kawaii"
@@ -65,11 +65,11 @@ export default function ReleasesPage() {
                       condensed: true,
                       cell: (cell) => cell.row.index + 1,
                     },
-                    uuid: {
-                      id: "uuid",
-                      header: "Unique Release ID",
-                      accessorKey: "uuid",
-                    },
+                    // uuid: {
+                    //   id: "uuid",
+                    //   header: "Unique Release ID",
+                    //   accessorKey: "uuid",
+                    // },
                     name: {
                       id: "name",
                       header: "Name",
@@ -85,42 +85,30 @@ export default function ReleasesPage() {
                       header: "Updated At",
                       accessorFn: (cell) => toDateTimeString(fromDjangoISO(cell.updated_at)),
                     },
-                    // repo: {
-                    //   id: "repo",
-                    //   header: "Github Repo",
-                    //   accessorKey: "repo",
-                    // },
-                    // service: {
-                    //   id: "service",
-                    //   header: "Service",
-                    //   accessorKey: "service",
-                    //   // cell: (cell) => <TicketImportanceTag status={cell.row.original.priority} />,
-                    // },
-                    // release_branch: {
-                    //   id: "release_branch",
-                    //   header: "Release Branch",
-                    //   accessorKey: "release_branch",
-                    // },
-                    // hotfix_branch: {
-                    //   id: "hotfix_branch",
-                    //   header: "Hotfix Branch",
-                    //   accessorKey: "hotfix_branch",
-                    // },
-                    // tag: {
-                    //   id: "tag",
-                    //   header: "Tag",
-                    //   accessorKey: "tag",
-                    //   cell: (cell) => (
-                    //     <Tag variant="subtle" colorScheme="orange" rounded="full">
-                    //       {cell.row.original.tag}
-                    //     </Tag>
-                    //   ),
-                    // },
-                    // special_notes: {
-                    //   id: "special_notes",
-                    //   header: "Special Notes",
-                    //   accessorKey: "special_notes",
-                    // },
+                    status: {
+                      id: "status",
+                      header: "Status",
+                      accessorKey: "approvers",
+                      cell: (cell) => (
+                        <Tag>
+                          {cell.row.original.approvers.filter((item) => !item.approved).length
+                            ? "Draft"
+                            : "Completed"}
+                        </Tag>
+                      ),
+                    },
+                    created_by: {
+                      id: "created_by",
+                      header: "Created By",
+                      accessorFn: (cell) =>
+                        `${cell.created_by.first_name} ${cell.created_by.last_name}`,
+                    },
+                    updated_by: {
+                      id: "updated_by",
+                      header: "Updated By",
+                      accessorFn: (cell) =>
+                        `${cell.updated_by.first_name} ${cell.updated_by.last_name}`,
+                    },
                   }}
                   onRowClick={(release) => {
                     push(reverse.user.manageRelease(release.uuid ?? ""))

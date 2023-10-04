@@ -3,6 +3,7 @@ from releases.models import Approver
 from releases.models import Constant
 from releases.models import Release
 from releases.models import ReleaseItem
+from releases.models import RevokeApproval
 
 
 @admin.register(Release)
@@ -13,6 +14,8 @@ class ReleaseAdmin(admin.ModelAdmin):
         "name",
         "created_at",
         "updated_at",
+        "created_by",
+        "updated_by",
     )
 
 
@@ -40,3 +43,8 @@ class ConstantAdmin(admin.ModelAdmin):
 @admin.register(Approver)
 class ApproverAdmin(admin.ModelAdmin):
     list_display = ("user", "release", "approved")
+
+
+@admin.register(RevokeApproval)
+class RevokeApprovalAdmin(admin.ModelAdmin):
+    list_display = ("user", "release", "reason")

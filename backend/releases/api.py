@@ -16,6 +16,7 @@ from releases.models import Approver
 from releases.models import Constant
 from releases.models import Release
 from releases.models import ReleaseItem
+from releases.models import RevokeApproval
 
 router = Router(auth=CommonBearerTokenAuth())
 logger = logging.getLogger("django.server")
@@ -146,12 +147,13 @@ class CreateReleaseRequest(Schema):
 # TODO: Add audit fields
 @router.post("/create", response=AckResponse)
 def create_release(request, form: CreateReleaseRequest):
-    print(form.approvers)
     user = request.auth
     for role in user.roles.all():
         if role.role == Roles.Role.ReleaseAdmin:
             with transaction.atomic():
-                release = Release.objects.create(name=form.release.name)
+                release = Release.objects.create(
+                    name=form.release.name, created_by=user, updated_by=user
+                )
                 for item in form.release.items:
                     ReleaseItem.objects.create(
                         repo=item.repo,
@@ -183,6 +185,7 @@ class UpdateReleaseRequest(Schema):
 # TODO: Add audit fields
 @router.post("/update", response=AckResponse)
 def update_release(request, form: UpdateReleaseRequest):
+    user = request.auth
     release = Release.objects.get(uuid=form.uuid)
 
     for approver in list(release.approvers.all()):
@@ -190,6 +193,8 @@ def update_release(request, form: UpdateReleaseRequest):
             continue
         else:
             with transaction.atomic():
+                release.updated_by = user
+                release.save()
                 ReleaseItem.objects.filter(release=release).delete()
                 for item in form.release.items:
                     ReleaseItem.objects.create(
@@ -211,10 +216,29 @@ def update_release(request, form: UpdateReleaseRequest):
     }
 
 
+class SimpleApproverModelSchema(ModelSchema):
+    user: SimpleUserSchema
+
+    class Config:
+        model = Approver
+        include = ("approved", "user")
+
+
 class SimpleAllReleaseModelSchema(ModelSchema):
+    approvers: list[SimpleApproverModelSchema]
+    created_by: SimpleUserSchema
+    updated_by: SimpleUserSchema
+
     class Config:
         model = Release
-        include = ("uuid", "name", "created_at", "updated_at")
+        include = (
+            "uuid",
+            "name",
+            "created_at",
+            "updated_at",
+            "created_by",
+            "updated_by",
+        )
 
 
 @response_schema
@@ -226,15 +250,10 @@ class AllReleaseResponse(Schema):
 def get_all_releases(request):
     releases_list = Release.objects.order_by("-updated_at").all()
 
-    return {"ok": True, "result": {"release_list": list(releases_list)}}
-
-
-class SimpleApproverModelSchema(ModelSchema):
-    user: SimpleUserSchema
-
-    class Config:
-        model = Approver
-        include = ("approved", "user")
+    return {
+        "ok": True,
+        "result": {"release_list": list(releases_list)},
+    }
 
 
 class SimpleGetReleaseModelSchema(ModelSchema):
@@ -302,5 +321,20 @@ def approve_release(request, uuid: uuid.UUID):
     approver = Approver.objects.get(release=release, user=user)
     approver.approved = True
     approver.save()
+
+    return {"ok": True}
+
+
+@router.post("/revoke", response=AckResponse)
+def revoke_approval(request, uuid: uuid.UUID, reason: str):
+    user = request.auth
+    release = Release.objects.get(uuid=uuid)
+
+    with transaction.atomic():
+        RevokeApproval.objects.create(user=user, release=release, reason=reason)
+
+        approver = Approver.objects.get(release=release, user=user)
+        approver.approved = False
+        approver.save()
 
     return {"ok": True}

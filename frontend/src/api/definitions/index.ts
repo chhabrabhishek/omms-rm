@@ -184,7 +184,14 @@ export type UpdateReleaseRequest = {
     release: SimpleReleaseModelSchema;
     uuid: string;
 };
+export type SimpleApproverModelSchema = {
+    user: SimpleUserSchema;
+    approved?: boolean;
+};
 export type SimpleAllReleaseModelSchema = {
+    approvers: SimpleApproverModelSchema[];
+    created_by: SimpleUserSchema;
+    updated_by: SimpleUserSchema;
     created_at: string;
     updated_at: string;
     uuid?: string;
@@ -197,10 +204,6 @@ export type AllReleaseStructuredResponse = {
     ok: boolean;
     error?: Error;
     result?: AllReleaseResponse;
-};
-export type SimpleApproverModelSchema = {
-    user: SimpleUserSchema;
-    approved?: boolean;
 };
 export type SimpleGetReleaseModelSchema = {
     items: SimpleReleaseItemModelSchema[];
@@ -358,6 +361,15 @@ function makeRequests(axios: AxiosInstance, config?: AxiosConfig) {
                 uuid
             },
             paramsSerializer: config?.paramsSerializer
+        }).then(res => res.data),
+        releasesApiRevokeApproval: (uuid: string, reason: string) => axios.request<AckStructuredResponse>({
+            method: "post",
+            url: `/api/releases/revoke`,
+            params: {
+                uuid,
+                reason
+            },
+            paramsSerializer: config?.paramsSerializer
         }).then(res => res.data)
     } as const;
 }
@@ -386,6 +398,7 @@ type MutationConfigs = {
     useReleasesApiCreateRelease?: (queryClient: QueryClient) => Pick<UseMutationOptions<Response<"releasesApiCreateRelease">, unknown, Parameters<Requests["releasesApiCreateRelease"]>[0], unknown>, "onSuccess" | "onSettled" | "onError">;
     useReleasesApiUpdateRelease?: (queryClient: QueryClient) => Pick<UseMutationOptions<Response<"releasesApiUpdateRelease">, unknown, Parameters<Requests["releasesApiUpdateRelease"]>[0], unknown>, "onSuccess" | "onSettled" | "onError">;
     useReleasesApiApproveRelease?: (queryClient: QueryClient) => Pick<UseMutationOptions<Response<"releasesApiApproveRelease">, unknown, unknown, unknown>, "onSuccess" | "onSettled" | "onError">;
+    useReleasesApiRevokeApproval?: (queryClient: QueryClient) => Pick<UseMutationOptions<Response<"releasesApiRevokeApproval">, unknown, unknown, unknown>, "onSuccess" | "onSettled" | "onError">;
 };
 function makeMutations(requests: Requests, config?: Config["mutations"]) {
     return {
@@ -398,6 +411,7 @@ function makeMutations(requests: Requests, config?: Config["mutations"]) {
         useReleasesApiPostConstant: (options?: Omit<UseMutationOptions<Response<"releasesApiPostConstant">, unknown, Parameters<Requests["releasesApiPostConstant"]>[0], unknown>, "mutationFn">) => useRapiniMutation<Response<"releasesApiPostConstant">, unknown, Parameters<Requests["releasesApiPostConstant"]>[0]>(payload => requests.releasesApiPostConstant(payload), config?.useReleasesApiPostConstant, options),
         useReleasesApiCreateRelease: (options?: Omit<UseMutationOptions<Response<"releasesApiCreateRelease">, unknown, Parameters<Requests["releasesApiCreateRelease"]>[0], unknown>, "mutationFn">) => useRapiniMutation<Response<"releasesApiCreateRelease">, unknown, Parameters<Requests["releasesApiCreateRelease"]>[0]>(payload => requests.releasesApiCreateRelease(payload), config?.useReleasesApiCreateRelease, options),
         useReleasesApiUpdateRelease: (options?: Omit<UseMutationOptions<Response<"releasesApiUpdateRelease">, unknown, Parameters<Requests["releasesApiUpdateRelease"]>[0], unknown>, "mutationFn">) => useRapiniMutation<Response<"releasesApiUpdateRelease">, unknown, Parameters<Requests["releasesApiUpdateRelease"]>[0]>(payload => requests.releasesApiUpdateRelease(payload), config?.useReleasesApiUpdateRelease, options),
-        useReleasesApiApproveRelease: (uuid: string, options?: Omit<UseMutationOptions<Response<"releasesApiApproveRelease">, unknown, unknown, unknown>, "mutationFn">) => useRapiniMutation<Response<"releasesApiApproveRelease">, unknown, unknown>(() => requests.releasesApiApproveRelease(uuid), config?.useReleasesApiApproveRelease, options)
+        useReleasesApiApproveRelease: (uuid: string, options?: Omit<UseMutationOptions<Response<"releasesApiApproveRelease">, unknown, unknown, unknown>, "mutationFn">) => useRapiniMutation<Response<"releasesApiApproveRelease">, unknown, unknown>(() => requests.releasesApiApproveRelease(uuid), config?.useReleasesApiApproveRelease, options),
+        useReleasesApiRevokeApproval: (uuid: string, reason: string, options?: Omit<UseMutationOptions<Response<"releasesApiRevokeApproval">, unknown, unknown, unknown>, "mutationFn">) => useRapiniMutation<Response<"releasesApiRevokeApproval">, unknown, unknown>(() => requests.releasesApiRevokeApproval(uuid, reason), config?.useReleasesApiRevokeApproval, options)
     } as const;
 }

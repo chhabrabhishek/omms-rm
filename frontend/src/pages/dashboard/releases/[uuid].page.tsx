@@ -30,6 +30,8 @@ import {
   AlertDialogBody,
   AlertDialogContent,
   AlertDialogFooter,
+  HStack,
+  Textarea,
 } from "@chakra-ui/react"
 import { IconCornerDownRight } from "@tabler/icons-react"
 import { useAppMutation } from "@/hooks/useAppMutation"
@@ -46,7 +48,7 @@ import {
 } from "@/api/definitions"
 import { toast } from "react-hot-toast"
 import If from "@/components/logic/If"
-import React, { useState } from "react"
+import React, { ChangeEvent, ReactElement, useRef, useState } from "react"
 import LoadingBlock from "@/components/indicators/LoadingBlock"
 
 // This page is only accessible by a User.
@@ -68,7 +70,16 @@ export default function ManageReleasePage() {
   const [pendingBy, setPendingBy] = useState<Array<SimpleUserSchema>>([])
 
   const { isOpen, onOpen, onClose } = useDisclosure()
-  const cancelRef = React.useRef(null)
+  const cancelRef = useRef(null)
+
+  const revokeApprovalModal = useDisclosure()
+  const revokeApprovalCancelRef = useRef(null)
+
+  const [reason, setReason] = useState("")
+
+  let handleInputChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
+    setReason(e.target.value)
+  }
 
   const magic = useMagicQueryHooks({
     autoRefetch: false,
@@ -200,12 +211,50 @@ export default function ManageReleasePage() {
           last_name: JSON.parse(localStorage.getItem("$auth") ?? "").last_name,
         } as SimpleUserSchema,
       ])
+      if (
+        !pendingBy.filter(
+          (item) => item.email !== JSON.parse(localStorage.getItem("$auth") ?? "").email
+        ).length
+      ) {
+        setSheetsDisabled(true)
+      }
     },
     autoRefetch: false,
   })
+
   const approveMutation = api.mutations.useReleasesApiApproveRelease(
     asPath.split("/")[asPath.split("/").length - 1] as string,
     hooks
+  )
+
+  const magicQueryHooks = useMagicQueryHooks({
+    onOk() {
+      toast.success("Approval Revoked")
+      query.refetch()
+      revokeApprovalModal.onClose()
+      setChecked(false)
+      setSheetsDisabled(false)
+      setApprovedBy(
+        approvedBy.filter(
+          (item) => item.email !== JSON.parse(localStorage.getItem("$auth") ?? "").email
+        )
+      )
+      setPendingBy([
+        ...pendingBy,
+        {
+          email: JSON.parse(localStorage.getItem("$auth") ?? "").email,
+          first_name: JSON.parse(localStorage.getItem("$auth") ?? "").first_name,
+          last_name: JSON.parse(localStorage.getItem("$auth") ?? "").last_name,
+        } as SimpleUserSchema,
+      ])
+    },
+    autoRefetch: false,
+  })
+
+  const revokeApprovalMutation = api.mutations.useReleasesApiRevokeApproval(
+    asPath.split("/")[asPath.split("/").length - 1] as string,
+    reason,
+    magicQueryHooks.hooks
   )
 
   return (
@@ -231,24 +280,41 @@ export default function ManageReleasePage() {
                 condition={(response) => (response?.release_data.items.length ?? 0) > 0}
                 then={(response) => (
                   <>
-                    {response.release_data.approvers.find(
-                      (item) =>
-                        item.user.email === JSON.parse(localStorage.getItem("$auth") ?? "").email
-                    ) && (
-                      <Checkbox
-                        disabled={
-                          response.release_data.approvers.find(
-                            (item) =>
-                              item.user.email ===
-                              JSON.parse(localStorage.getItem("$auth") ?? "").email
-                          )?.approved || checked
-                        }
-                        isChecked={checked}
-                        onChange={(e) => (e.target.checked ? onOpen() : onClose())}
-                      >
-                        Approve
-                      </Checkbox>
-                    )}
+                    <HStack w="full" spacing="6" align="center" justify="space-evenly">
+                      {response.release_data.approvers.find(
+                        (item) =>
+                          item.user.email === JSON.parse(localStorage.getItem("$auth") ?? "").email
+                      ) && (
+                        <Checkbox
+                          disabled={
+                            response.release_data.approvers.find(
+                              (item) =>
+                                item.user.email ===
+                                JSON.parse(localStorage.getItem("$auth") ?? "").email
+                            )?.approved || checked
+                          }
+                          isChecked={checked}
+                          onChange={(e) => (e.target.checked ? onOpen() : onClose())}
+                        >
+                          Approve
+                        </Checkbox>
+                      )}
+                      {sheetsDisabled &&
+                        response.release_data.approvers.find(
+                          (item) =>
+                            item.user.email ===
+                            JSON.parse(localStorage.getItem("$auth") ?? "").email
+                        ) && (
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            fontWeight="medium"
+                            onClick={revokeApprovalModal.onOpen}
+                          >
+                            Revoke Approval
+                          </Button>
+                        )}
+                    </HStack>
                     {approvedBy.length > 0 && (
                       <Text fontSize="md" textAlign="center">
                         This release has been approved by :{" "}
@@ -338,6 +404,52 @@ export default function ManageReleasePage() {
                     ml={3}
                   >
                     Approve
+                  </Button>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialogOverlay>
+          </AlertDialog>
+
+          <AlertDialog
+            isOpen={revokeApprovalModal.isOpen}
+            leastDestructiveRef={revokeApprovalCancelRef}
+            onClose={revokeApprovalModal.onClose}
+            closeOnEsc={false}
+            closeOnOverlayClick={false}
+          >
+            <AlertDialogOverlay>
+              <AlertDialogContent>
+                <AlertDialogHeader fontSize="lg" fontWeight="bold">
+                  Revoke Approval by {JSON.parse(localStorage.getItem("$auth") ?? "").email}
+                </AlertDialogHeader>
+
+                <AlertDialogBody>
+                  Are you sure you want to revoke the approval? If yes, you need to provide a valid
+                  reason to do so.
+                  <Textarea
+                    mt={4}
+                    value={reason}
+                    onChange={handleInputChange}
+                    placeholder="Provide a valid reason, to revoke this approval"
+                  />
+                </AlertDialogBody>
+
+                <AlertDialogFooter>
+                  <Button ref={cancelRef} onClick={revokeApprovalModal.onClose}>
+                    Cancel
+                  </Button>
+                  <Button
+                    colorScheme="red"
+                    onClick={() => {
+                      if (reason) {
+                        revokeApprovalMutation.mutate({})
+                      } else {
+                        toast.error("Reason field cannot by empty.")
+                      }
+                    }}
+                    ml={3}
+                  >
+                    Revoke
                   </Button>
                 </AlertDialogFooter>
               </AlertDialogContent>
