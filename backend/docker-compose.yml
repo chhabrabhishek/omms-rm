@@ -1,0 +1,11 @@
+version: "3"
+
+services:
+  release_backend:
+    build: .
+    command: bash -c "poetry run python manage.py makemigrations && poetry run python manage.py migrate && poetry run python manage.py runserver 0.0.0.0:8000"
+    container_name: release
+    volumes:
+      - .:/release
+    ports:
+      - "8000:8000"

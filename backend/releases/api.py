@@ -1,4 +1,3 @@
-import git
 import logging
 import subprocess
 import uuid
