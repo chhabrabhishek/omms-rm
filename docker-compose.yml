@@ -1,0 +1,30 @@
+version: "3"
+services:
+  nextjs:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API: http://localhost
+    restart: always
+    env_file:
+      - ./frontend/.env
+    environment:
+      NEXT_PUBLIC_API: ${NEXT_PUBLIC_API}
+  release-api:
+    build: ./backend
+    restart: always
+    environment:
+      - "DEBUG=False"
+      - "FE_URL=http://localhost:3000/"
+  nginx:
+    build: ./nginx
+    restart: always
+    ports:
+      - 80:80
+    volumes:
+      - static-volume:/app/static
+    depends_on:
+      - nextjs
+      - release-api
+volumes:
+  static-volume:

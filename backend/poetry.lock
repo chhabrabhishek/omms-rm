@@ -630,22 +630,7 @@ typing-extensions = {version = ">=4.0", markers = "python_version < \"3.11\""}
 [package.extras]
 standard = ["colorama (>=0.4)", "httptools (>=0.5.0)", "python-dotenv (>=0.13)", "pyyaml (>=5.1)", "uvloop (>=0.14.0,!=0.15.0,!=0.15.1)", "watchfiles (>=0.13)", "websockets (>=10.4)"]
 
-[[package]]
-name = "whitenoise"
-version = "6.5.0"
-description = "Radically simplified static file serving for WSGI applications"
-category = "main"
-optional = false
-python-versions = ">=3.7"
-files = [
-    {file = "whitenoise-6.5.0-py3-none-any.whl", hash = "sha256:16468e9ad2189f09f4a8c635a9031cc9bb2cdbc8e5e53365407acf99f7ade9ec"},
-    {file = "whitenoise-6.5.0.tar.gz", hash = "sha256:15fe60546ac975b58e357ccaeb165a4ca2d0ab697e48450b8f0307ca368195a8"},
-]
-
-[package.extras]
-brotli = ["Brotli"]
-
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "358508eba1549f2dd47d12c3a02ec1fba724f5a3ad07eba560151f543facbe1b"
+content-hash = "bb67a0df97e320c5f606e3582c0800f0524b117ad50b715e9ff4bd2fb369ad64"

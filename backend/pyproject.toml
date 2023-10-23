@@ -17,7 +17,6 @@ django-extensions = "^3.2.3"
 django-simple-history = "^3.3.0"
 django-cors-headers = "^4.2.0"
 python-dotenv = "^1.0.0"
-whitenoise = "^6.5.0"
 gunicorn = "^21.2.0"
 uvicorn = "^0.23.2"
 

@@ -2,6 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   pageExtensions: ["page.tsx"],
+  output: "standalone"
 }
 
 module.exports = nextConfig
