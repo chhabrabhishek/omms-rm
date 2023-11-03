@@ -127,6 +127,7 @@ class SimpleReleaseItemModelSchema(ModelSchema):
             "hotfix_branch",
             "tag",
             "special_notes",
+            "devops_notes",
         )
 
 
@@ -161,6 +162,7 @@ def create_release(request, form: CreateReleaseRequest):
                         hotfix_branch=item.hotfix_branch,
                         tag=item.tag,
                         special_notes=item.special_notes,
+                        devops_notes=item.devops_notes,
                         release=release,
                     )
                 for item in form.approvers:
@@ -188,23 +190,38 @@ def update_release(request, form: UpdateReleaseRequest):
     release = Release.objects.get(uuid=form.uuid)
 
     for approver in list(release.approvers.all()):
-        if approver.approved:
+        if approver.approved and Roles.Role.DevOps not in [
+            role.role for role in list(user.roles.all())
+        ]:
             continue
         else:
             with transaction.atomic():
                 release.updated_by = user
                 release.save()
-                ReleaseItem.objects.filter(release=release).delete()
                 for item in form.release.items:
-                    ReleaseItem.objects.create(
-                        repo=item.repo,
-                        service=item.service,
-                        release_branch=item.release_branch,
-                        hotfix_branch=item.hotfix_branch,
-                        tag=item.tag,
-                        special_notes=item.special_notes,
-                        release=release,
+                    release_item = ReleaseItem.objects.get(
+                        release=release, repo=item.repo, service=item.service
                     )
+                    if Roles.Role.DevOps in [
+                        role.role for role in list(user.roles.all())
+                    ]:
+                        release_item.repo = item.repo
+                        release_item.service = item.service
+                        release_item.release_branch = item.release_branch
+                        release_item.hotfix_branch = item.hotfix_branch
+                        release_item.tag = item.tag
+                        release_item.special_notes = item.special_notes
+                        release_item.devops_notes = item.devops_notes
+                        release_item.release = release
+                    else:
+                        release_item.repo = item.repo
+                        release_item.service = item.service
+                        release_item.release_branch = item.release_branch
+                        release_item.hotfix_branch = item.hotfix_branch
+                        release_item.tag = item.tag
+                        release_item.special_notes = item.special_notes
+                        release_item.release = release
+                    release_item.save()
 
             return {"ok": True}
     return {

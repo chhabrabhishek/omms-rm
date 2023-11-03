@@ -29,6 +29,7 @@ class ReleaseItemAdmin(admin.ModelAdmin):
         "hotfix_branch",
         "tag",
         "special_notes",
+        "devops_notes",
         "created_at",
         "updated_at",
         "release",

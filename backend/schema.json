@@ -1396,6 +1396,10 @@
           "special_notes": {
             "title": "Special Notes",
             "type": "string"
+          },
+          "devops_notes": {
+            "title": "Devops Notes",
+            "type": "string"
           }
         },
         "required": [

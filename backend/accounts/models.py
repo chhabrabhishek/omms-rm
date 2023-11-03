@@ -97,6 +97,7 @@ class AuthToken(AppModel):
     def is_valid(self) -> bool:
         return self.active and timezone.now() <= self.valid_until()
 
+
 class Roles(AppModel):
     """
     Roles for authorization
@@ -106,9 +107,11 @@ class Roles(AppModel):
         Admin = 1
         ReleaseAdmin = 2
         User = 3
+        DevOps = 4
 
     role = enum.EnumField(Role)
     account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name="roles")
+
 
 class PendingRoles(AppModel):
     """
@@ -116,4 +119,6 @@ class PendingRoles(AppModel):
     """
 
     requested_role = enum.EnumField(Roles.Role)
-    account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name="requested_roles")
+    account = models.ForeignKey(
+        Account, on_delete=models.PROTECT, related_name="requested_roles"
+    )

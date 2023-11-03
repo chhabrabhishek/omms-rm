@@ -32,6 +32,7 @@ import {
   AlertDialogFooter,
   HStack,
   Textarea,
+  Input,
 } from "@chakra-ui/react"
 import { IconCornerDownRight } from "@tabler/icons-react"
 import { useAppMutation } from "@/hooks/useAppMutation"
@@ -44,6 +45,7 @@ import {
   GetReleaseResponse,
   SimpleConstantSchema,
   SimpleReleaseItemModelSchema,
+  SimpleRolesSchema,
   SimpleUserSchema,
 } from "@/api/definitions"
 import { toast } from "react-hot-toast"
@@ -143,6 +145,7 @@ export default function ManageReleasePage() {
           release_branch: updatedRow?.release_branch,
           hotfix_branch: updatedRow?.hotfix_branch,
           special_notes: updatedRow?.special_notes,
+          devops_notes: updatedRow?.devops_notes,
         } as SimpleReleaseItemModelSchema,
       ])
     }
@@ -154,6 +157,7 @@ export default function ManageReleasePage() {
           tag: updatedRow?.tag,
           hotfix_branch: updatedRow?.hotfix_branch,
           special_notes: updatedRow?.special_notes,
+          devops_notes: updatedRow?.devops_notes,
         } as SimpleReleaseItemModelSchema,
       ])
     }
@@ -165,6 +169,7 @@ export default function ManageReleasePage() {
           tag: updatedRow?.tag,
           release_branch: updatedRow?.release_branch,
           special_notes: updatedRow?.special_notes,
+          devops_notes: updatedRow?.devops_notes,
         } as SimpleReleaseItemModelSchema,
       ])
     }
@@ -176,6 +181,19 @@ export default function ManageReleasePage() {
           tag: updatedRow?.tag,
           release_branch: updatedRow?.release_branch,
           hotfix_branch: updatedRow?.hotfix_branch,
+          devops_notes: updatedRow?.devops_notes,
+        } as SimpleReleaseItemModelSchema,
+      ])
+    }
+    if ("devops_notes" in eventData) {
+      setData((previousData) => [
+        ...(previousData as SimpleReleaseItemModelSchema[]),
+        {
+          ...eventData,
+          tag: updatedRow?.tag,
+          release_branch: updatedRow?.release_branch,
+          hotfix_branch: updatedRow?.hotfix_branch,
+          special_notes: updatedRow?.special_notes,
         } as SimpleReleaseItemModelSchema,
       ])
     }
@@ -459,6 +477,7 @@ export default function ManageReleasePage() {
           <Box w="full" textAlign="end" py="8">
             <Button
               w={["full", "full", "auto"]}
+              mr={2}
               type="submit"
               colorScheme="blue"
               rightIcon={<Icon as={IconCornerDownRight} />}
@@ -477,6 +496,28 @@ export default function ManageReleasePage() {
             >
               Save & Continue
             </Button>
+            {JSON.parse(localStorage.getItem("$auth") ?? "").roles.find(
+              (item: SimpleRolesSchema) => item.role === 4
+            ) && (
+              <Button
+                w={["full", "full", "auto"]}
+                colorScheme="blue"
+                rightIcon={<Icon as={IconCornerDownRight} />}
+                isLoading={updateReleaseMutation.isLoading}
+                loadingText="Saving"
+                onClick={() =>
+                  updateReleaseMutation.mutate({
+                    release: {
+                      name: response?.release_data.name ?? "",
+                      items: data ?? [],
+                    },
+                    uuid: asPath.split("/")[asPath.split("/").length - 1],
+                  })
+                }
+              >
+                Save Devops
+              </Button>
+            )}
           </Box>
         </>
       ) : (
@@ -520,6 +561,9 @@ function TableSheets(props: {
                     <Th>Hotfix Branches</Th>
                     <Th>Tags</Th>
                     <Th>Special Notes</Th>
+                    {JSON.parse(localStorage.getItem("$auth") ?? "").roles.find(
+                      (item: SimpleRolesSchema) => item.role === 4
+                    ) && <Th>DevOps Notes</Th>}
                   </Tr>
                 </Thead>
 
@@ -615,6 +659,24 @@ function TableSheets(props: {
                           <EditableInput />
                         </Editable>
                       </Td>
+                      {JSON.parse(localStorage.getItem("$auth") ?? "").roles.find(
+                        (item: SimpleRolesSchema) => item.role === 4
+                      ) && (
+                        <Td>
+                          <Input
+                            defaultValue={item.devops_notes}
+                            onChange={(e) =>
+                              props.onBranchTagChange({
+                                devops_notes: e.target.value,
+                                service: item.service,
+                                repo: item.repo,
+                              } as SimpleReleaseItemModelSchema)
+                            }
+                            placeholder="Notes"
+                            size="md"
+                          />
+                        </Td>
+                      )}
                     </Tr>
                   ))}
                 </Tbody>
@@ -626,6 +688,9 @@ function TableSheets(props: {
                     <Th>Hotfix Branches</Th>
                     <Th>Tags</Th>
                     <Th>Special Notes</Th>
+                    {JSON.parse(localStorage.getItem("$auth") ?? "").roles.find(
+                      (item: SimpleRolesSchema) => item.role === 4
+                    ) && <Th>DevOps Notes</Th>}
                   </Tr>
                 </Tfoot>
               </Table>

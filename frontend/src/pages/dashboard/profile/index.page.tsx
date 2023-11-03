@@ -124,6 +124,10 @@ export const rolesOptions: Array<IServiceOptions> = [
     label: "User",
     value: "3",
   },
+  {
+    label: "DevOps",
+    value: "4",
+  },
 ]
 
 function ProfileUpdateSection(props: {

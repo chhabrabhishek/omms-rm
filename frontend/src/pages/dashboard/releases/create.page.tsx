@@ -38,6 +38,7 @@ import {
   ConstantUserResponse,
   SimpleConstantSchema,
   SimpleReleaseItemModelSchema,
+  SimpleRolesSchema,
 } from "@/api/definitions"
 import { toast } from "react-hot-toast"
 import { reverse } from "@/utils/reverse"
@@ -132,6 +133,7 @@ export default function CreateReleasePage() {
           release_branch: updatedRow?.release_branch,
           hotfix_branch: updatedRow?.hotfix_branch,
           special_notes: updatedRow?.special_notes,
+          devops_notes: updatedRow?.devops_notes,
         } as SimpleReleaseItemModelSchema,
       ])
     }
@@ -143,6 +145,7 @@ export default function CreateReleasePage() {
           tag: updatedRow?.tag,
           hotfix_branch: updatedRow?.hotfix_branch,
           special_notes: updatedRow?.special_notes,
+          devops_notes: updatedRow?.devops_notes,
         } as SimpleReleaseItemModelSchema,
       ])
     }
@@ -154,6 +157,7 @@ export default function CreateReleasePage() {
           tag: updatedRow?.tag,
           release_branch: updatedRow?.release_branch,
           special_notes: updatedRow?.special_notes,
+          devops_notes: updatedRow?.devops_notes,
         } as SimpleReleaseItemModelSchema,
       ])
     }
@@ -165,6 +169,19 @@ export default function CreateReleasePage() {
           tag: updatedRow?.tag,
           release_branch: updatedRow?.release_branch,
           hotfix_branch: updatedRow?.hotfix_branch,
+          devops_notes: updatedRow?.devops_notes,
+        } as SimpleReleaseItemModelSchema,
+      ])
+    }
+    if ("devops_notes" in eventData) {
+      setData((previousData) => [
+        ...(previousData as SimpleReleaseItemModelSchema[]),
+        {
+          ...eventData,
+          tag: updatedRow?.tag,
+          release_branch: updatedRow?.release_branch,
+          hotfix_branch: updatedRow?.hotfix_branch,
+          special_notes: updatedRow?.special_notes,
         } as SimpleReleaseItemModelSchema,
       ])
     }
@@ -341,6 +358,9 @@ function TableSheets(props: {
                     <Th>Hotfix Branches</Th>
                     <Th>Tags</Th>
                     <Th>Special Notes</Th>
+                    {JSON.parse(localStorage.getItem("$auth") ?? "").roles.find(
+                      (item: SimpleRolesSchema) => item.role === 4
+                    ) && <Th>DevOps Notes</Th>}
                   </Tr>
                 </Thead>
 
@@ -419,6 +439,23 @@ function TableSheets(props: {
                           <EditableInput />
                         </Editable>
                       </Td>
+                      {JSON.parse(localStorage.getItem("$auth") ?? "").roles.find(
+                        (item: SimpleRolesSchema) => item.role === 4
+                      ) && (
+                        <Td>
+                          <Input
+                            onChange={(e) =>
+                              props.onBranchTagChange({
+                                devops_notes: e.target.value,
+                                service: item.service,
+                                repo: item.repo,
+                              } as SimpleReleaseItemModelSchema)
+                            }
+                            placeholder="Notes"
+                            size="md"
+                          />
+                        </Td>
+                      )}
                     </Tr>
                   ))}
                 </Tbody>
@@ -430,6 +467,9 @@ function TableSheets(props: {
                     <Th>Hotfix Branches</Th>
                     <Th>Tags</Th>
                     <Th>Special Notes</Th>
+                    {JSON.parse(localStorage.getItem("$auth") ?? "").roles.find(
+                      (item: SimpleRolesSchema) => item.role === 4
+                    ) && <Th>DevOps Notes</Th>}
                   </Tr>
                 </Tfoot>
               </Table>

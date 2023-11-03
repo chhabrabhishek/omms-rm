@@ -23,7 +23,7 @@ class Release(AppModel):
     created_by = models.OneToOneField(
         "accounts.Account", on_delete=models.PROTECT, related_name="release_created_by"
     )
-    updated_by = models.OneToOneField(
+    updated_by = models.ForeignKey(
         "accounts.Account", on_delete=models.PROTECT, related_name="release_updated_by"
     )
 
@@ -43,6 +43,7 @@ class ReleaseItem(AppModel):
     )
     tag = models.CharField(max_length=1024, null=True, default=None, blank=True)
     special_notes = models.TextField(null=True, default=None)
+    devops_notes = models.TextField(null=True, default=None)
     release = models.ForeignKey(Release, on_delete=models.PROTECT, related_name="items")
 
 
@@ -52,7 +53,7 @@ class Approver(AppModel):
     """
 
     approved = models.BooleanField(default=False)
-    user = models.OneToOneField(
+    user = models.ForeignKey(
         "accounts.Account", on_delete=models.PROTECT, related_name="approver"
     )
     release = models.ForeignKey(

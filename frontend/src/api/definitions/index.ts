@@ -171,6 +171,7 @@ export type SimpleReleaseItemModelSchema = {
     hotfix_branch?: string;
     tag?: string;
     special_notes?: string;
+    devops_notes?: string;
 };
 export type SimpleReleaseModelSchema = {
     items: SimpleReleaseItemModelSchema[];

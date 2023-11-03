@@ -9,5 +9,5 @@ RUN pip install poetry~=1.4.2 && \
     poetry run ./manage.py collectstatic --no-input
 
 EXPOSE 8000
-RUN chmod +x /app/bin/start.sh
-CMD [ "/app/bin/start.sh" ]
+# RUN chmod +x /app/bin/start.sh
+CMD ["poetry", "run", "python", "manage.py", "runserver", "0.0.0.0:8000"]
