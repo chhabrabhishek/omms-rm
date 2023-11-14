@@ -26,18 +26,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get(
-    "SECRET_KEY", "django-insecure-s)^7r@=42-fm#0@*2f266by&#w#^65t_j+ee^vkiwoiailszvb"
-)
+SECRET_KEY = os.environ.get("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = literal_eval(os.environ.get("DEBUG", "True"))
+DEBUG = bool(os.environ.get("DEBUG", default=0))
 
 IS_DEV = DEBUG
 
-ALLOWED_HOSTS = ["127.0.0.1", "localhost", "0.0.0.0"]
+ALLOWED_HOSTS = []
 if "HOST" in os.environ:
-    ALLOWED_HOSTS.append(os.environ["HOST"])
+    ALLOWED_HOSTS + os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
 
 
 # Application definition
@@ -95,8 +93,12 @@ WSGI_APPLICATION = "app.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": os.environ.get("DB_SQLITE", BASE_DIR / "db.sqlite3"),
+        "ENGINE": os.environ.get("SQL_ENGINE", "django.db.backends.sqlite3"),
+        "NAME": os.environ.get("SQL_DATABASE", BASE_DIR / "db.sqlite3"),
+        "USER": os.environ.get("SQL_USER", "user"),
+        "PASSWORD": os.environ.get("SQL_PASSWORD", "password"),
+        "HOST": os.environ.get("SQL_HOST", "localhost"),
+        "PORT": os.environ.get("SQL_PORT", "5432"),
     }
 }
 
@@ -145,9 +147,9 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = "static/"
+STATIC_URL = "/static/"
 
-STATIC_ROOT = BASE_DIR / "static"
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 if IS_DEV:
     LOGGING = {
@@ -171,20 +173,20 @@ if IS_DEV:
         },
     }
 
-if IS_DEV:
-    FE_URL = "http://localhost:3000/"
-else:
-    FE_URL = os.environ["FE_URL"]
+# if IS_DEV:
+#     FE_URL = "http://localhost:3000/"
+# else:
+#     FE_URL = os.environ.get("FE_URL")
 
 # CORS
 # https://github.com/adamchainz/django-cors-headers#configuration
 
-CORS_ALLOWED_ORIGINS = [FE_URL.rstrip("/")]
+# CORS_ALLOWED_ORIGINS = [FE_URL.rstrip("/")]
 
 # CSRF
 # https://docs.djangoproject.com/en/4.2/ref/settings/#std-setting-CSRF_TRUSTED_ORIGINS
 
-if "HOST" in os.environ:
-    HOST = os.environ["HOST"]
-    SCHEME = os.environ["SCHEME"]
-    CSRF_TRUSTED_ORIGINS = [f"{SCHEME}://{HOST}"]
+# if "HOST" in os.environ:
+#     HOST = os.environ["HOST"]
+#     SCHEME = os.environ["SCHEME"]
+#     CSRF_TRUSTED_ORIGINS = [f"{SCHEME}://{HOST}"]

@@ -20,7 +20,7 @@ class Release(AppModel):
 
     uuid = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
     name = models.CharField(max_length=1024)
-    created_by = models.OneToOneField(
+    created_by = models.ForeignKey(
         "accounts.Account", on_delete=models.PROTECT, related_name="release_created_by"
     )
     updated_by = models.ForeignKey(
