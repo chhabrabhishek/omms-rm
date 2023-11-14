@@ -14,7 +14,7 @@ FROM base as production
 WORKDIR /app
 
 ENV NODE_ENV=production
-RUN rm -rf node_modules && yarn install --immutable --immutable-cache --check-cache
+RUN rm -rf node_modules && yarn install --immutable --immutable-cache --check-cache --network-timeout 100000
 
 RUN addgroup -g 1001 -S nodejs
 RUN adduser -S nextjs -u 1001
