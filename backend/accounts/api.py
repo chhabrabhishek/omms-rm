@@ -81,7 +81,7 @@ def login(request, login: LoginRequest):
     }
 
 
-def length_validated_field(min_length=2, max_length=64):
+def length_validated_field(min_length=2, max_length=150):
     return Field(..., min_length=min_length, max_length=max_length)
 
 

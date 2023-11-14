@@ -53,12 +53,12 @@ class Account(AbstractUser):
     # Emails are also the primary identity of the users on the
     # platform. So, drop the username field.
     username = None
-    first_name = models.CharField(max_length=64)
-    last_name = models.CharField(max_length=64)
+    first_name = models.CharField(max_length=150)
+    last_name = models.CharField(max_length=150)
     email = models.EmailField(unique=True)
-    password = models.CharField(max_length=64)
+    password = models.CharField(max_length=150)
     msid = models.CharField(max_length=8)
-    team_name = models.CharField(max_length=64)
+    team_name = models.CharField(max_length=150)
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
@@ -84,7 +84,7 @@ class AuthToken(AppModel):
         related_name="auth_tokens",
     )
     token = models.CharField(
-        max_length=32,
+        max_length=150,
         unique=True,
         editable=False,
         default=generate_auth_token,
