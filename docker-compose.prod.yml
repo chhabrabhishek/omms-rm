@@ -7,7 +7,7 @@ services:
       dockerfile: Dockerfile.prod
     command: gunicorn app.wsgi:application --bind 0.0.0.0:8000
     volumes:
-      - static_volume:/usr/src/app/staticfiles
+      - static_volume:/home/app/web/staticfiles
     restart: always
     expose:
       - 8000
@@ -34,7 +34,7 @@ services:
   nginx:
     build: ./nginx
     volumes:
-      - static_volume:/usr/src/app/staticfiles
+      - static_volume:/home/app/web/staticfiles
     restart: always
     ports:
       - 80:80
