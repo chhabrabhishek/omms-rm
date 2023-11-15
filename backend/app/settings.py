@@ -33,7 +33,7 @@ DEBUG = bool(os.environ.get("DEBUG", default=0))
 
 IS_DEV = DEBUG
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["localhost", "rn000133847.uhc.com"]
 if "HOST" in os.environ:
     ALLOWED_HOSTS + os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
 
