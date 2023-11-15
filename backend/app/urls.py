@@ -32,6 +32,6 @@ api.add_router("/tickets/", tickets_router)
 api.add_router("/releases/", releases_router)
 
 urlpatterns = [
-    path("api/admin/", admin.site.urls),
+    path("admin/", admin.site.urls),
     path("api/", api.urls),
 ]
