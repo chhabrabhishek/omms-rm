@@ -22,9 +22,9 @@ services:
     expose:
       - 3000
     env_file:
-      - ./frontend/.env.prod
+      - ./frontend/.env.production
     environment:
-      NEXT_PUBLIC_API: http://localhost
+      NEXT_PUBLIC_API: http://rn000133847.uhc.com
   db:
     image: postgres:15
     volumes:
