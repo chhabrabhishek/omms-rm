@@ -189,6 +189,7 @@ if IS_DEV:
 # CORS_ALLOWED_ORIGINS = [FE_URL.rstrip("/")]
 
 CORS_ALLOW_ALL_ORIGINS = True
+CSRF_TRUSTED_ORIGINS = ["https://omms-release.optum.com"]
 
 # CSRF
 # https://docs.djangoproject.com/en/4.2/ref/settings/#std-setting-CSRF_TRUSTED_ORIGINS
