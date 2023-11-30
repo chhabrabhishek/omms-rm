@@ -729,13 +729,13 @@
         "properties": {
           "first_name": {
             "title": "First Name",
-            "maxLength": 64,
+            "maxLength": 150,
             "minLength": 2,
             "type": "string"
           },
           "last_name": {
             "title": "Last Name",
-            "maxLength": 64,
+            "maxLength": 150,
             "minLength": 2,
             "type": "string"
           },
@@ -746,7 +746,7 @@
           },
           "password": {
             "title": "Password",
-            "maxLength": 64,
+            "maxLength": 150,
             "type": "string"
           }
         },
@@ -781,13 +781,13 @@
         "properties": {
           "first_name": {
             "title": "First Name",
-            "maxLength": 64,
+            "maxLength": 150,
             "minLength": 2,
             "type": "string"
           },
           "last_name": {
             "title": "Last Name",
-            "maxLength": 64,
+            "maxLength": 150,
             "minLength": 2,
             "type": "string"
           },
@@ -817,7 +817,7 @@
           },
           "team_name": {
             "title": "Team Name",
-            "maxLength": 64,
+            "maxLength": 150,
             "type": "string"
           }
         },
@@ -933,13 +933,13 @@
         "properties": {
           "first_name": {
             "title": "First Name",
-            "maxLength": 64,
+            "maxLength": 150,
             "minLength": 2,
             "type": "string"
           },
           "last_name": {
             "title": "Last Name",
-            "maxLength": 64,
+            "maxLength": 150,
             "minLength": 2,
             "type": "string"
           },
@@ -950,7 +950,7 @@
           },
           "team_name": {
             "title": "Team Name",
-            "maxLength": 64,
+            "maxLength": 150,
             "type": "string"
           }
         },
@@ -1110,12 +1110,12 @@
         "properties": {
           "first_name": {
             "title": "First Name",
-            "maxLength": 64,
+            "maxLength": 150,
             "type": "string"
           },
           "last_name": {
             "title": "Last Name",
-            "maxLength": 64,
+            "maxLength": 150,
             "type": "string"
           },
           "email": {
@@ -1299,12 +1299,12 @@
         "properties": {
           "first_name": {
             "title": "First Name",
-            "maxLength": 64,
+            "maxLength": 150,
             "type": "string"
           },
           "last_name": {
             "title": "Last Name",
-            "maxLength": 64,
+            "maxLength": 150,
             "type": "string"
           },
           "email": {
@@ -1317,49 +1317,6 @@
           "first_name",
           "last_name",
           "email"
-        ]
-      },
-      "ConstantUserResponse": {
-        "title": "ConstantUserResponse",
-        "type": "object",
-        "properties": {
-          "constants": {
-            "title": "Constants",
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/SimpleConstantSchema"
-            }
-          },
-          "users": {
-            "title": "Users",
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/SimpleUserSchema"
-            }
-          }
-        },
-        "required": [
-          "constants",
-          "users"
-        ]
-      },
-      "ConstantUserStructuredResponse": {
-        "title": "ConstantUserStructuredResponse",
-        "type": "object",
-        "properties": {
-          "ok": {
-            "title": "Ok",
-            "type": "boolean"
-          },
-          "error": {
-            "$ref": "#/components/schemas/Error"
-          },
-          "result": {
-            "$ref": "#/components/schemas/ConstantUserResponse"
-          }
-        },
-        "required": [
-          "ok"
         ]
       },
       "SimpleReleaseItemModelSchema": {
@@ -1407,6 +1364,84 @@
           "service"
         ]
       },
+      "SimpleAllConstantReleaseModelSchema": {
+        "title": "SimpleAllConstantReleaseModelSchema",
+        "type": "object",
+        "properties": {
+          "items": {
+            "title": "Items",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SimpleReleaseItemModelSchema"
+            }
+          },
+          "uuid": {
+            "title": "Uuid",
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "title": "Name",
+            "maxLength": 1024,
+            "type": "string"
+          }
+        },
+        "required": [
+          "items",
+          "name"
+        ]
+      },
+      "ConstantUserResponse": {
+        "title": "ConstantUserResponse",
+        "type": "object",
+        "properties": {
+          "constants": {
+            "title": "Constants",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SimpleConstantSchema"
+            }
+          },
+          "users": {
+            "title": "Users",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SimpleUserSchema"
+            }
+          },
+          "release_list": {
+            "title": "Release List",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SimpleAllConstantReleaseModelSchema"
+            }
+          }
+        },
+        "required": [
+          "constants",
+          "users",
+          "release_list"
+        ]
+      },
+      "ConstantUserStructuredResponse": {
+        "title": "ConstantUserStructuredResponse",
+        "type": "object",
+        "properties": {
+          "ok": {
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "error": {
+            "$ref": "#/components/schemas/Error"
+          },
+          "result": {
+            "$ref": "#/components/schemas/ConstantUserResponse"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      },
       "SimpleReleaseModelSchema": {
         "title": "SimpleReleaseModelSchema",
         "type": "object",
@@ -1440,13 +1475,21 @@
             "title": "Approvers",
             "type": "array",
             "items": {
+              "type": "integer"
+            }
+          },
+          "targets": {
+            "title": "Targets",
+            "type": "array",
+            "items": {
               "type": "string"
             }
           }
         },
         "required": [
           "release",
-          "approvers"
+          "approvers",
+          "targets"
         ]
       },
       "UpdateReleaseRequest": {
@@ -1456,6 +1499,13 @@
           "release": {
             "$ref": "#/components/schemas/SimpleReleaseModelSchema"
           },
+          "targets": {
+            "title": "Targets",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
           "uuid": {
             "title": "Uuid",
             "type": "string",
@@ -1464,6 +1514,7 @@
         },
         "required": [
           "release",
+          "targets",
           "uuid"
         ]
       },
@@ -1471,8 +1522,9 @@
         "title": "SimpleApproverModelSchema",
         "type": "object",
         "properties": {
-          "user": {
-            "$ref": "#/components/schemas/SimpleUserSchema"
+          "group": {
+            "title": "Group",
+            "type": "integer"
           },
           "approved": {
             "title": "Approved",
@@ -1481,7 +1533,21 @@
           }
         },
         "required": [
-          "user"
+          "group"
+        ]
+      },
+      "SimpleTargetModelSchema": {
+        "title": "SimpleTargetModelSchema",
+        "type": "object",
+        "properties": {
+          "target": {
+            "title": "Target",
+            "maxLength": 1024,
+            "type": "string"
+          }
+        },
+        "required": [
+          "target"
         ]
       },
       "SimpleAllReleaseModelSchema": {
@@ -1500,6 +1566,13 @@
           },
           "updated_by": {
             "$ref": "#/components/schemas/SimpleUserSchema"
+          },
+          "targets": {
+            "title": "Targets",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SimpleTargetModelSchema"
+            }
           },
           "created_at": {
             "title": "Created At",
@@ -1526,6 +1599,7 @@
           "approvers",
           "created_by",
           "updated_by",
+          "targets",
           "created_at",
           "updated_at",
           "name"
@@ -1584,6 +1658,13 @@
               "$ref": "#/components/schemas/SimpleApproverModelSchema"
             }
           },
+          "targets": {
+            "title": "Targets",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SimpleTargetModelSchema"
+            }
+          },
           "name": {
             "title": "Name",
             "maxLength": 1024,
@@ -1593,6 +1674,7 @@
         "required": [
           "items",
           "approvers",
+          "targets",
           "name"
         ]
       },

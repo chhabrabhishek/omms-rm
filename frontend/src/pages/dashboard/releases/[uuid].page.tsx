@@ -5,9 +5,6 @@ import {
   Card,
   CardBody,
   CardHeader,
-  Editable,
-  EditableInput,
-  EditablePreview,
   Heading,
   Icon,
   Select as ChakraSelect,
@@ -32,7 +29,7 @@ import {
   AlertDialogFooter,
   HStack,
   Textarea,
-  Input,
+  Tooltip,
 } from "@chakra-ui/react"
 import { IconCornerDownRight } from "@tabler/icons-react"
 import { useAppMutation } from "@/hooks/useAppMutation"
@@ -46,12 +43,16 @@ import {
   SimpleConstantSchema,
   SimpleReleaseItemModelSchema,
   SimpleRolesSchema,
-  SimpleUserSchema,
 } from "@/api/definitions"
 import { toast } from "react-hot-toast"
 import If from "@/components/logic/If"
-import React, { ChangeEvent, ReactElement, useRef, useState } from "react"
+import React, { ChangeEvent, useRef, useState } from "react"
 import LoadingBlock from "@/components/indicators/LoadingBlock"
+import { AppFormControl } from "@/components/form/AppFormControl"
+import { ControlledMultiAppSelect } from "@/components/form/controls/Select"
+import { useAppForm } from "@/hooks/useAppForm"
+import zod from "zod"
+import { rolesOptions } from "../profile/index.page"
 
 // This page is only accessible by a User.
 ManageReleasePage.access = Access.User
@@ -61,6 +62,10 @@ interface IServiceOptions {
   value: string
 }
 
+const schema = zod.object({
+  targetEnvs: zod.array(zod.string().nonempty()).nullish().default(null),
+})
+
 export default function ManageReleasePage() {
   const { asPath } = useRouter()
   const [response, setResponse] = useState<GetReleaseResponse>()
@@ -68,8 +73,8 @@ export default function ManageReleasePage() {
   const [serviceOptions, setServiceOptions] = useState<Array<IServiceOptions>>([])
   const [checked, setChecked] = useState<boolean>(false)
   const [sheetsDisabled, setSheetsDisabled] = useState<boolean>(false)
-  const [approvedBy, setApprovedBy] = useState<Array<SimpleUserSchema>>([])
-  const [pendingBy, setPendingBy] = useState<Array<SimpleUserSchema>>([])
+  const [approvedBy, setApprovedBy] = useState<Array<number>>([])
+  const [pendingBy, setPendingBy] = useState<Array<number>>([])
 
   const { isOpen, onOpen, onClose } = useDisclosure()
   const cancelRef = useRef(null)
@@ -83,9 +88,20 @@ export default function ManageReleasePage() {
     setReason(e.target.value)
   }
 
+  const form = useAppForm<zod.infer<typeof schema>>({
+    schema,
+    initialFocus: "targetEnvs",
+  })
+
   const magic = useMagicQueryHooks({
     autoRefetch: false,
     onOk(responseData) {
+      form.reset({
+        targetEnvs:
+          (responseData.result as GetReleaseResponse).release_data.targets.map(
+            (item) => item.target
+          ) ?? [],
+      })
       if (!(response && data)) {
         const tempConstants = [
           ...new Map(
@@ -101,9 +117,28 @@ export default function ManageReleasePage() {
           (responseData.result as GetReleaseResponse).release_data.items.map((item) => item) ?? []
         )
         setChecked(
-          (responseData.result as GetReleaseResponse).release_data.approvers.find(
-            (item) => item.user.email === JSON.parse(localStorage.getItem("$auth") ?? "").email
-          )?.approved ?? false
+          !(
+            ((responseData.result as GetReleaseResponse).release_data.approvers
+              .filter((item) => !item.approved)
+              .map((item) => item.group)
+              .includes(2) ||
+              (responseData.result as GetReleaseResponse).release_data.approvers
+                .filter((item) => !item.approved)
+                .map((item) => item.group)
+                .includes(4)) &&
+            (JSON.parse(localStorage.getItem("$auth") ?? "")
+              .roles.map((item: any) => item.role)
+              .includes(2) ||
+              JSON.parse(localStorage.getItem("$auth") ?? "")
+                .roles.map((item: any) => item.role)
+                .includes(4))
+          ) &&
+            ((responseData.result as GetReleaseResponse).release_data.approvers.find((item) =>
+              JSON.parse(localStorage.getItem("$auth") ?? "")
+                .roles.map((item: any) => item.role)
+                .includes(item.group)
+            )?.approved ??
+              false)
         )
         setSheetsDisabled(
           (responseData.result as GetReleaseResponse).release_data.approvers
@@ -114,9 +149,9 @@ export default function ManageReleasePage() {
         )
         for (let approver of (responseData.result as GetReleaseResponse).release_data.approvers) {
           if (approver.approved) {
-            setApprovedBy((previousApprovedBy) => [...previousApprovedBy, approver.user])
+            setApprovedBy((previousApprovedBy) => [...previousApprovedBy, approver.group])
           } else {
-            setPendingBy((previousPendingBy) => [...previousPendingBy, approver.user])
+            setPendingBy((previousPendingBy) => [...previousPendingBy, approver.group])
           }
         }
       }
@@ -218,20 +253,27 @@ export default function ManageReleasePage() {
       setChecked(true)
       setPendingBy(
         pendingBy.filter(
-          (item) => item.email !== JSON.parse(localStorage.getItem("$auth") ?? "").email
+          (item) =>
+            !JSON.parse(localStorage.getItem("$auth") ?? "")
+              .roles.map((item: any) => item.role)
+              .includes(item)
         )
       )
       setApprovedBy([
-        ...approvedBy,
-        {
-          email: JSON.parse(localStorage.getItem("$auth") ?? "").email,
-          first_name: JSON.parse(localStorage.getItem("$auth") ?? "").first_name,
-          last_name: JSON.parse(localStorage.getItem("$auth") ?? "").last_name,
-        } as SimpleUserSchema,
+        ...new Set(
+          approvedBy
+            .concat(
+              JSON.parse(localStorage.getItem("$auth") ?? "").roles.map((item: any) => item.role)
+            )
+            .filter((item) => item !== 1 && item !== 3)
+        ),
       ])
       if (
         !pendingBy.filter(
-          (item) => item.email !== JSON.parse(localStorage.getItem("$auth") ?? "").email
+          (item) =>
+            !JSON.parse(localStorage.getItem("$auth") ?? "")
+              .roles.map((item: any) => item.role)
+              .includes(item)
         ).length
       ) {
         setSheetsDisabled(true)
@@ -252,19 +294,8 @@ export default function ManageReleasePage() {
       revokeApprovalModal.onClose()
       setChecked(false)
       setSheetsDisabled(false)
-      setApprovedBy(
-        approvedBy.filter(
-          (item) => item.email !== JSON.parse(localStorage.getItem("$auth") ?? "").email
-        )
-      )
-      setPendingBy([
-        ...pendingBy,
-        {
-          email: JSON.parse(localStorage.getItem("$auth") ?? "").email,
-          first_name: JSON.parse(localStorage.getItem("$auth") ?? "").first_name,
-          last_name: JSON.parse(localStorage.getItem("$auth") ?? "").last_name,
-        } as SimpleUserSchema,
-      ])
+      setApprovedBy(approvedBy.filter((item) => item !== 2))
+      setPendingBy([2])
     },
     autoRefetch: false,
   })
@@ -299,17 +330,28 @@ export default function ManageReleasePage() {
                 then={(response) => (
                   <>
                     <HStack w="full" spacing="6" align="center" justify="space-evenly">
-                      {response.release_data.approvers.find(
-                        (item) =>
-                          item.user.email === JSON.parse(localStorage.getItem("$auth") ?? "").email
+                      {response.release_data.approvers.find((item) =>
+                        JSON.parse(localStorage.getItem("$auth") ?? "")
+                          .roles.map((item: any) => item.role)
+                          .includes(item.group)
                       ) && (
                         <Checkbox
                           disabled={
-                            response.release_data.approvers.find(
-                              (item) =>
-                                item.user.email ===
-                                JSON.parse(localStorage.getItem("$auth") ?? "").email
-                            )?.approved || checked
+                            (!(
+                              (pendingBy.includes(2) || pendingBy.includes(4)) &&
+                              (JSON.parse(localStorage.getItem("$auth") ?? "")
+                                .roles.map((item: any) => item.role)
+                                .includes(2) ||
+                                JSON.parse(localStorage.getItem("$auth") ?? "")
+                                  .roles.map((item: any) => item.role)
+                                  .includes(4))
+                            ) &&
+                              response.release_data.approvers.find((item) =>
+                                JSON.parse(localStorage.getItem("$auth") ?? "")
+                                  .roles.map((item: any) => item.role)
+                                  .includes(item.group)
+                              )?.approved) ||
+                            checked
                           }
                           isChecked={checked}
                           onChange={(e) => (e.target.checked ? onOpen() : onClose())}
@@ -318,10 +360,10 @@ export default function ManageReleasePage() {
                         </Checkbox>
                       )}
                       {sheetsDisabled &&
-                        response.release_data.approvers.find(
-                          (item) =>
-                            item.user.email ===
-                            JSON.parse(localStorage.getItem("$auth") ?? "").email
+                        response.release_data.approvers.find((item) =>
+                          JSON.parse(localStorage.getItem("$auth") ?? "")
+                            .roles.map((item: any) => item.role)
+                            .includes(2)
                         ) && (
                           <Button
                             size="sm"
@@ -339,8 +381,16 @@ export default function ManageReleasePage() {
                         <strong>
                           {approvedBy.map((item, index) =>
                             index === approvedBy.length - 1
-                              ? `${item.first_name} ${item.last_name} (${item.email})`
-                              : `${item.first_name} ${item.last_name} (${item.email}), `
+                              ? `${
+                                  rolesOptions.find(
+                                    (roleoption) => Number.parseInt(roleoption.value) === item
+                                  )?.label
+                                }`
+                              : `${
+                                  rolesOptions.find(
+                                    (roleoption) => Number.parseInt(roleoption.value) === item
+                                  )?.label
+                                }, `
                           )}
                         </strong>
                       </Text>
@@ -351,8 +401,16 @@ export default function ManageReleasePage() {
                         <strong>
                           {pendingBy.map((item, index) =>
                             index === pendingBy.length - 1
-                              ? `${item.first_name} ${item.last_name} (${item.email})`
-                              : `${item.first_name} ${item.last_name} (${item.email}), `
+                              ? `${
+                                  rolesOptions.find(
+                                    (roleoption) => Number.parseInt(roleoption.value) === item
+                                  )?.label
+                                }`
+                              : `${
+                                  rolesOptions.find(
+                                    (roleoption) => Number.parseInt(roleoption.value) === item
+                                  )?.label
+                                }, `
                           )}
                         </strong>
                       </Text>
@@ -364,6 +422,27 @@ export default function ManageReleasePage() {
                         administrator.
                       </Text>
                     )}
+                    <AppFormControl label="Target Envs" error={form.formState.errors.targetEnvs}>
+                      <ControlledMultiAppSelect
+                        controller={{
+                          name: "targetEnvs",
+                          control: form.control,
+                        }}
+                        variant="filled"
+                        placeholder="Enter all the target envs"
+                        closeMenuOnSelect={false}
+                        noOptionsMessage={() => "Type to Create"}
+                        tagVariant="solid"
+                        isClearable={false}
+                        isCreatable
+                        isDisabled={
+                          sheetsDisabled &&
+                          !JSON.parse(localStorage.getItem("$auth") ?? "")
+                            .roles.map((item: any) => item.role)
+                            .includes(4)
+                        }
+                      />
+                    </AppFormControl>
                     {[...new Set(response.release_data.items.map((item) => item.service))].map(
                       (item, index) => (
                         <TableSheets
@@ -491,6 +570,7 @@ export default function ManageReleasePage() {
                     items: data ?? [],
                   },
                   uuid: asPath.split("/")[asPath.split("/").length - 1],
+                  targets: form.getValues().targetEnvs ?? [],
                 })
               }
             >
@@ -512,6 +592,7 @@ export default function ManageReleasePage() {
                       items: data ?? [],
                     },
                     uuid: asPath.split("/")[asPath.split("/").length - 1],
+                    targets: form.getValues().targetEnvs ?? [],
                   })
                 }
               >
@@ -546,7 +627,11 @@ function TableSheets(props: {
 
           <CardBody>
             <TableContainer w="full">
-              <Table variant="simple">
+              <Table
+                variant="simple"
+                size="md"
+                __css={{ "table-layout": "fixed", "width": "150%" }}
+              >
                 <TableCaption>
                   {
                     props.serviceOptions.find((item) => item.value === props.response[0].service)
@@ -568,117 +653,138 @@ function TableSheets(props: {
                 </Thead>
 
                 <Tbody>
-                  {props.response.map((item, index) => (
-                    <Tr key={item.repo + item.service}>
-                      <Td>{item.repo}</Td>
-                      <Td>
-                        <ChakraSelect
-                          placeholder="Select Release Branch"
-                          defaultValue={item.release_branch}
-                          disabled={props.sheetsDisabled}
-                          onChange={(e) =>
-                            props.onBranchTagChange({
-                              release_branch: e.target.value ?? "",
-                              service: item.service,
-                              repo: item.repo,
-                            } as SimpleReleaseItemModelSchema)
-                          }
-                        >
-                          {(
-                            props.constant.find((constantItem) => constantItem.repo === item.repo)
-                              ?.branches ?? []
-                          ).map((item) => (
-                            <option key={item} value={item}>
-                              {item}
-                            </option>
-                          ))}
-                        </ChakraSelect>
-                      </Td>
-                      <Td>
-                        <ChakraSelect
-                          placeholder="Select Hotfix Branch"
-                          defaultValue={item.hotfix_branch}
-                          disabled={props.sheetsDisabled}
-                          onChange={(e) =>
-                            props.onBranchTagChange({
-                              hotfix_branch: e.target.value ?? "",
-                              service: item.service,
-                              repo: item.repo,
-                            } as SimpleReleaseItemModelSchema)
-                          }
-                        >
-                          {(
-                            props.constant.find((constantItem) => constantItem.repo === item.repo)
-                              ?.branches ?? []
-                          ).map((item) => (
-                            <option key={item} value={item}>
-                              {item}
-                            </option>
-                          ))}
-                        </ChakraSelect>
-                      </Td>
-                      <Td>
-                        <ChakraSelect
-                          placeholder="Select Tag"
-                          defaultValue={item.tag}
-                          disabled={props.sheetsDisabled}
-                          onChange={(e) =>
-                            props.onBranchTagChange({
-                              tag: e.target.value ?? "",
-                              service: item.service,
-                              repo: item.repo,
-                            } as SimpleReleaseItemModelSchema)
-                          }
-                        >
-                          {(
-                            props.constant.find((constantItem) => constantItem.repo === item.repo)
-                              ?.tags ?? []
-                          ).map((item) => (
-                            <option key={item} value={item}>
-                              {item}
-                            </option>
-                          ))}
-                        </ChakraSelect>
-                      </Td>
-                      <Td>
-                        <Editable
-                          w="20vh"
-                          overflowX="auto"
-                          placeholder="Notes"
-                          defaultValue={item.special_notes}
-                          isDisabled={props.sheetsDisabled}
-                          onChange={(e) =>
-                            props.onBranchTagChange({
-                              special_notes: e,
-                              service: item.service,
-                              repo: item.repo,
-                            } as SimpleReleaseItemModelSchema)
-                          }
-                        >
-                          <EditablePreview />
-                          <EditableInput />
-                        </Editable>
-                      </Td>
-                      {JSON.parse(localStorage.getItem("$auth") ?? "").roles.find(
-                        (item: SimpleRolesSchema) => item.role === 4
-                      ) && (
+                  {props.response
+                    .sort(function (x, y) {
+                      if (!x.release_branch) {
+                        return 1
+                      }
+                      if (!y.release_branch) {
+                        return -1
+                      }
+                      return 0
+                    })
+                    .map((item, index) => (
+                      <Tr key={item.repo + item.service}>
                         <Td>
-                          <Input
-                            defaultValue={item.devops_notes}
+                          <Tooltip label={item.repo}>
+                            <Text
+                              overflow="auto"
+                              css={{
+                                "&::-webkit-scrollbar": {
+                                  display: "none",
+                                },
+                              }}
+                              p={2}
+                              borderRadius="md"
+                              bg={item.release_branch ? "green.100" : "red.100"}
+                            >
+                              {item.repo}
+                            </Text>
+                          </Tooltip>
+                        </Td>
+                        <Td>
+                          <ChakraSelect
+                            placeholder="Select Release Branch"
+                            defaultValue={item.release_branch}
+                            disabled={props.sheetsDisabled}
                             onChange={(e) =>
                               props.onBranchTagChange({
-                                devops_notes: e.target.value,
+                                release_branch: e.target.value ?? "",
                                 service: item.service,
                                 repo: item.repo,
                               } as SimpleReleaseItemModelSchema)
                             }
-                            placeholder="Notes"
-                            size="md"
+                          >
+                            {(
+                              props.constant.find((constantItem) => constantItem.repo === item.repo)
+                                ?.branches ?? []
+                            ).map((item) => (
+                              <option key={item} value={item}>
+                                {item}
+                              </option>
+                            ))}
+                          </ChakraSelect>
+                        </Td>
+                        <Td>
+                          <ChakraSelect
+                            placeholder="Select Hotfix Branch"
+                            defaultValue={item.hotfix_branch}
+                            disabled={props.sheetsDisabled}
+                            onChange={(e) =>
+                              props.onBranchTagChange({
+                                hotfix_branch: e.target.value ?? "",
+                                service: item.service,
+                                repo: item.repo,
+                              } as SimpleReleaseItemModelSchema)
+                            }
+                          >
+                            {(
+                              props.constant.find((constantItem) => constantItem.repo === item.repo)
+                                ?.branches ?? []
+                            ).map((item) => (
+                              <option key={item} value={item}>
+                                {item}
+                              </option>
+                            ))}
+                          </ChakraSelect>
+                        </Td>
+                        <Td>
+                          <ChakraSelect
+                            placeholder="Select Tag"
+                            defaultValue={item.tag}
+                            disabled={props.sheetsDisabled}
+                            onChange={(e) =>
+                              props.onBranchTagChange({
+                                tag: e.target.value ?? "",
+                                service: item.service,
+                                repo: item.repo,
+                              } as SimpleReleaseItemModelSchema)
+                            }
+                          >
+                            {(
+                              props.constant.find((constantItem) => constantItem.repo === item.repo)
+                                ?.tags ?? []
+                            ).map((item) => (
+                              <option key={item} value={item}>
+                                {item}
+                              </option>
+                            ))}
+                          </ChakraSelect>
+                        </Td>
+                        <Td>
+                          <Textarea
+                            placeholder="Special Notes"
+                            defaultValue={item.special_notes}
+                            isDisabled={props.sheetsDisabled}
+                            onChange={(e) =>
+                              props.onBranchTagChange({
+                                special_notes: e.target.value,
+                                service: item.service,
+                                repo: item.repo,
+                              } as SimpleReleaseItemModelSchema)
+                            }
                           />
                         </Td>
-                      )}
-                    </Tr>
-                  ))}
+                        {JSON.parse(localStorage.getItem("$auth") ?? "").roles.find(
+                          (item: SimpleRolesSchema) => item.role === 4
+                        ) && (
+                          <Td>
+                            <Textarea
+                              defaultValue={item.devops_notes}
+                              onChange={(e) =>
+                                props.onBranchTagChange({
+                                  devops_notes: e.target.value,
+                                  service: item.service,
+                                  repo: item.repo,
+                                } as SimpleReleaseItemModelSchema)
+                              }
+                              placeholder="Notes"
+                              size="md"
+                            />
+                          </Td>
+                        )}
+                      </Tr>
+                    ))}
                 </Tbody>
 
                 <Tfoot>

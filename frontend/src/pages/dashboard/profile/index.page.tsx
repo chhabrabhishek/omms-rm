@@ -128,6 +128,26 @@ export const rolesOptions: Array<IServiceOptions> = [
     label: "DevOps",
     value: "4",
   },
+  {
+    label: "PEP",
+    value: "5",
+  },
+  {
+    label: "Mule",
+    value: "6",
+  },
+  {
+    label: "Talend",
+    value: "7",
+  },
+  {
+    label: "DB",
+    value: "8",
+  },
+  {
+    label: "DC",
+    value: "9",
+  },
 ]
 
 function ProfileUpdateSection(props: {
@@ -146,7 +166,7 @@ function ProfileUpdateSection(props: {
       title="Personal Details"
       subtitle="Lorem ipsum dolor sit amet consectetur adipisicing elit."
     >
-      <VStack spacing="12" mb="6rem">
+      <VStack spacing="12" mb="48">
         <SimpleGrid w="full" spacing="6" columns={[1, 1, 2]}>
           <AppFormControl
             label="First Name"
@@ -178,6 +198,36 @@ function ProfileUpdateSection(props: {
             <Input readOnly disabled variant="filled" defaultValue={props.user?.email} />
           </AppFormControl>
 
+          <AppFormControl label="Roles">
+            <Select
+              isMulti
+              colorScheme="purple"
+              placeholder="Select roles"
+              defaultValue={rolesOptions.filter((item) =>
+                props.roles.includes(Number.parseInt(item.value))
+              )}
+              options={rolesOptions.filter(
+                (item) => !props.pendingRoles.includes(Number.parseInt(item.value))
+              )}
+              onChange={handleRoleSelect}
+            />
+          </AppFormControl>
+
+          {props.pendingRoles.length > 0 && (
+            <AppFormControl label="Pending Roles">
+              <Select
+                isMulti
+                colorScheme="purple"
+                isDisabled
+                defaultValue={rolesOptions.filter((item) =>
+                  props.pendingRoles.includes(Number.parseInt(item.value))
+                )}
+                options={rolesOptions}
+                onChange={handleRoleSelect}
+              />
+            </AppFormControl>
+          )}
+
           <AppFormControl label="MSID" isRequired error={props.form.formState.errors.msid}>
             <Input
               type="text"
@@ -199,34 +249,6 @@ function ProfileUpdateSection(props: {
               {...props.form.register("team_name")}
             />
           </AppFormControl>
-          <AppFormControl label="Roles">
-            <Select
-              isMulti
-              colorScheme="purple"
-              placeholder="Select roles"
-              defaultValue={rolesOptions.filter((item) =>
-                props.roles.includes(Number.parseInt(item.value))
-              )}
-              options={rolesOptions.filter(
-                (item) => !props.pendingRoles.includes(Number.parseInt(item.value))
-              )}
-              onChange={handleRoleSelect}
-            />
-          </AppFormControl>
-          {props.pendingRoles.length > 0 && (
-            <AppFormControl label="Pending Roles">
-              <Select
-                isMulti
-                colorScheme="purple"
-                isDisabled
-                defaultValue={rolesOptions.filter((item) =>
-                  props.pendingRoles.includes(Number.parseInt(item.value))
-                )}
-                options={rolesOptions}
-                onChange={handleRoleSelect}
-              />
-            </AppFormControl>
-          )}
         </SimpleGrid>
       </VStack>
     </CardSection>

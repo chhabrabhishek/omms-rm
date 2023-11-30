@@ -155,15 +155,6 @@ export type SimpleUserSchema = {
     last_name: string;
     email: string;
 };
-export type ConstantUserResponse = {
-    constants: SimpleConstantSchema[];
-    users: SimpleUserSchema[];
-};
-export type ConstantUserStructuredResponse = {
-    ok: boolean;
-    error?: Error;
-    result?: ConstantUserResponse;
-};
 export type SimpleReleaseItemModelSchema = {
     repo: string;
     service: string;
@@ -173,26 +164,47 @@ export type SimpleReleaseItemModelSchema = {
     special_notes?: string;
     devops_notes?: string;
 };
+export type SimpleAllConstantReleaseModelSchema = {
+    items: SimpleReleaseItemModelSchema[];
+    uuid?: string;
+    name: string;
+};
+export type ConstantUserResponse = {
+    constants: SimpleConstantSchema[];
+    users: SimpleUserSchema[];
+    release_list: SimpleAllConstantReleaseModelSchema[];
+};
+export type ConstantUserStructuredResponse = {
+    ok: boolean;
+    error?: Error;
+    result?: ConstantUserResponse;
+};
 export type SimpleReleaseModelSchema = {
     items: SimpleReleaseItemModelSchema[];
     name: string;
 };
 export type CreateReleaseRequest = {
     release: SimpleReleaseModelSchema;
-    approvers: string[];
+    approvers: number[];
+    targets: string[];
 };
 export type UpdateReleaseRequest = {
     release: SimpleReleaseModelSchema;
+    targets: string[];
     uuid: string;
 };
 export type SimpleApproverModelSchema = {
-    user: SimpleUserSchema;
+    group: number;
     approved?: boolean;
+};
+export type SimpleTargetModelSchema = {
+    target: string;
 };
 export type SimpleAllReleaseModelSchema = {
     approvers: SimpleApproverModelSchema[];
     created_by: SimpleUserSchema;
     updated_by: SimpleUserSchema;
+    targets: SimpleTargetModelSchema[];
     created_at: string;
     updated_at: string;
     uuid?: string;
@@ -209,6 +221,7 @@ export type AllReleaseStructuredResponse = {
 export type SimpleGetReleaseModelSchema = {
     items: SimpleReleaseItemModelSchema[];
     approvers: SimpleApproverModelSchema[];
+    targets: SimpleTargetModelSchema[];
     name: string;
 };
 export type GetReleaseResponse = {

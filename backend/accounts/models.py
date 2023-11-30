@@ -108,6 +108,11 @@ class Roles(AppModel):
         ReleaseAdmin = 2
         User = 3
         DevOps = 4
+        PEP = 5
+        Mule = 6
+        Talend = 7
+        DB = 8
+        DC = 9
 
     role = enum.EnumField(Role)
     account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name="roles")

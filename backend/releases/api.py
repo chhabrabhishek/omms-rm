@@ -16,6 +16,7 @@ from releases.models import Constant
 from releases.models import Release
 from releases.models import ReleaseItem
 from releases.models import RevokeApproval
+from releases.models import Target
 
 router = Router(auth=CommonBearerTokenAuth())
 logger = logging.getLogger("django.server")
@@ -76,10 +77,36 @@ class SimpleUserSchema(ModelSchema):
         include = ("first_name", "last_name", "email")
 
 
+class SimpleReleaseItemModelSchema(ModelSchema):
+    class Config:
+        model = ReleaseItem
+        include = (
+            "repo",
+            "service",
+            "release_branch",
+            "hotfix_branch",
+            "tag",
+            "special_notes",
+            "devops_notes",
+        )
+
+
+class SimpleAllConstantReleaseModelSchema(ModelSchema):
+    items: list[SimpleReleaseItemModelSchema]
+
+    class Config:
+        model = Release
+        include = (
+            "uuid",
+            "name",
+        )
+
+
 @response_schema
 class ConstantUserResponse(Schema):
     constants: list[SimpleConstantSchema]
     users: list[SimpleUserSchema]
+    release_list: list[SimpleAllConstantReleaseModelSchema]
 
 
 @router.get("/constant", response=ConstantUserResponse)
@@ -110,25 +137,16 @@ def get_constant_and_users(request):
         ]
 
     users = Account.objects.filter(~Q(first_name=""))
+    release_list = Release.objects.all()
 
     return {
         "ok": True,
-        "result": {"constants": list(constants), "users": list(users)},
+        "result": {
+            "constants": list(constants),
+            "users": list(users),
+            "release_list": list(release_list),
+        },
     }
-
-
-class SimpleReleaseItemModelSchema(ModelSchema):
-    class Config:
-        model = ReleaseItem
-        include = (
-            "repo",
-            "service",
-            "release_branch",
-            "hotfix_branch",
-            "tag",
-            "special_notes",
-            "devops_notes",
-        )
 
 
 class SimpleReleaseModelSchema(ModelSchema):
@@ -141,35 +159,48 @@ class SimpleReleaseModelSchema(ModelSchema):
 
 class CreateReleaseRequest(Schema):
     release: SimpleReleaseModelSchema
-    approvers: list[str]
+    approvers: list[int]
+    targets: list[str]
 
 
 # TODO: Add audit fields
 @router.post("/create", response=AckResponse)
 def create_release(request, form: CreateReleaseRequest):
     user = request.auth
-    for role in user.roles.all():
-        if role.role == Roles.Role.ReleaseAdmin:
-            with transaction.atomic():
-                release = Release.objects.create(
-                    name=form.release.name, created_by=user, updated_by=user
-                )
-                for item in form.release.items:
-                    ReleaseItem.objects.create(
-                        repo=item.repo,
-                        service=item.service,
-                        release_branch=item.release_branch,
-                        hotfix_branch=item.hotfix_branch,
-                        tag=item.tag,
-                        special_notes=item.special_notes,
-                        devops_notes=item.devops_notes,
-                        release=release,
+    try:
+        for role in user.roles.all():
+            if role.role == Roles.Role.ReleaseAdmin:
+                with transaction.atomic():
+                    release = Release.objects.create(
+                        name=form.release.name, created_by=user, updated_by=user
                     )
-                for item in form.approvers:
-                    user = Account.objects.get(email=item)
-                    Approver.objects.create(user=user, release=release)
+                    for item in form.release.items:
+                        ReleaseItem.objects.create(
+                            repo=item.repo,
+                            service=item.service,
+                            release_branch=item.release_branch,
+                            hotfix_branch=item.hotfix_branch,
+                            tag=item.tag,
+                            special_notes=item.special_notes,
+                            devops_notes=item.devops_notes,
+                            release=release,
+                        )
+                    for item in form.approvers:
+                        Approver.objects.create(group=item, release=release)
+                    Approver.objects.create(group=2, release=release)
+                    Approver.objects.create(group=4, release=release)
+                    for item in form.targets:
+                        Target.objects.create(target=item, release=release)
 
-            return {"ok": True}
+                return {"ok": True}
+    except Exception as e:
+        logger.error(e)
+        {
+            "ok": False,
+            "error": {
+                "reason": "internal_server_error",
+            },
+        }
     return {
         "ok": False,
         "error": {
@@ -180,6 +211,7 @@ def create_release(request, form: CreateReleaseRequest):
 
 class UpdateReleaseRequest(Schema):
     release: SimpleReleaseModelSchema
+    targets: list[str]
     uuid: uuid.UUID
 
 
@@ -222,6 +254,10 @@ def update_release(request, form: UpdateReleaseRequest):
                         release_item.special_notes = item.special_notes
                         release_item.release = release
                     release_item.save()
+                targets = Target.objects.filter(release=release)
+                targets.delete()
+                for item in form.targets:
+                    Target.objects.create(target=item, release=release)
 
             return {"ok": True}
     return {
@@ -233,17 +269,24 @@ def update_release(request, form: UpdateReleaseRequest):
 
 
 class SimpleApproverModelSchema(ModelSchema):
-    user: SimpleUserSchema
+    group: int
 
     class Config:
         model = Approver
-        include = ("approved", "user")
+        include = ("approved", "group")
+
+
+class SimpleTargetModelSchema(ModelSchema):
+    class Config:
+        model = Target
+        include = ("target",)
 
 
 class SimpleAllReleaseModelSchema(ModelSchema):
     approvers: list[SimpleApproverModelSchema]
     created_by: SimpleUserSchema
     updated_by: SimpleUserSchema
+    targets: list[SimpleTargetModelSchema]
 
     class Config:
         model = Release
@@ -264,17 +307,27 @@ class AllReleaseResponse(Schema):
 
 @router.get("/all", response=AllReleaseResponse)
 def get_all_releases(request):
-    releases_list = Release.objects.order_by("-updated_at").all()
+    try:
+        releases_list = Release.objects.order_by("-updated_at").all()
 
-    return {
-        "ok": True,
-        "result": {"release_list": list(releases_list)},
-    }
+        return {
+            "ok": True,
+            "result": {"release_list": list(releases_list)},
+        }
+    except Exception as e:
+        print(e)
+        return {
+            "ok": False,
+            "error": {
+                "reason": "internal_server_error",
+            },
+        }
 
 
 class SimpleGetReleaseModelSchema(ModelSchema):
     items: list[SimpleReleaseItemModelSchema]
     approvers: list[SimpleApproverModelSchema]
+    targets: list[SimpleTargetModelSchema]
 
     class Config:
         model = Release
@@ -333,10 +386,14 @@ def get_release_with_uuid(request, uuid: uuid.UUID):
 def approve_release(request, uuid: uuid.UUID):
     user = request.auth
     release = Release.objects.get(uuid=uuid)
-
-    approver = Approver.objects.get(release=release, user=user)
-    approver.approved = True
-    approver.save()
+    for role in list(user.roles.all()):
+        if role.role in [1, 3]:
+            continue
+        else:
+            approver = Approver.objects.filter(release=release, group=role.role).first()
+            if approver:
+                approver.approved = True
+                approver.save()
 
     return {"ok": True}
 
@@ -349,7 +406,7 @@ def revoke_approval(request, uuid: uuid.UUID, reason: str):
     with transaction.atomic():
         RevokeApproval.objects.create(user=user, release=release, reason=reason)
 
-        approver = Approver.objects.get(release=release, user=user)
+        approver = Approver.objects.get(release=release, group=2)
         approver.approved = False
         approver.save()
 

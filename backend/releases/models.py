@@ -1,6 +1,8 @@
 import uuid
 from django.db import models
+from django_enumfield import enum
 from app.utils.models import AppModel
+from accounts.models import Roles
 
 
 class Constant(AppModel):
@@ -53,11 +55,20 @@ class Approver(AppModel):
     """
 
     approved = models.BooleanField(default=False)
-    user = models.ForeignKey(
-        "accounts.Account", on_delete=models.PROTECT, related_name="approver"
-    )
+    group = enum.EnumField(Roles.Role)
     release = models.ForeignKey(
         Release, on_delete=models.PROTECT, related_name="approvers"
+    )
+
+
+class Target(AppModel):
+    """
+    Represents all the target envs for a release
+    """
+
+    target = models.CharField(max_length=1024)
+    release = models.ForeignKey(
+        Release, on_delete=models.PROTECT, related_name="targets"
     )
 
 

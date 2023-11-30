@@ -65,15 +65,23 @@ export default function ReleasesPage() {
                       condensed: true,
                       cell: (cell) => cell.row.index + 1,
                     },
-                    // uuid: {
-                    //   id: "uuid",
-                    //   header: "Unique Release ID",
-                    //   accessorKey: "uuid",
-                    // },
                     name: {
                       id: "name",
                       header: "Name",
                       accessorKey: "name",
+                    },
+                    targetEnv: {
+                      id: "targetEnv",
+                      header: "Target Envs",
+                      cell: (cell) => (
+                        <>
+                          {cell.row.original.targets.map((item) => (
+                            <Tag key={item.target} mx={1}>
+                              {item.target}
+                            </Tag>
+                          ))}
+                        </>
+                      ),
                     },
                     created_at: {
                       id: "created_at",
@@ -87,7 +95,7 @@ export default function ReleasesPage() {
                     },
                     status: {
                       id: "status",
-                      header: "Status",
+                      header: "Checklist Status",
                       accessorKey: "approvers",
                       cell: (cell) => (
                         <Tag>
