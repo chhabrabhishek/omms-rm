@@ -35,7 +35,6 @@ IS_DEV = DEBUG
 
 ALLOWED_HOSTS = [
     "localhost",
-    "rn000133847.uhc.com",
     "omms-release.optum.com",
     "localhost:3000",
 ]
