@@ -8,10 +8,12 @@ import { useAppQuery } from "@/hooks/useAppQuery"
 import { Access } from "@/types/Page"
 import { fromDjangoISO, toDateTimeString } from "@/utils/date"
 import { reverse } from "@/utils/reverse"
-import { Box, Card, CardBody, Icon, Tag, Text, VStack } from "@chakra-ui/react"
+import { Box, Card, CardBody, HStack, Icon, Tag, Text, VStack } from "@chakra-ui/react"
 import { IconPlus } from "@tabler/icons-react"
 import { useRouter } from "next/router"
 import { Planet } from "react-kawaii"
+import { deploymentStatusOptions } from "./[uuid].page"
+import { DateTime } from "luxon"
 
 ReleasesPage.access = Access.User
 export default function ReleasesPage() {
@@ -83,6 +85,49 @@ export default function ReleasesPage() {
                         </>
                       ),
                     },
+                    status: {
+                      id: "status",
+                      header: "Checklist Status",
+                      cell: (cell) => (
+                        <Tag>
+                          {cell.row.original.approvers.filter((item) => !item.approved).length
+                            ? "Draft"
+                            : "Completed"}
+                        </Tag>
+                      ),
+                    },
+                    deployment_status: {
+                      id: "deployment_status",
+                      header: "Deployment Status",
+                      cell: (cell) => (
+                        <Tag>
+                          {
+                            deploymentStatusOptions.find(
+                              (item) => item.value === cell.row.original.deployment_status
+                            )?.label
+                          }
+                        </Tag>
+                      ),
+                    },
+                    release_window: {
+                      id: "release_window",
+                      header: "Release Window",
+                      cell: (cell) => (
+                        <HStack>
+                          <Tag>
+                            {DateTime.fromISO(
+                              cell.row.original.start_window!.replace("Z", "")
+                            ).toLocaleString(DateTime.DATETIME_MED)}
+                          </Tag>
+                          <Text>~</Text>
+                          <Tag>
+                            {DateTime.fromISO(
+                              cell.row.original.end_window!.replace("Z", "")
+                            ).toLocaleString(DateTime.DATETIME_MED)}
+                          </Tag>
+                        </HStack>
+                      ),
+                    },
                     created_at: {
                       id: "created_at",
                       header: "Created At",
@@ -92,18 +137,6 @@ export default function ReleasesPage() {
                       id: "updated_at",
                       header: "Updated At",
                       accessorFn: (cell) => toDateTimeString(fromDjangoISO(cell.updated_at)),
-                    },
-                    status: {
-                      id: "status",
-                      header: "Checklist Status",
-                      accessorKey: "approvers",
-                      cell: (cell) => (
-                        <Tag>
-                          {cell.row.original.approvers.filter((item) => !item.approved).length
-                            ? "Draft"
-                            : "Completed"}
-                        </Tag>
-                      ),
                     },
                     created_by: {
                       id: "created_by",

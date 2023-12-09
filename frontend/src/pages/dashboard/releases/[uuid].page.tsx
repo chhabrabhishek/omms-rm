@@ -30,6 +30,7 @@ import {
   HStack,
   Textarea,
   Tooltip,
+  SimpleGrid,
 } from "@chakra-ui/react"
 import { IconCornerDownRight } from "@tabler/icons-react"
 import { useAppMutation } from "@/hooks/useAppMutation"
@@ -53,6 +54,10 @@ import { ControlledMultiAppSelect } from "@/components/form/controls/Select"
 import { useAppForm } from "@/hooks/useAppForm"
 import zod from "zod"
 import { rolesOptions } from "../profile/index.page"
+import Datetime from "react-datetime"
+import { DateTime } from "luxon"
+import { Select } from "chakra-react-select"
+import "react-datetime/css/react-datetime.css"
 
 // This page is only accessible by a User.
 ManageReleasePage.access = Access.User
@@ -64,6 +69,7 @@ interface IServiceOptions {
 
 const schema = zod.object({
   targetEnvs: zod.array(zod.string().nonempty()).nullish().default(null),
+  deploymentComment: zod.string(),
 })
 
 export default function ManageReleasePage() {
@@ -84,6 +90,11 @@ export default function ManageReleasePage() {
 
   const [reason, setReason] = useState("")
 
+  const [startWindowDT, setStartWindowDT] = useState<Date>()
+  const [endWindowDT, setEndWindowDT] = useState<Date>()
+
+  const [deploymentStatus, setDeploymentStatus] = useState<number>(0)
+
   let handleInputChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     setReason(e.target.value)
   }
@@ -96,13 +107,28 @@ export default function ManageReleasePage() {
   const magic = useMagicQueryHooks({
     autoRefetch: false,
     onOk(responseData) {
-      form.reset({
-        targetEnvs:
-          (responseData.result as GetReleaseResponse).release_data.targets.map(
-            (item) => item.target
-          ) ?? [],
-      })
       if (!(response && data)) {
+        form.reset({
+          targetEnvs:
+            (responseData.result as GetReleaseResponse).release_data.targets.map(
+              (item) => item.target
+            ) ?? [],
+          deploymentComment: (responseData.result as GetReleaseResponse).release_data
+            .deployment_comment,
+        })
+        setStartWindowDT(
+          new Date(
+            (responseData.result as GetReleaseResponse).release_data.start_window!.replace("Z", "")
+          )
+        )
+        setEndWindowDT(
+          new Date(
+            (responseData.result as GetReleaseResponse).release_data.end_window!.replace("Z", "")
+          )
+        )
+        setDeploymentStatus(
+          (responseData.result as GetReleaseResponse).release_data.deployment_status
+        )
         const tempConstants = [
           ...new Map(
             (responseData.result as GetReleaseResponse).constants.map((item) => [
@@ -415,6 +441,7 @@ export default function ManageReleasePage() {
                         </strong>
                       </Text>
                     )}
+
                     {sheetsDisabled && (
                       <Text fontSize="md" fontWeight="bold" textAlign="center">
                         This release has been approved by all the approvers, hence can't be
@@ -422,27 +449,118 @@ export default function ManageReleasePage() {
                         administrator.
                       </Text>
                     )}
-                    <AppFormControl label="Target Envs" error={form.formState.errors.targetEnvs}>
-                      <ControlledMultiAppSelect
-                        controller={{
-                          name: "targetEnvs",
-                          control: form.control,
-                        }}
-                        variant="filled"
-                        placeholder="Enter all the target envs"
-                        closeMenuOnSelect={false}
-                        noOptionsMessage={() => "Type to Create"}
-                        tagVariant="solid"
-                        isClearable={false}
-                        isCreatable
-                        isDisabled={
-                          sheetsDisabled &&
-                          !JSON.parse(localStorage.getItem("$auth") ?? "")
-                            .roles.map((item: any) => item.role)
-                            .includes(4)
-                        }
-                      />
-                    </AppFormControl>
+
+                    <SimpleGrid
+                      w="full"
+                      columns={[1, 1, 2]}
+                      spacing={[6, 8]}
+                      display="flex"
+                      flexDirection={["column", "column", "row"]}
+                      alignItems={["flex-start", "flex-start", "flex-end"]}
+                    >
+                      <AppFormControl
+                        w={["full", "full", "50%"]}
+                        label="Target Envs"
+                        error={form.formState.errors.targetEnvs}
+                      >
+                        <ControlledMultiAppSelect
+                          controller={{
+                            name: "targetEnvs",
+                            control: form.control,
+                          }}
+                          variant="filled"
+                          placeholder="Enter all the target envs"
+                          closeMenuOnSelect={false}
+                          noOptionsMessage={() => "Type to Create"}
+                          tagVariant="solid"
+                          isClearable={false}
+                          isCreatable
+                          isDisabled={
+                            sheetsDisabled &&
+                            !JSON.parse(localStorage.getItem("$auth") ?? "")
+                              .roles.map((item: any) => item.role)
+                              .includes(4)
+                          }
+                        />
+                      </AppFormControl>
+
+                      <HStack w={["full", "full", "50%"]}>
+                        <AppFormControl w={["full", "full", "50%"]} label="Start Window">
+                          <Datetime
+                            initialValue={startWindowDT}
+                            onChange={(value: any) => setStartWindowDT(value.toDate())}
+                            inputProps={{
+                              disabled:
+                                sheetsDisabled &&
+                                !JSON.parse(localStorage.getItem("$auth") ?? "")
+                                  .roles.map((item: any) => item.role)
+                                  .includes(4),
+                            }}
+                          />
+                        </AppFormControl>
+
+                        <AppFormControl w={["full", "full", "50%"]} label="End Window">
+                          <Datetime
+                            initialValue={endWindowDT}
+                            onChange={(value: any) => setEndWindowDT(value.toDate())}
+                            inputProps={{
+                              disabled:
+                                sheetsDisabled &&
+                                !JSON.parse(localStorage.getItem("$auth") ?? "")
+                                  .roles.map((item: any) => item.role)
+                                  .includes(4),
+                            }}
+                          />
+                        </AppFormControl>
+                      </HStack>
+                    </SimpleGrid>
+
+                    <SimpleGrid
+                      w="full"
+                      columns={[1, 1, 2]}
+                      spacing={[6, 8]}
+                      display="flex"
+                      flexDirection={["column", "column", "row"]}
+                      alignItems="flex-start"
+                    >
+                      <AppFormControl w={["full", "full", "50%"]} label="Deployment Status">
+                        <Select
+                          colorScheme="purple"
+                          placeholder="Select the deployment status"
+                          options={deploymentStatusOptions}
+                          defaultValue={deploymentStatusOptions.find(
+                            (item) => item.value === deploymentStatus
+                          )}
+                          isDisabled={
+                            sheetsDisabled &&
+                            !JSON.parse(localStorage.getItem("$auth") ?? "")
+                              .roles.map((item: any) => item.role)
+                              .includes(4)
+                          }
+                          onChange={(e) => {
+                            setDeploymentStatus(e?.value!)
+                          }}
+                        />
+                      </AppFormControl>
+
+                      <AppFormControl
+                        w={["full", "full", "50%"]}
+                        label="Deployment Comments"
+                        error={form.formState.errors.deploymentComment}
+                      >
+                        <Textarea
+                          placeholder="Deployment Comments"
+                          disabled={
+                            sheetsDisabled &&
+                            !JSON.parse(localStorage.getItem("$auth") ?? "")
+                              .roles.map((item: any) => item.role)
+                              .includes(4)
+                          }
+                          {...form.register("deploymentComment")}
+                        />
+                      </AppFormControl>
+                    </SimpleGrid>
+
                     {[...new Set(response.release_data.items.map((item) => item.service))].map(
                       (item, index) => (
                         <TableSheets
@@ -568,6 +686,14 @@ export default function ManageReleasePage() {
                   release: {
                     name: response?.release_data.name ?? "",
                     items: data ?? [],
+                    start_window: DateTime.fromISO(startWindowDT!.toISOString())
+                      .toFormat("yyyy-MM-dd HH:mm:ss")
+                      .replace(" ", "T"),
+                    end_window: DateTime.fromISO(endWindowDT!.toISOString())
+                      .toFormat("yyyy-MM-dd HH:mm:ss")
+                      .replace(" ", "T"),
+                    deployment_status: deploymentStatus,
+                    deployment_comment: form.getValues().deploymentComment,
                   },
                   uuid: asPath.split("/")[asPath.split("/").length - 1],
                   targets: form.getValues().targetEnvs ?? [],
@@ -590,6 +716,14 @@ export default function ManageReleasePage() {
                     release: {
                       name: response?.release_data.name ?? "",
                       items: data ?? [],
+                      start_window: DateTime.fromISO(startWindowDT!.toISOString())
+                        .toFormat("yyyy-MM-dd HH:mm:ss")
+                        .replace(" ", "T"),
+                      end_window: DateTime.fromISO(endWindowDT!.toISOString())
+                        .toFormat("yyyy-MM-dd HH:mm:ss")
+                        .replace(" ", "T"),
+                      deployment_status: deploymentStatus,
+                      deployment_comment: form.getValues().deploymentComment,
                     },
                     uuid: asPath.split("/")[asPath.split("/").length - 1],
                     targets: form.getValues().targetEnvs ?? [],
@@ -607,6 +741,13 @@ export default function ManageReleasePage() {
     </Shell>
   )
 }
+
+export const deploymentStatusOptions = [
+  { label: "Unknown", value: 0 },
+  { label: "Success", value: 1 },
+  { label: "Partial Success", value: 2 },
+  { label: "Fail", value: 3 },
+]
 
 function TableSheets(props: {
   response: SimpleReleaseItemModelSchema[]

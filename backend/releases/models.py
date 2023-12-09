@@ -20,6 +20,12 @@ class Release(AppModel):
     Represents a release
     """
 
+    class DeploymentStatus(enum.Enum):
+        Unknown = 0
+        Success = 1
+        PartialSuccess = 2
+        Fail = 3
+
     uuid = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
     name = models.CharField(max_length=1024)
     created_by = models.ForeignKey(
@@ -28,6 +34,12 @@ class Release(AppModel):
     updated_by = models.ForeignKey(
         "accounts.Account", on_delete=models.PROTECT, related_name="release_updated_by"
     )
+    start_window = models.DateTimeField(null=True, default=None, blank=True)
+    end_window = models.DateTimeField(null=True, default=None, blank=True)
+    deployment_status = enum.EnumField(
+        DeploymentStatus, default=DeploymentStatus.Unknown
+    )
+    deployment_comment = models.TextField(null=True, default=None, blank=True)
 
 
 class ReleaseItem(AppModel):

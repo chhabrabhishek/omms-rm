@@ -17,6 +17,10 @@ class ReleaseAdmin(admin.ModelAdmin):
         "updated_at",
         "created_by",
         "updated_by",
+        "start_window",
+        "end_window",
+        "deployment_status",
+        "deployment_comment",
     )
 
 

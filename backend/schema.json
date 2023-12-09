@@ -1457,6 +1457,16 @@
             "title": "Name",
             "maxLength": 1024,
             "type": "string"
+          },
+          "start_window": {
+            "title": "Start Window",
+            "type": "string",
+            "format": "date-time"
+          },
+          "end_window": {
+            "title": "End Window",
+            "type": "string",
+            "format": "date-time"
           }
         },
         "required": [
@@ -1492,12 +1502,53 @@
           "targets"
         ]
       },
+      "SimpleUpdateReleaseModelSchema": {
+        "title": "SimpleUpdateReleaseModelSchema",
+        "type": "object",
+        "properties": {
+          "items": {
+            "title": "Items",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SimpleReleaseItemModelSchema"
+            }
+          },
+          "deployment_status": {
+            "title": "Deployment Status",
+            "type": "integer"
+          },
+          "name": {
+            "title": "Name",
+            "maxLength": 1024,
+            "type": "string"
+          },
+          "start_window": {
+            "title": "Start Window",
+            "type": "string",
+            "format": "date-time"
+          },
+          "end_window": {
+            "title": "End Window",
+            "type": "string",
+            "format": "date-time"
+          },
+          "deployment_comment": {
+            "title": "Deployment Comment",
+            "type": "string"
+          }
+        },
+        "required": [
+          "items",
+          "deployment_status",
+          "name"
+        ]
+      },
       "UpdateReleaseRequest": {
         "title": "UpdateReleaseRequest",
         "type": "object",
         "properties": {
           "release": {
-            "$ref": "#/components/schemas/SimpleReleaseModelSchema"
+            "$ref": "#/components/schemas/SimpleUpdateReleaseModelSchema"
           },
           "targets": {
             "title": "Targets",
@@ -1574,6 +1625,10 @@
               "$ref": "#/components/schemas/SimpleTargetModelSchema"
             }
           },
+          "deployment_status": {
+            "title": "Deployment Status",
+            "type": "integer"
+          },
           "created_at": {
             "title": "Created At",
             "type": "string",
@@ -1593,6 +1648,20 @@
             "title": "Name",
             "maxLength": 1024,
             "type": "string"
+          },
+          "start_window": {
+            "title": "Start Window",
+            "type": "string",
+            "format": "date-time"
+          },
+          "end_window": {
+            "title": "End Window",
+            "type": "string",
+            "format": "date-time"
+          },
+          "deployment_comment": {
+            "title": "Deployment Comment",
+            "type": "string"
           }
         },
         "required": [
@@ -1600,6 +1669,7 @@
           "created_by",
           "updated_by",
           "targets",
+          "deployment_status",
           "created_at",
           "updated_at",
           "name"
@@ -1665,9 +1735,27 @@
               "$ref": "#/components/schemas/SimpleTargetModelSchema"
             }
           },
+          "deployment_status": {
+            "title": "Deployment Status",
+            "type": "integer"
+          },
           "name": {
             "title": "Name",
             "maxLength": 1024,
+            "type": "string"
+          },
+          "start_window": {
+            "title": "Start Window",
+            "type": "string",
+            "format": "date-time"
+          },
+          "end_window": {
+            "title": "End Window",
+            "type": "string",
+            "format": "date-time"
+          },
+          "deployment_comment": {
+            "title": "Deployment Comment",
             "type": "string"
           }
         },
@@ -1675,6 +1763,7 @@
           "items",
           "approvers",
           "targets",
+          "deployment_status",
           "name"
         ]
       },

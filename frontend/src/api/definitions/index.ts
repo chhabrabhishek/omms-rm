@@ -182,14 +182,24 @@ export type ConstantUserStructuredResponse = {
 export type SimpleReleaseModelSchema = {
     items: SimpleReleaseItemModelSchema[];
     name: string;
+    start_window?: string;
+    end_window?: string;
 };
 export type CreateReleaseRequest = {
     release: SimpleReleaseModelSchema;
     approvers: number[];
     targets: string[];
 };
+export type SimpleUpdateReleaseModelSchema = {
+    items: SimpleReleaseItemModelSchema[];
+    deployment_status: number;
+    name: string;
+    start_window?: string;
+    end_window?: string;
+    deployment_comment?: string;
+};
 export type UpdateReleaseRequest = {
-    release: SimpleReleaseModelSchema;
+    release: SimpleUpdateReleaseModelSchema;
     targets: string[];
     uuid: string;
 };
@@ -205,10 +215,14 @@ export type SimpleAllReleaseModelSchema = {
     created_by: SimpleUserSchema;
     updated_by: SimpleUserSchema;
     targets: SimpleTargetModelSchema[];
+    deployment_status: number;
     created_at: string;
     updated_at: string;
     uuid?: string;
     name: string;
+    start_window?: string;
+    end_window?: string;
+    deployment_comment?: string;
 };
 export type AllReleaseResponse = {
     release_list: SimpleAllReleaseModelSchema[];
@@ -222,7 +236,11 @@ export type SimpleGetReleaseModelSchema = {
     items: SimpleReleaseItemModelSchema[];
     approvers: SimpleApproverModelSchema[];
     targets: SimpleTargetModelSchema[];
+    deployment_status: number;
     name: string;
+    start_window?: string;
+    end_window?: string;
+    deployment_comment?: string;
 };
 export type GetReleaseResponse = {
     release_data: SimpleGetReleaseModelSchema;

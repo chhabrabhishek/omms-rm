@@ -25,6 +25,7 @@ import {
   Textarea,
   Text,
   Tooltip,
+  HStack,
 } from "@chakra-ui/react"
 import zod from "zod"
 import { useAppForm } from "@/hooks/useAppForm"
@@ -51,7 +52,9 @@ import { useState } from "react"
 import { ControlledMultiAppSelect } from "@/components/form/controls/Select"
 import { rolesOptions } from "../profile/index.page"
 import { useMagicQueryHooks } from "@/hooks/useAppQuery"
-import DataTable from "@/components/table/Table"
+import Datetime from "react-datetime"
+import { DateTime } from "luxon"
+import "react-datetime/css/react-datetime.css"
 
 // This page is only accessible by a User.
 CreateReleasePage.access = Access.User
@@ -82,6 +85,8 @@ export default function CreateReleasePage() {
   const [releaseType, setReleaseType] = useState<string>()
   const [selectedReleaseUUID, setSelectedReleaseUUID] = useState<string>("")
   const [spin, setSpin] = useState<boolean>(true)
+  const [startWindowDT, setStartWindowDT] = useState<Date>(new Date())
+  const [endWindowDT, setEndWindowDT] = useState<Date>(new Date())
 
   const query = useAppQuery(api.queries.useReleasesApiGetConstantAndUsers, {
     autoRefetch: false,
@@ -450,6 +455,12 @@ export default function CreateReleasePage() {
                           release: {
                             name: form.name,
                             items: data ?? [],
+                            start_window: DateTime.fromISO(startWindowDT.toISOString())
+                              .toFormat("yyyy-MM-dd HH:mm:ss")
+                              .replace(" ", "T"),
+                            end_window: DateTime.fromISO(endWindowDT.toISOString())
+                              .toFormat("yyyy-MM-dd HH:mm:ss")
+                              .replace(" ", "T"),
                           },
                           approvers: selectedApprovers,
                           targets: form.targetEnvs ?? [],
@@ -524,6 +535,22 @@ export default function CreateReleasePage() {
                           isCreatable
                         />
                       </AppFormControl>
+
+                      <HStack w={["full", "full", "50%"]}>
+                        <AppFormControl w={["full", "full", "50%"]} label="Start Window" isRequired>
+                          <Datetime
+                            initialValue={startWindowDT}
+                            onChange={(value: any) => setStartWindowDT(value.toDate())}
+                          />
+                        </AppFormControl>
+
+                        <AppFormControl w={["full", "full", "50%"]} label="End Window" isRequired>
+                          <Datetime
+                            initialValue={endWindowDT}
+                            onChange={(value: any) => setEndWindowDT(value.toDate())}
+                          />
+                        </AppFormControl>
+                      </HStack>
                     </SimpleGrid>
 
                     {[...new Set(response.map((item) => item.service))].map((item, index) => (
@@ -574,6 +601,12 @@ export default function CreateReleasePage() {
                           release: {
                             name: form.name,
                             items: inheritData ?? [],
+                            start_window: DateTime.fromISO(startWindowDT.toISOString())
+                              .toFormat("yyyy-MM-dd HH:mm:ss")
+                              .replace(" ", "T"),
+                            end_window: DateTime.fromISO(endWindowDT.toISOString())
+                              .toFormat("yyyy-MM-dd HH:mm:ss")
+                              .replace(" ", "T"),
                           },
                           approvers: selectedApprovers,
                           targets: form.targetEnvs ?? [],
@@ -648,6 +681,22 @@ export default function CreateReleasePage() {
                           isCreatable
                         />
                       </AppFormControl>
+
+                      <HStack w={["full", "full", "50%"]}>
+                        <AppFormControl w={["full", "full", "50%"]} label="Start Window" isRequired>
+                          <Datetime
+                            initialValue={startWindowDT}
+                            onChange={(value: any) => setStartWindowDT(value.toDate())}
+                          />
+                        </AppFormControl>
+
+                        <AppFormControl w={["full", "full", "50%"]} label="End Window" isRequired>
+                          <Datetime
+                            initialValue={endWindowDT}
+                            onChange={(value: any) => setEndWindowDT(value.toDate())}
+                          />
+                        </AppFormControl>
+                      </HStack>
                     </SimpleGrid>
 
                     {[...new Set(result.release_data.items.map((item) => item.service))].map(

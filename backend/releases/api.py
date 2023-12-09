@@ -154,7 +154,7 @@ class SimpleReleaseModelSchema(ModelSchema):
 
     class Config:
         model = Release
-        include = ("name",)
+        include = ("name", "start_window", "end_window")
 
 
 class CreateReleaseRequest(Schema):
@@ -172,7 +172,11 @@ def create_release(request, form: CreateReleaseRequest):
             if role.role == Roles.Role.ReleaseAdmin:
                 with transaction.atomic():
                     release = Release.objects.create(
-                        name=form.release.name, created_by=user, updated_by=user
+                        name=form.release.name,
+                        created_by=user,
+                        updated_by=user,
+                        start_window=form.release.start_window,
+                        end_window=form.release.end_window,
                     )
                     for item in form.release.items:
                         ReleaseItem.objects.create(
@@ -209,8 +213,23 @@ def create_release(request, form: CreateReleaseRequest):
     }
 
 
+class SimpleUpdateReleaseModelSchema(ModelSchema):
+    items: list[SimpleReleaseItemModelSchema]
+    deployment_status: int
+
+    class Config:
+        model = Release
+        include = (
+            "name",
+            "start_window",
+            "end_window",
+            "deployment_status",
+            "deployment_comment",
+        )
+
+
 class UpdateReleaseRequest(Schema):
-    release: SimpleReleaseModelSchema
+    release: SimpleUpdateReleaseModelSchema
     targets: list[str]
     uuid: uuid.UUID
 
@@ -229,30 +248,26 @@ def update_release(request, form: UpdateReleaseRequest):
         else:
             with transaction.atomic():
                 release.updated_by = user
+                release.start_window = form.release.start_window
+                release.end_window = form.release.end_window
+                release.deployment_status = form.release.deployment_status
+                release.deployment_comment = form.release.deployment_comment
                 release.save()
                 for item in form.release.items:
                     release_item = ReleaseItem.objects.get(
                         release=release, repo=item.repo, service=item.service
                     )
+                    release_item.repo = item.repo
+                    release_item.service = item.service
+                    release_item.release_branch = item.release_branch
+                    release_item.hotfix_branch = item.hotfix_branch
+                    release_item.tag = item.tag
+                    release_item.special_notes = item.special_notes
+                    release_item.release = release
                     if Roles.Role.DevOps in [
                         role.role for role in list(user.roles.all())
                     ]:
-                        release_item.repo = item.repo
-                        release_item.service = item.service
-                        release_item.release_branch = item.release_branch
-                        release_item.hotfix_branch = item.hotfix_branch
-                        release_item.tag = item.tag
-                        release_item.special_notes = item.special_notes
                         release_item.devops_notes = item.devops_notes
-                        release_item.release = release
-                    else:
-                        release_item.repo = item.repo
-                        release_item.service = item.service
-                        release_item.release_branch = item.release_branch
-                        release_item.hotfix_branch = item.hotfix_branch
-                        release_item.tag = item.tag
-                        release_item.special_notes = item.special_notes
-                        release_item.release = release
                     release_item.save()
                 targets = Target.objects.filter(release=release)
                 targets.delete()
@@ -287,6 +302,7 @@ class SimpleAllReleaseModelSchema(ModelSchema):
     created_by: SimpleUserSchema
     updated_by: SimpleUserSchema
     targets: list[SimpleTargetModelSchema]
+    deployment_status: int
 
     class Config:
         model = Release
@@ -297,6 +313,10 @@ class SimpleAllReleaseModelSchema(ModelSchema):
             "updated_at",
             "created_by",
             "updated_by",
+            "start_window",
+            "end_window",
+            "deployment_status",
+            "deployment_comment",
         )
 
 
@@ -328,10 +348,16 @@ class SimpleGetReleaseModelSchema(ModelSchema):
     items: list[SimpleReleaseItemModelSchema]
     approvers: list[SimpleApproverModelSchema]
     targets: list[SimpleTargetModelSchema]
+    deployment_status: int
 
     class Config:
         model = Release
-        include = ("name",)
+        include = (
+            "name",
+            "start_window",
+            "end_window",
+            "deployment_comment",
+        )
 
 
 @response_schema
