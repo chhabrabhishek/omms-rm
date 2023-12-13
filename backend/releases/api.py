@@ -1,5 +1,5 @@
 import logging
-import subprocess
+import requests
 import uuid
 from django.db import transaction
 from django.db.models import Q
@@ -21,6 +21,11 @@ from releases.models import Target
 router = Router(auth=CommonBearerTokenAuth())
 logger = logging.getLogger("django.server")
 
+headers = {
+    "user-agent": "release-api",
+    "Authorization": "Bearer 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",
+}
+
 
 class SimpleConstantSchema(ModelSchema):
     tags: list[str]
@@ -41,27 +46,19 @@ def post_constant(request, service_options: list[str]):
     constants = Constant.objects.filter(service__in=service_options).all()
 
     for item in list(constants):
-        tags_result = subprocess.run(
-            ["git", "ls-remote", "--tags", item.repo], stdout=subprocess.PIPE, text=True
+        tags_response = requests.get(
+            f"https://api.github.com/repos/{item.repo}/tags",
+            headers=headers,
         )
-        output_tags = tags_result.stdout.splitlines()
-        item.tags = [
-            line.split("refs/tags/")[-1]
-            for line in output_tags
-            if "refs/tags/" in line and "^{}" not in line
-        ]
 
-        branches_result = subprocess.run(
-            ["git", "ls-remote", "--heads", item.repo],
-            stdout=subprocess.PIPE,
-            text=True,
+        item.tags = list(map((lambda item: item["name"]), tags_response.json()))
+
+        branches_response = requests.get(
+            f"https://api.github.com/repos/{item.repo}/branches",
+            headers=headers,
         )
-        output_branches = branches_result.stdout.splitlines()
-        item.branches = [
-            line.split("refs/heads/")[-1]
-            for line in output_branches
-            if "refs/heads/" in line and "^{}" not in line
-        ]
+
+        item.branches = list(map((lambda item: item["name"]), branches_response.json()))
 
     return {
         "ok": True,
@@ -78,6 +75,8 @@ class SimpleUserSchema(ModelSchema):
 
 
 class SimpleReleaseItemModelSchema(ModelSchema):
+    repo: str
+
     class Config:
         model = ReleaseItem
         include = (
@@ -114,27 +113,19 @@ def get_constant_and_users(request):
     constants = Constant.objects.all()
 
     for item in list(constants):
-        tags_result = subprocess.run(
-            ["git", "ls-remote", "--tags", item.repo], stdout=subprocess.PIPE, text=True
+        tags_response = requests.get(
+            f"https://api.github.com/repos/{item.repo}/tags",
+            headers=headers,
         )
-        output_tags = tags_result.stdout.splitlines()
-        item.tags = [
-            line.split("refs/tags/")[-1]
-            for line in output_tags
-            if "refs/tags/" in line and "^{}" not in line
-        ]
 
-        branches_result = subprocess.run(
-            ["git", "ls-remote", "--heads", item.repo],
-            stdout=subprocess.PIPE,
-            text=True,
+        item.tags = list(map((lambda item: item["name"]), tags_response.json()))
+
+        branches_response = requests.get(
+            f"https://api.github.com/repos/{item.repo}/branches",
+            headers=headers,
         )
-        output_branches = branches_result.stdout.splitlines()
-        item.branches = [
-            line.split("refs/heads/")[-1]
-            for line in output_branches
-            if "refs/heads/" in line and "^{}" not in line
-        ]
+
+        item.branches = list(map((lambda item: item["name"]), branches_response.json()))
 
     users = Account.objects.filter(~Q(first_name=""))
     release_list = Release.objects.all()
@@ -255,15 +246,14 @@ def update_release(request, form: UpdateReleaseRequest):
                 release.save()
                 for item in form.release.items:
                     release_item = ReleaseItem.objects.get(
-                        release=release, repo=item.repo, service=item.service
+                        release=release,
+                        repo=item.repo,
+                        service=item.service,
                     )
-                    release_item.repo = item.repo
-                    release_item.service = item.service
                     release_item.release_branch = item.release_branch
                     release_item.hotfix_branch = item.hotfix_branch
                     release_item.tag = item.tag
                     release_item.special_notes = item.special_notes
-                    release_item.release = release
                     if Roles.Role.DevOps in [
                         role.role for role in list(user.roles.all())
                     ]:
@@ -377,27 +367,19 @@ def get_release_with_uuid(request, uuid: uuid.UUID):
     constants = Constant.objects.filter(service__in=service_options.keys()).all()
 
     for item in list(constants):
-        tags_result = subprocess.run(
-            ["git", "ls-remote", "--tags", item.repo], stdout=subprocess.PIPE, text=True
+        tags_response = requests.get(
+            f"https://api.github.com/repos/{item.repo}/tags",
+            headers=headers,
         )
-        output_tags = tags_result.stdout.splitlines()
-        item.tags = [
-            line.split("refs/tags/")[-1]
-            for line in output_tags
-            if "refs/tags/" in line and "^{}" not in line
-        ]
 
-        branches_result = subprocess.run(
-            ["git", "ls-remote", "--heads", item.repo],
-            stdout=subprocess.PIPE,
-            text=True,
+        item.tags = list(map((lambda item: item["name"]), tags_response.json()))
+
+        branches_response = requests.get(
+            f"https://api.github.com/repos/{item.repo}/branches",
+            headers=headers,
         )
-        output_branches = branches_result.stdout.splitlines()
-        item.branches = [
-            line.split("refs/heads/")[-1]
-            for line in output_branches
-            if "refs/heads/" in line and "^{}" not in line
-        ]
+
+        item.branches = list(map((lambda item: item["name"]), branches_response.json()))
 
     return {
         "ok": True,

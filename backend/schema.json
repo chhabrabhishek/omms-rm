@@ -1234,9 +1234,7 @@
           },
           "repo": {
             "title": "Repo",
-            "minLength": 1,
-            "maxLength": 65536,
-            "format": "uri",
+            "maxLength": 1024,
             "type": "string"
           },
           "service": {
@@ -1325,9 +1323,6 @@
         "properties": {
           "repo": {
             "title": "Repo",
-            "minLength": 1,
-            "maxLength": 65536,
-            "format": "uri",
             "type": "string"
           },
           "service": {

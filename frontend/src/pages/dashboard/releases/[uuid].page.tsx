@@ -807,7 +807,7 @@ function TableSheets(props: {
                     .map((item, index) => (
                       <Tr key={item.repo + item.service}>
                         <Td>
-                          <Tooltip label={item.repo}>
+                          <Tooltip label={`https://github.com/${item.repo}`}>
                             <Text
                               overflow="auto"
                               css={{
@@ -819,7 +819,7 @@ function TableSheets(props: {
                               borderRadius="md"
                               bg={item.release_branch ? "green.100" : "red.100"}
                             >
-                              {item.repo}
+                              https://github.com/{item.repo}
                             </Text>
                           </Tooltip>
                         </Td>

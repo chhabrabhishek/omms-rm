@@ -10,7 +10,7 @@ class Constant(AppModel):
     Represents the model to hold the constant data
     """
 
-    repo = models.URLField(max_length=1024)
+    repo = models.CharField(max_length=1024)
     service = models.CharField(max_length=1024)
     name = models.CharField(max_length=1024)
 
@@ -47,7 +47,7 @@ class ReleaseItem(AppModel):
     Represents a release item
     """
 
-    repo = models.URLField(max_length=1024)
+    repo = models.CharField(max_length=1024)
     service = models.CharField(max_length=1024)
     release_branch = models.CharField(
         max_length=1024, null=True, default=None, blank=True

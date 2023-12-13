@@ -791,7 +791,7 @@ function TableSheets(props: {
                       {props.constant.map((item, index) => (
                         <Tr key={item.repo + item.service}>
                           <Td>
-                            <Tooltip label={item.repo}>
+                            <Tooltip label={`https://github.com/${item.repo}`}>
                               <Text
                                 overflow="auto"
                                 css={{
@@ -800,7 +800,7 @@ function TableSheets(props: {
                                   },
                                 }}
                               >
-                                {item.repo}
+                                https://github.com/{item.repo}
                               </Text>
                             </Tooltip>
                           </Td>
