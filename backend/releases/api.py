@@ -23,7 +23,7 @@ logger = logging.getLogger("django.server")
 
 headers = {
     "user-agent": "release-api",
-    "Authorization": "Bearer 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",
+    "Authorization": "Bearer auth_token",
 }
 
 
@@ -47,18 +47,45 @@ def post_constant(request, service_options: list[str]):
 
     for item in list(constants):
         tags_response = requests.get(
-            f"https://api.github.com/repos/{item.repo}/tags",
+            f"https://api.github.com/repos/{item.repo}/tags?per_page=100",
             headers=headers,
         )
 
         item.tags = list(map((lambda item: item["name"]), tags_response.json()))
 
+        if "Link" in tags_response.headers:
+            for index in range(
+                2,
+                int(tags_response.headers["Link"].split("&page=")[2].split(">")[0]) + 1,
+            ):
+                tags_response = requests.get(
+                    f"https://api.github.com/repos/{item.repo}/tags?per_page=100&page={index}",
+                    headers=headers,
+                )
+                item.tags = item.tags + list(
+                    map((lambda item: item["name"]), tags_response.json())
+                )
+
         branches_response = requests.get(
-            f"https://api.github.com/repos/{item.repo}/branches",
+            f"https://api.github.com/repos/{item.repo}/branches?per_page=100",
             headers=headers,
         )
 
         item.branches = list(map((lambda item: item["name"]), branches_response.json()))
+
+        if "Link" in branches_response.headers:
+            for index in range(
+                2,
+                int(branches_response.headers["Link"].split("&page=")[2].split(">")[0])
+                + 1,
+            ):
+                branches_response = requests.get(
+                    f"https://api.github.com/repos/{item.repo}/branches?per_page=100&page={index}",
+                    headers=headers,
+                )
+                item.branches = item.branches + list(
+                    map((lambda item: item["name"]), branches_response.json())
+                )
 
     return {
         "ok": True,
@@ -114,18 +141,45 @@ def get_constant_and_users(request):
 
     for item in list(constants):
         tags_response = requests.get(
-            f"https://api.github.com/repos/{item.repo}/tags",
+            f"https://api.github.com/repos/{item.repo}/tags?per_page=100",
             headers=headers,
         )
 
         item.tags = list(map((lambda item: item["name"]), tags_response.json()))
 
+        if "Link" in tags_response.headers:
+            for index in range(
+                2,
+                int(tags_response.headers["Link"].split("&page=")[2].split(">")[0]) + 1,
+            ):
+                tags_response = requests.get(
+                    f"https://api.github.com/repos/{item.repo}/tags?per_page=100&page={index}",
+                    headers=headers,
+                )
+                item.tags = item.tags + list(
+                    map((lambda item: item["name"]), tags_response.json())
+                )
+
         branches_response = requests.get(
-            f"https://api.github.com/repos/{item.repo}/branches",
+            f"https://api.github.com/repos/{item.repo}/branches?per_page=100",
             headers=headers,
         )
 
         item.branches = list(map((lambda item: item["name"]), branches_response.json()))
+
+        if "Link" in branches_response.headers:
+            for index in range(
+                2,
+                int(branches_response.headers["Link"].split("&page=")[2].split(">")[0])
+                + 1,
+            ):
+                branches_response = requests.get(
+                    f"https://api.github.com/repos/{item.repo}/branches?per_page=100&page={index}",
+                    headers=headers,
+                )
+                item.branches = item.branches + list(
+                    map((lambda item: item["name"]), branches_response.json())
+                )
 
     users = Account.objects.filter(~Q(first_name=""))
     release_list = Release.objects.all()
@@ -368,18 +422,45 @@ def get_release_with_uuid(request, uuid: uuid.UUID):
 
     for item in list(constants):
         tags_response = requests.get(
-            f"https://api.github.com/repos/{item.repo}/tags",
+            f"https://api.github.com/repos/{item.repo}/tags?per_page=100",
             headers=headers,
         )
 
         item.tags = list(map((lambda item: item["name"]), tags_response.json()))
 
+        if "Link" in tags_response.headers:
+            for index in range(
+                2,
+                int(tags_response.headers["Link"].split("&page=")[2].split(">")[0]) + 1,
+            ):
+                tags_response = requests.get(
+                    f"https://api.github.com/repos/{item.repo}/tags?per_page=100&page={index}",
+                    headers=headers,
+                )
+                item.tags = item.tags + list(
+                    map((lambda item: item["name"]), tags_response.json())
+                )
+
         branches_response = requests.get(
-            f"https://api.github.com/repos/{item.repo}/branches",
+            f"https://api.github.com/repos/{item.repo}/branches?per_page=100",
             headers=headers,
         )
 
         item.branches = list(map((lambda item: item["name"]), branches_response.json()))
+
+        if "Link" in branches_response.headers:
+            for index in range(
+                2,
+                int(branches_response.headers["Link"].split("&page=")[2].split(">")[0])
+                + 1,
+            ):
+                branches_response = requests.get(
+                    f"https://api.github.com/repos/{item.repo}/branches?per_page=100&page={index}",
+                    headers=headers,
+                )
+                item.branches = item.branches + list(
+                    map((lambda item: item["name"]), branches_response.json())
+                )
 
     return {
         "ok": True,
