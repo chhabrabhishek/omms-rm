@@ -136,8 +136,6 @@ export type AllTicketsStructuredResponse = {
     result?: AllTicketsResponse;
 };
 export type SimpleConstantSchema = {
-    tags: string[];
-    branches: string[];
     repo: string;
     service: string;
     name: string;

@@ -1218,20 +1218,6 @@
         "title": "SimpleConstantSchema",
         "type": "object",
         "properties": {
-          "tags": {
-            "title": "Tags",
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "branches": {
-            "title": "Branches",
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
           "repo": {
             "title": "Repo",
             "maxLength": 1024,
@@ -1249,8 +1235,6 @@
           }
         },
         "required": [
-          "tags",
-          "branches",
           "repo",
           "service",
           "name"

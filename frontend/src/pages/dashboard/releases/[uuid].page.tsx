@@ -31,6 +31,7 @@ import {
   Textarea,
   Tooltip,
   SimpleGrid,
+  Input,
 } from "@chakra-ui/react"
 import { IconCornerDownRight } from "@tabler/icons-react"
 import { useAppMutation } from "@/hooks/useAppMutation"
@@ -94,6 +95,7 @@ export default function ManageReleasePage() {
   const [endWindowDT, setEndWindowDT] = useState<Date>()
 
   const [deploymentStatus, setDeploymentStatus] = useState<number>(0)
+  const [falseBranches, setFalseBranches] = useState<Array<string>>([])
 
   let handleInputChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     setReason(e.target.value)
@@ -264,11 +266,19 @@ export default function ManageReleasePage() {
     onOk() {
       toast.success("Updated")
     },
-    onNotOk() {
-      toast.error(
-        "This release has been approved by all the users and can't be further modified. Please contact your system administrator."
-      )
-      setSheetsDisabled(true)
+    onNotOk(response) {
+      if (response.error?.reason === "branch_not_found") {
+        setFalseBranches(response.error.detail?.split(", ") ?? [])
+        toast.error(
+          `Release branch you entered in ${response.error.detail} does not exist. Please verify the branches and try again`,
+          { duration: 5000 }
+        )
+      } else {
+        toast.error(
+          "This release has been approved by all the users and can't be further modified. Please contact your system administrator."
+        )
+        setSheetsDisabled(true)
+      }
     },
   })
 
@@ -561,15 +571,19 @@ export default function ManageReleasePage() {
                       </AppFormControl>
                     </SimpleGrid>
 
+                    {falseBranches.length > 0 && (
+                      <Text color="red.800">
+                        Release branch you entered in <strong>`{falseBranches.join(", ")}`</strong>{" "}
+                        does not exist. Please verify the branches and try again
+                      </Text>
+                    )}
+
                     {[...new Set(response.release_data.items.map((item) => item.service))].map(
                       (item, index) => (
                         <TableSheets
                           key={item}
                           response={response.release_data.items.filter(
                             (responseItem) => responseItem.service === item
-                          )}
-                          constant={response.constants.filter(
-                            (constantItem) => constantItem.service === item
                           )}
                           serviceOptions={serviceOptions}
                           sheetsDisabled={sheetsDisabled}
@@ -751,7 +765,6 @@ export const deploymentStatusOptions = [
 
 function TableSheets(props: {
   response: SimpleReleaseItemModelSchema[]
-  constant: SimpleConstantSchema[]
   serviceOptions: Array<IServiceOptions>
   sheetsDisabled: boolean
   onBranchTagChange: (data: SimpleReleaseItemModelSchema) => void
@@ -824,8 +837,10 @@ function TableSheets(props: {
                           </Tooltip>
                         </Td>
                         <Td>
-                          <ChakraSelect
-                            placeholder="Select Release Branch"
+                          <Input
+                            type="text"
+                            variant="filled"
+                            placeholder="Enter Release Branch"
                             defaultValue={item.release_branch}
                             disabled={props.sheetsDisabled}
                             onChange={(e) =>
@@ -835,20 +850,13 @@ function TableSheets(props: {
                                 repo: item.repo,
                               } as SimpleReleaseItemModelSchema)
                             }
-                          >
-                            {(
-                              props.constant.find((constantItem) => constantItem.repo === item.repo)
-                                ?.branches ?? []
-                            ).map((item) => (
-                              <option key={item} value={item}>
-                                {item}
-                              </option>
-                            ))}
-                          </ChakraSelect>
+                          />
                         </Td>
                         <Td>
-                          <ChakraSelect
-                            placeholder="Select Hotfix Branch"
+                          <Input
+                            type="text"
+                            variant="filled"
+                            placeholder="Enter Hotfix Branch"
                             defaultValue={item.hotfix_branch}
                             disabled={props.sheetsDisabled}
                             onChange={(e) =>
@@ -858,20 +866,13 @@ function TableSheets(props: {
                                 repo: item.repo,
                               } as SimpleReleaseItemModelSchema)
                             }
-                          >
-                            {(
-                              props.constant.find((constantItem) => constantItem.repo === item.repo)
-                                ?.branches ?? []
-                            ).map((item) => (
-                              <option key={item} value={item}>
-                                {item}
-                              </option>
-                            ))}
-                          </ChakraSelect>
+                          />
                         </Td>
                         <Td>
-                          <ChakraSelect
-                            placeholder="Select Tag"
+                          <Input
+                            type="text"
+                            variant="filled"
+                            placeholder="Enter Tag"
                             defaultValue={item.tag}
                             disabled={props.sheetsDisabled}
                             onChange={(e) =>
@@ -881,16 +882,7 @@ function TableSheets(props: {
                                 repo: item.repo,
                               } as SimpleReleaseItemModelSchema)
                             }
-                          >
-                            {(
-                              props.constant.find((constantItem) => constantItem.repo === item.repo)
-                                ?.tags ?? []
-                            ).map((item) => (
-                              <option key={item} value={item}>
-                                {item}
-                              </option>
-                            ))}
-                          </ChakraSelect>
+                          />
                         </Td>
                         <Td>
                           <Textarea

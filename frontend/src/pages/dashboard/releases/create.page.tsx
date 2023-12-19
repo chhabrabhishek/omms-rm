@@ -87,6 +87,7 @@ export default function CreateReleasePage() {
   const [spin, setSpin] = useState<boolean>(true)
   const [startWindowDT, setStartWindowDT] = useState<Date>(new Date())
   const [endWindowDT, setEndWindowDT] = useState<Date>(new Date())
+  const [falseBranches, setFalseBranches] = useState<Array<string>>([])
 
   const query = useAppQuery(api.queries.useReleasesApiGetConstantAndUsers, {
     autoRefetch: false,
@@ -316,10 +317,18 @@ export default function CreateReleasePage() {
       toast.success("Release created.")
       replace(reverse.user.releases())
     },
-    onNotOk() {
-      toast.error(
-        "You are not authorized to create a release. Please raise the access for Release Admin in your profile."
-      )
+    onNotOk(response) {
+      if (response.error?.reason === "branch_not_found") {
+        setFalseBranches(response.error.detail?.split(", ") ?? [])
+        toast.error(
+          `Release branch you entered in ${response.error.detail} does not exist. Please verify the branches and try again`,
+          { duration: 5000 }
+        )
+      } else {
+        toast.error(
+          "You are not authorized to create a release. Please raise the access for Release Admin in your profile."
+        )
+      }
     },
   })
 
@@ -328,7 +337,6 @@ export default function CreateReleasePage() {
   }
 
   const handleInheritRelease = () => {
-    setSpin(true)
     setReleaseType("inherit")
   }
 
@@ -376,6 +384,7 @@ export default function CreateReleasePage() {
                         }
                       })}
                       onChange={(e) => {
+                        setSpin(true)
                         setSelectedReleaseUUID(e?.value ?? "")
                       }}
                     />
@@ -553,6 +562,13 @@ export default function CreateReleasePage() {
                       </HStack>
                     </SimpleGrid>
 
+                    {falseBranches.length > 0 && (
+                      <Text color="red.800">
+                        Release branch you entered in <strong>`{falseBranches.join(", ")}`</strong>{" "}
+                        does not exist. Please verify the branches and try again
+                      </Text>
+                    )}
+
                     {[...new Set(response.map((item) => item.service))].map((item, index) => (
                       <TableSheets
                         key={item}
@@ -699,6 +715,13 @@ export default function CreateReleasePage() {
                       </HStack>
                     </SimpleGrid>
 
+                    {falseBranches.length > 0 && (
+                      <Text color="red.800">
+                        Release branch you entered in <strong>`{falseBranches.join(", ")}`</strong>{" "}
+                        does not exist. Please verify the branches and try again
+                      </Text>
+                    )}
+
                     {[...new Set(result.release_data.items.map((item) => item.service))].map(
                       (item, index) => (
                         <TableSheets
@@ -805,8 +828,10 @@ function TableSheets(props: {
                             </Tooltip>
                           </Td>
                           <Td>
-                            <ChakraSelect
-                              placeholder="Select Release Branch"
+                            <Input
+                              type="text"
+                              variant="filled"
+                              placeholder="Enter Release Branch"
                               onChange={(e) =>
                                 props.onBranchTagChange({
                                   release_branch: e.target.value ?? "",
@@ -814,17 +839,13 @@ function TableSheets(props: {
                                   repo: item.repo,
                                 } as SimpleReleaseItemModelSchema)
                               }
-                            >
-                              {item.branches.map((item) => (
-                                <option key={item} value={item}>
-                                  {item}
-                                </option>
-                              ))}
-                            </ChakraSelect>
+                            />
                           </Td>
                           <Td>
-                            <ChakraSelect
-                              placeholder="Select Hotfix Branch"
+                            <Input
+                              type="text"
+                              variant="filled"
+                              placeholder="Enter Hotfix Branch"
                               onChange={(e) =>
                                 props.onBranchTagChange({
                                   hotfix_branch: e.target.value ?? "",
@@ -832,17 +853,13 @@ function TableSheets(props: {
                                   repo: item.repo,
                                 } as SimpleReleaseItemModelSchema)
                               }
-                            >
-                              {item.branches.map((item) => (
-                                <option key={item} value={item}>
-                                  {item}
-                                </option>
-                              ))}
-                            </ChakraSelect>
+                            />
                           </Td>
                           <Td>
-                            <ChakraSelect
-                              placeholder="Select Tag"
+                            <Input
+                              type="text"
+                              variant="filled"
+                              placeholder="Enter Tag"
                               onChange={(e) =>
                                 props.onBranchTagChange({
                                   tag: e.target.value ?? "",
@@ -850,13 +867,7 @@ function TableSheets(props: {
                                   repo: item.repo,
                                 } as SimpleReleaseItemModelSchema)
                               }
-                            >
-                              {item.tags.map((item) => (
-                                <option key={item} value={item}>
-                                  {item}
-                                </option>
-                              ))}
-                            </ChakraSelect>
+                            />
                           </Td>
                           <Td>
                             <Textarea
@@ -954,7 +965,7 @@ function TableSheets(props: {
                       {props.response!.map((item, index) => (
                         <Tr key={item.repo + item.service}>
                           <Td>
-                            <Tooltip label={item.repo}>
+                            <Tooltip label={`https://github.com/${item.repo}`}>
                               <Text
                                 overflow="auto"
                                 css={{
@@ -963,13 +974,15 @@ function TableSheets(props: {
                                   },
                                 }}
                               >
-                                {item.repo}
+                                https://github.com/{item.repo}
                               </Text>
                             </Tooltip>
                           </Td>
                           <Td>
-                            <ChakraSelect
-                              placeholder="Select Release Branch"
+                            <Input
+                              type="text"
+                              variant="filled"
+                              placeholder="Enter Release Branch"
                               defaultValue={item.release_branch}
                               onChange={(e) =>
                                 props.onBranchTagChange({
@@ -978,21 +991,13 @@ function TableSheets(props: {
                                   repo: item.repo,
                                 } as SimpleReleaseItemModelSchema)
                               }
-                            >
-                              {(
-                                props.constant.find(
-                                  (constantItem) => constantItem.repo === item.repo
-                                )?.branches ?? []
-                              ).map((item) => (
-                                <option key={item} value={item}>
-                                  {item}
-                                </option>
-                              ))}
-                            </ChakraSelect>
+                            />
                           </Td>
                           <Td>
-                            <ChakraSelect
-                              placeholder="Select Hotfix Branch"
+                            <Input
+                              type="text"
+                              variant="filled"
+                              placeholder="Enter Hotfix Branch"
                               defaultValue={item.hotfix_branch}
                               onChange={(e) =>
                                 props.onBranchTagChange({
@@ -1001,21 +1006,13 @@ function TableSheets(props: {
                                   repo: item.repo,
                                 } as SimpleReleaseItemModelSchema)
                               }
-                            >
-                              {(
-                                props.constant.find(
-                                  (constantItem) => constantItem.repo === item.repo
-                                )?.branches ?? []
-                              ).map((item) => (
-                                <option key={item} value={item}>
-                                  {item}
-                                </option>
-                              ))}
-                            </ChakraSelect>
+                            />
                           </Td>
                           <Td>
-                            <ChakraSelect
-                              placeholder="Select Tag"
+                            <Input
+                              type="text"
+                              variant="filled"
+                              placeholder="Enter Tag"
                               defaultValue={item.tag}
                               onChange={(e) =>
                                 props.onBranchTagChange({
@@ -1024,17 +1021,7 @@ function TableSheets(props: {
                                   repo: item.repo,
                                 } as SimpleReleaseItemModelSchema)
                               }
-                            >
-                              {(
-                                props.constant.find(
-                                  (constantItem) => constantItem.repo === item.repo
-                                )?.tags ?? []
-                              ).map((item) => (
-                                <option key={item} value={item}>
-                                  {item}
-                                </option>
-                              ))}
-                            </ChakraSelect>
+                            />
                           </Td>
                           <Td>
                             <Textarea
