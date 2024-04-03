@@ -351,7 +351,7 @@ export default function ManageReleasePage() {
           title: response?.release_data
             ? `Manage ${response?.release_data.name}`
             : "Manage Release",
-          subtitle: "Lorem ipsum dolor, sit amet consectetur adipisicing elit.",
+          subtitle: "Manage, Modify and View the releases",
         },
       }}
     >

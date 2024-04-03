@@ -68,7 +68,7 @@ export default function ProfilePage() {
         title: "Profile",
         banner: {
           title: "Profile",
-          subtitle: "Lorem ipsum dolor, sit amet consectetur adipisicing elit.",
+          subtitle: "Update your profile",
         },
       }}
     >
@@ -164,7 +164,7 @@ function ProfileUpdateSection(props: {
   return (
     <CardSection
       title="Personal Details"
-      subtitle="Lorem ipsum dolor sit amet consectetur adipisicing elit."
+      subtitle="Personal and Professional details"
     >
       <VStack spacing="12" mb="48">
         <SimpleGrid w="full" spacing="6" columns={[1, 1, 2]}>

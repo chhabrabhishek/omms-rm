@@ -28,8 +28,8 @@ import {
   IconLogout,
   IconClipboardCheck,
   IconArrowLeft,
-  IconTicket,
   IconThumbUp,
+  IconArchive
 } from "@tabler/icons-react"
 import { isString } from "underscore"
 import Link from "next/link"
@@ -92,17 +92,17 @@ export function Shell(props: {
           nav={{
             items: auth
               ? [
-                  // {
-                  //   name: "tickets",
-                  //   label: "Tickets",
-                  //   icon: <Icon as={IconTicket} />,
-                  //   href: reverse.user.tickets(),
-                  // },
                   {
                     name: "releases",
                     label: "Releases",
                     icon: <Icon as={IconClipboardCheck} />,
                     href: reverse.user.releases(),
+                  },
+                  {
+                    name: "deployment-snapshot",
+                    label: "Deployment Snapshot",
+                    icon: <Icon as={IconArchive} />,
+                    href: reverse.user.deploymentSnapshot(),
                   },
                 ]
               : [],

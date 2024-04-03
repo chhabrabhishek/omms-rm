@@ -29,7 +29,7 @@ export default function ReleasesPage() {
         title: "Releases",
         sliver: {
           title: "Releases",
-          subtitle: "Lorem ipsum dolor sit amet consectetur adipisicing elit.",
+          subtitle: "All the historical releases",
           breadcrumbs: [
             { label: "Dashboard", href: reverse.user.dashboard() },
             { label: "Releases", href: reverse.user.releases() },

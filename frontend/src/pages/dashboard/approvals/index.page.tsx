@@ -70,7 +70,7 @@ export default function ApprovalsPage() {
         title: "Manage Approvals",
         banner: {
           title: "Manage Approvals",
-          subtitle: "Lorem ipsum dolor, sit amet consectetur adipisicing elit.",
+          subtitle: "Approve or Reject the approvals",
         },
       }}
     >

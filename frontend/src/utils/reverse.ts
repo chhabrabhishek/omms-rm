@@ -20,12 +20,11 @@ export const reverse = {
     profile: () => join(reverse.user.root(), "profile"),
     approvals: () => join(reverse.user.root(), "approvals"),
 
-    tickets: () => join(reverse.user.root(), "/tickets"),
-    createTicket: () => join(reverse.user.tickets(), "/create"),
-
     releases: () => join(reverse.user.root(), "/releases"),
     createRelease: () => join(reverse.user.releases(), "/create"),
     manageRelease: (uuid: string) => join(reverse.user.releases(), `/${uuid}`),
+
+    deploymentSnapshot: () => join(reverse.user.root(), "/deployment-snapshot"),
 
     dashboard: () => join(reverse.user.root(), "/dashboard"),
   },

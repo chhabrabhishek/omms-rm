@@ -347,7 +347,7 @@ export default function CreateReleasePage() {
         title: "Create a New Release",
         banner: {
           title: "Create a New Release",
-          subtitle: "Lorem ipsum dolor, sit amet consectetur adipisicing elit.",
+          subtitle: "Start a new release",
         },
       }}
     >
