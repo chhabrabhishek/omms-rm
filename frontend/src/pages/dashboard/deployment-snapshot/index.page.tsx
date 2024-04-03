@@ -1,45 +1,28 @@
+import { api } from "@/api"
+import { GetDeploymentSnapshotResponse, SimpleGetDeploymentSnapshotSchema } from "@/api/definitions"
+import WithQuery from "@/components/indicators/WithQuery"
 import { Shell } from "@/components/layout/Shell"
+import If from "@/components/logic/If"
 import DataTable from "@/components/table/Table"
+import { useAppQuery } from "@/hooks/useAppQuery"
 import { Access } from "@/types/Page"
 import { reverse } from "@/utils/reverse"
-import {
-  Box,
-  Card,
-  CardBody,
-  Input,
-  Text,
-  VStack,
-} from "@chakra-ui/react"
-import axios from "axios"
-import { ChangeEvent, useEffect, useState } from "react"
+import { Box, Card, CardBody, Input, Text, VStack } from "@chakra-ui/react"
+import { ChangeEvent, useState } from "react"
 import { Planet } from "react-kawaii"
-
-interface SnapshotData {
-  id: string
-  azure_repo: string
-  commit_hash: string
-  deployed_by: string
-  deployment_date: string
-  docker_tag: string
-  repo_name: string
-  target_env: string
-  tenant_id: string
-}
 
 DeploymentSnapshotPage.access = Access.User
 export default function DeploymentSnapshotPage() {
-  const [tempSnapshotData, setTempSnapshotData] = useState<SnapshotData[]>([])
-  const [snapshotData, setSnapshotData] = useState<SnapshotData[]>([])
+  const [tempSnapshotData, setTempSnapshotData] = useState<SimpleGetDeploymentSnapshotSchema[]>([])
+  const [snapshotData, setSnapshotData] = useState<SimpleGetDeploymentSnapshotSchema[]>([])
 
-  useEffect(() => {
-    axios
-      .get("http://rn000133847:3000/snapshots")
-      .then((response) => {
-        setTempSnapshotData(response.data.data)
-        setSnapshotData(response.data.data)
-      })
-      .catch((error) => console.log(error))
-  }, [])
+  const query = useAppQuery(api.queries.useReleasesApiDeploymentSnapshot, {
+    autoRefetch: false,
+    onOk(result) {
+        setTempSnapshotData(result.result?.snapshot_data!)
+        setSnapshotData(result.result?.snapshot_data!)
+    },
+  })
 
   const handleSnapshotFilter = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.value) {
@@ -76,77 +59,84 @@ export default function DeploymentSnapshotPage() {
         placeholder="Search Docker Tag, Repo Name or Commit Hash"
         onChange={handleSnapshotFilter}
       />
-      {snapshotData.length > 0 ? (
-        <Box w="full" border="default" borderRadius="md" shadow="sm" bg="white">
-          <DataTable
-            rows={snapshotData}
-            columns={{
-              id: {
-                id: "id",
-                light: true,
-                condensed: true,
-                cell: (cell) => cell.row.index + 1,
-              },
-              repo_name: {
-                id: "repo_name",
-                header: "Repo Name",
-                accessorKey: "repo_name",
-              },
-              docker_tag: {
-                id: "docker_tag",
-                header: "Docker Tag",
-                accessorKey: "docker_tag",
-              },
-              commit_hash: {
-                id: "commit_hash",
-                header: "Commit Hash",
-                accessorKey: "commit_hash",
-              },
-              target_env: {
-                id: "target_env",
-                header: "Target Env",
-                accessorKey: "target_env",
-              },
-              azure_repo: {
-                id: "azure_repo",
-                header: "Azure Repo",
-                accessorFn: (cell) =>
-                  cell.azure_repo == "crpepshnprdcus001" ? "SGS Non Prod" : "Multi Tenant",
-              },
-              tenant_id: {
-                id: "tenant_id",
-                header: "Tenant ID",
-                accessorKey: "tenant_id",
-              },
-              deployed_by: {
-                id: "deployed_by",
-                header: "Deployed By",
-                accessorKey: "deployed_by",
-              },
-              deployment_date: {
-                id: "deployment_date",
-                header: "Deployment Date",
-                accessorKey: "deployment_date",
-              },
-            }}
-            onRowClick={(release) => {
-              // push(reverse.user.manageRelease(release.uuid ?? ""))
-            }}
-          />
-        </Box>
-      ) : (
-        <Card w="full" border="default" shadow="none">
-          <CardBody py="24">
-            <VStack spacing="4">
-              <Box justifySelf="center">
-                <Planet mood="sad" size={64} />
+      <WithQuery
+        query={query}
+        onOk={(response?: GetDeploymentSnapshotResponse) => (
+          <If
+            value={snapshotData}
+            condition={(snapshot_data) => (snapshot_data?.length ?? 0) > 0}
+            then={(snapshot_data) => (
+              <Box w="full" border="default" borderRadius="md" shadow="sm" bg="white">
+                <DataTable
+                  rows={snapshot_data}
+                  columns={{
+                    id: {
+                      id: "id",
+                      light: true,
+                      condensed: true,
+                      cell: (cell) => cell.row.index + 1,
+                    },
+                    repo_name: {
+                      id: "repo_name",
+                      header: "Repo Name",
+                      accessorKey: "repo_name",
+                    },
+                    docker_tag: {
+                      id: "docker_tag",
+                      header: "Docker Tag",
+                      accessorKey: "docker_tag",
+                    },
+                    commit_hash: {
+                      id: "commit_hash",
+                      header: "Commit Hash",
+                      accessorKey: "commit_hash",
+                    },
+                    target_env: {
+                      id: "target_env",
+                      header: "Target Env",
+                      accessorKey: "target_env",
+                    },
+                    azure_repo: {
+                      id: "azure_repo",
+                      header: "Azure Repo",
+                      accessorFn: (cell) =>
+                        cell.azure_repo == "crpepshnprdcus001" ? "SGS Non Prod" : "Multi Tenant",
+                    },
+                    tenant_id: {
+                      id: "tenant_id",
+                      header: "Tenant ID",
+                      accessorKey: "tenant_id",
+                    },
+                    deployed_by: {
+                      id: "deployed_by",
+                      header: "Deployed By",
+                      accessorKey: "deployed_by",
+                    },
+                    deployment_date: {
+                      id: "deployment_date",
+                      header: "Deployment Date",
+                      accessorKey: "deployment_date",
+                    },
+                  }}
+                />
               </Box>
+            )}
+            else={() => (
+              <Card w="full" border="default" shadow="none">
+                <CardBody py="24">
+                  <VStack spacing="4">
+                    <Box justifySelf="center">
+                      <Planet mood="sad" size={64} />
+                    </Box>
 
-              <Text color="muted">You do not have any snapshots</Text>
-            </VStack>
-          </CardBody>
-        </Card>
-      )}
+                    <Text color="muted">You do not have any snapshots</Text>
+                  </VStack>
+                </CardBody>
+              </Card>
+            )}
+          />
+        )}
+      />
     </Shell>
   )
 }

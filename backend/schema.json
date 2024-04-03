@@ -587,6 +587,30 @@
           }
         ]
       }
+    },
+    "/api/releases/snapshots": {
+      "get": {
+        "operationId": "releases_api_deployment_snapshot",
+        "summary": "Deployment Snapshot",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetDeploymentSnapshotStructuredResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "CommonBearerTokenAuth": []
+          }
+        ]
+      }
     }
   },
   "components": {
@@ -1779,6 +1803,89 @@
           },
           "result": {
             "$ref": "#/components/schemas/GetReleaseResponse"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      },
+      "SimpleGetDeploymentSnapshotSchema": {
+        "title": "SimpleGetDeploymentSnapshotSchema",
+        "type": "object",
+        "properties": {
+          "azure_repo": {
+            "title": "Azure Repo",
+            "type": "string"
+          },
+          "commit_hash": {
+            "title": "Commit Hash",
+            "type": "string"
+          },
+          "deployed_by": {
+            "title": "Deployed By",
+            "type": "string"
+          },
+          "deployment_date": {
+            "title": "Deployment Date",
+            "type": "string"
+          },
+          "docker_tag": {
+            "title": "Docker Tag",
+            "type": "string"
+          },
+          "repo_name": {
+            "title": "Repo Name",
+            "type": "string"
+          },
+          "target_env": {
+            "title": "Target Env",
+            "type": "string"
+          },
+          "tenant_id": {
+            "title": "Tenant Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "azure_repo",
+          "commit_hash",
+          "deployed_by",
+          "deployment_date",
+          "docker_tag",
+          "repo_name",
+          "target_env",
+          "tenant_id"
+        ]
+      },
+      "GetDeploymentSnapshotResponse": {
+        "title": "GetDeploymentSnapshotResponse",
+        "type": "object",
+        "properties": {
+          "snapshot_data": {
+            "title": "Snapshot Data",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SimpleGetDeploymentSnapshotSchema"
+            }
+          }
+        },
+        "required": [
+          "snapshot_data"
+        ]
+      },
+      "GetDeploymentSnapshotStructuredResponse": {
+        "title": "GetDeploymentSnapshotStructuredResponse",
+        "type": "object",
+        "properties": {
+          "ok": {
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "error": {
+            "$ref": "#/components/schemas/Error"
+          },
+          "result": {
+            "$ref": "#/components/schemas/GetDeploymentSnapshotResponse"
           }
         },
         "required": [

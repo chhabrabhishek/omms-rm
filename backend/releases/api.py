@@ -408,3 +408,32 @@ def revoke_approval(request, uuid: uuid.UUID, reason: str):
         approver.save()
 
     return {"ok": True}
+
+
+class SimpleGetDeploymentSnapshotSchema(Schema):
+    azure_repo: str
+    commit_hash: str
+    deployed_by: str
+    deployment_date: str
+    docker_tag: str
+    repo_name: str
+    target_env: str
+    tenant_id: str
+
+
+@response_schema
+class GetDeploymentSnapshotResponse(Schema):
+    snapshot_data: list[SimpleGetDeploymentSnapshotSchema]
+
+
+@router.get("/snapshots", response=GetDeploymentSnapshotResponse)
+def deployment_snapshot(request):
+    try:
+        snapshot_response = requests.get("http://rn000133847:3000/snapshots")
+    except Exception as e:
+        print(e)
+
+    return {
+        "ok": True,
+        "result": {"snapshot_data": snapshot_response.json()["data"]},
+    }
