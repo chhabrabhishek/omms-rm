@@ -76,7 +76,7 @@ ROOT_URLCONF = "app.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": ["templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -197,3 +197,12 @@ CSRF_TRUSTED_ORIGINS = ["https://omms-release.optum.com"]
 #     HOST = os.environ["HOST"]
 #     SCHEME = os.environ["SCHEME"]
 #     CSRF_TRUSTED_ORIGINS = [f"{SCHEME}://{HOST}"]
+
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = os.environ.get("EMAIL_HOST", "ctc-smtp-relay-k8s.optum.com")
+EMAIL_PORT = int(os.environ.get("EMAIL_PORT", 25))
+EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
+EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "0") == "1"
+EMAIL_USE_SSL = os.environ.get("EMAIL_USE_SSL", "0") == "1"
+EMAIL_FROM = os.environ.get("EMAIL_FROM", "Team RelEase <admins@release.omms>")

@@ -60,6 +60,14 @@ class ReleaseItem(AppModel):
     devops_notes = models.TextField(null=True, default=None)
     release = models.ForeignKey(Release, on_delete=models.PROTECT, related_name="items")
 
+class TalendReleaseItem(AppModel):
+    """
+    Represents a talend release item
+    """
+
+    job_name = models.CharField(max_length=1024)
+    package_location = models.CharField(max_length=5120)
+    release = models.ForeignKey(Release, on_delete=models.PROTECT, related_name="talend_items")
 
 class Approver(AppModel):
     """

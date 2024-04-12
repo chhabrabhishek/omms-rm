@@ -187,8 +187,13 @@ export type ConstantUserStructuredResponse = {
   error?: Error
   result?: ConstantUserResponse
 }
+export type SimpleTalendReleaseItemModelSchema = {
+  job_name: string
+  package_location: string
+}
 export type SimpleReleaseModelSchema = {
   items: SimpleReleaseItemModelSchema[]
+  talend_items: SimpleTalendReleaseItemModelSchema[]
   name: string
   start_window?: string
   end_window?: string
@@ -200,6 +205,7 @@ export type CreateReleaseRequest = {
 }
 export type SimpleUpdateReleaseModelSchema = {
   items: SimpleReleaseItemModelSchema[]
+  talend_items: SimpleTalendReleaseItemModelSchema[]
   deployment_status: number
   name: string
   start_window?: string
@@ -242,6 +248,7 @@ export type AllReleaseStructuredResponse = {
 }
 export type SimpleGetReleaseModelSchema = {
   items: SimpleReleaseItemModelSchema[]
+  talend_items: SimpleTalendReleaseItemModelSchema[]
   approvers: SimpleApproverModelSchema[]
   targets: SimpleTargetModelSchema[]
   deployment_status: number
@@ -485,6 +492,17 @@ function makeRequests(axios: AxiosInstance, config?: AxiosConfig) {
         .request<AckStructuredResponse>({
           method: "post",
           url: `/api/releases/approve`,
+          params: {
+            uuid,
+          },
+          paramsSerializer: config?.paramsSerializer,
+        })
+        .then((res) => res.data),
+    releasesApiDeletePendingReleaseItems: (uuid: string) =>
+      axios
+        .request<AckStructuredResponse>({
+          method: "post",
+          url: `/api/releases/deleteReleaseItems`,
           params: {
             uuid,
           },
@@ -764,6 +782,12 @@ type MutationConfigs = {
     UseMutationOptions<Response<"releasesApiApproveRelease">, unknown, unknown, unknown>,
     "onSuccess" | "onSettled" | "onError"
   >
+  useReleasesApiDeletePendingReleaseItems?: (
+    queryClient: QueryClient
+  ) => Pick<
+    UseMutationOptions<Response<"releasesApiDeletePendingReleaseItems">, unknown, unknown, unknown>,
+    "onSuccess" | "onSettled" | "onError"
+  >
   useReleasesApiRevokeApproval?: (
     queryClient: QueryClient
   ) => Pick<
@@ -950,6 +974,23 @@ function makeMutations(requests: Requests, config?: Config["mutations"]) {
       useRapiniMutation<Response<"releasesApiApproveRelease">, unknown, unknown>(
         () => requests.releasesApiApproveRelease(uuid),
         config?.useReleasesApiApproveRelease,
+        options
+      ),
+    useReleasesApiDeletePendingReleaseItems: (
+      uuid: string,
+      options?: Omit<
+        UseMutationOptions<
+          Response<"releasesApiDeletePendingReleaseItems">,
+          unknown,
+          unknown,
+          unknown
+        >,
+        "mutationFn"
+      >
+    ) =>
+      useRapiniMutation<Response<"releasesApiDeletePendingReleaseItems">, unknown, unknown>(
+        () => requests.releasesApiDeletePendingReleaseItems(uuid),
+        config?.useReleasesApiDeletePendingReleaseItems,
         options
       ),
     useReleasesApiRevokeApproval: (

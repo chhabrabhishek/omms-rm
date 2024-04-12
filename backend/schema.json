@@ -544,6 +544,41 @@
         ]
       }
     },
+    "/api/releases/deleteReleaseItems": {
+      "post": {
+        "operationId": "releases_api_delete_pending_release_items",
+        "summary": "Delete Pending Release Items",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "uuid",
+            "schema": {
+              "title": "Uuid",
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AckStructuredResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "CommonBearerTokenAuth": []
+          }
+        ]
+      }
+    },
     "/api/releases/revoke": {
       "post": {
         "operationId": "releases_api_revoke_approval",
@@ -1445,6 +1480,26 @@
           "ok"
         ]
       },
+      "SimpleTalendReleaseItemModelSchema": {
+        "title": "SimpleTalendReleaseItemModelSchema",
+        "type": "object",
+        "properties": {
+          "job_name": {
+            "title": "Job Name",
+            "maxLength": 1024,
+            "type": "string"
+          },
+          "package_location": {
+            "title": "Package Location",
+            "maxLength": 5120,
+            "type": "string"
+          }
+        },
+        "required": [
+          "job_name",
+          "package_location"
+        ]
+      },
       "SimpleReleaseModelSchema": {
         "title": "SimpleReleaseModelSchema",
         "type": "object",
@@ -1454,6 +1509,13 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/SimpleReleaseItemModelSchema"
+            }
+          },
+          "talend_items": {
+            "title": "Talend Items",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SimpleTalendReleaseItemModelSchema"
             }
           },
           "name": {
@@ -1474,6 +1536,7 @@
         },
         "required": [
           "items",
+          "talend_items",
           "name"
         ]
       },
@@ -1516,6 +1579,13 @@
               "$ref": "#/components/schemas/SimpleReleaseItemModelSchema"
             }
           },
+          "talend_items": {
+            "title": "Talend Items",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SimpleTalendReleaseItemModelSchema"
+            }
+          },
           "deployment_status": {
             "title": "Deployment Status",
             "type": "integer"
@@ -1542,6 +1612,7 @@
         },
         "required": [
           "items",
+          "talend_items",
           "deployment_status",
           "name"
         ]
@@ -1724,6 +1795,13 @@
               "$ref": "#/components/schemas/SimpleReleaseItemModelSchema"
             }
           },
+          "talend_items": {
+            "title": "Talend Items",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SimpleTalendReleaseItemModelSchema"
+            }
+          },
           "approvers": {
             "title": "Approvers",
             "type": "array",
@@ -1764,6 +1842,7 @@
         },
         "required": [
           "items",
+          "talend_items",
           "approvers",
           "targets",
           "deployment_status",

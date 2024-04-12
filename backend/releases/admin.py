@@ -4,6 +4,7 @@ from releases.models import Constant
 from releases.models import Release
 from releases.models import ReleaseItem
 from releases.models import RevokeApproval
+from releases.models import TalendReleaseItem
 from releases.models import Target
 
 
@@ -37,6 +38,16 @@ class ReleaseItemAdmin(admin.ModelAdmin):
         "devops_notes",
         "created_at",
         "updated_at",
+        "release",
+    )
+
+
+@admin.register(TalendReleaseItem)
+class ReleaseItemAdmin(admin.ModelAdmin):
+    list_display = (
+        "pk",
+        "job_name",
+        "package_location",
         "release",
     )
 

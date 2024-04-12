@@ -45,6 +45,7 @@ import {
   SimpleConstantSchema,
   SimpleReleaseItemModelSchema,
   SimpleRolesSchema,
+  SimpleTalendReleaseItemModelSchema,
 } from "@/api/definitions"
 import { toast } from "react-hot-toast"
 import If from "@/components/logic/If"
@@ -82,6 +83,9 @@ export default function ManageReleasePage() {
   const [sheetsDisabled, setSheetsDisabled] = useState<boolean>(false)
   const [approvedBy, setApprovedBy] = useState<Array<number>>([])
   const [pendingBy, setPendingBy] = useState<Array<number>>([])
+  const [talendData, setTalendData] = useState<Array<SimpleTalendReleaseItemModelSchema>>([
+    { job_name: "", package_location: "" },
+  ])
 
   const { isOpen, onOpen, onClose } = useDisclosure()
   const cancelRef = useRef(null)
@@ -182,6 +186,7 @@ export default function ManageReleasePage() {
             setPendingBy((previousPendingBy) => [...previousPendingBy, approver.group])
           }
         }
+        setTalendData((responseData.result as GetReleaseResponse).release_data.talend_items)
       }
     },
   })
@@ -282,6 +287,10 @@ export default function ManageReleasePage() {
     },
   })
 
+  const deletePendingReleaseItemsMutation = api.mutations.useReleasesApiDeletePendingReleaseItems(
+    asPath.split("/")[asPath.split("/").length - 1] as string
+  )
+
   const { hooks } = useMagicQueryHooks({
     onOk() {
       toast.success("Approved")
@@ -313,6 +322,7 @@ export default function ManageReleasePage() {
         ).length
       ) {
         setSheetsDisabled(true)
+        deletePendingReleaseItemsMutation.mutate({})
       }
     },
     autoRefetch: false,
@@ -580,15 +590,118 @@ export default function ManageReleasePage() {
 
                     {[...new Set(response.release_data.items.map((item) => item.service))].map(
                       (item, index) => (
-                        <TableSheets
-                          key={item}
-                          response={response.release_data.items.filter(
-                            (responseItem) => responseItem.service === item
+                        <VStack>
+                          <TableSheets
+                            key={item}
+                            response={response.release_data.items.filter(
+                              (responseItem) => responseItem.service === item
+                            )}
+                            serviceOptions={serviceOptions}
+                            sheetsDisabled={sheetsDisabled}
+                            onBranchTagChange={handleBranchTagChange}
+                          />
+                          {talendData.length && (
+                            <Box w="full">
+                              <VStack w="full" spacing="12">
+                                <Card w="full">
+                                  <CardHeader>
+                                    <Heading size="md">Talend</Heading>
+                                  </CardHeader>
+
+                                  <CardBody>
+                                    <TableContainer w="full">
+                                      <Table
+                                        variant="simple"
+                                        size="md"
+                                        __css={{ "table-layout": "fixed", "width": "100%" }}
+                                      >
+                                        <TableCaption>Talend</TableCaption>
+
+                                        <Thead>
+                                          <Tr>
+                                            <Th>Job Name</Th>
+                                            <Th>Package Location</Th>
+                                          </Tr>
+                                        </Thead>
+
+                                        <Tbody>
+                                          {talendData.map((item, index) => (
+                                            <Tr key={index}>
+                                              <Td>
+                                                <Input
+                                                  type="text"
+                                                  variant="filled"
+                                                  placeholder="Enter Job Name"
+                                                  defaultValue={item.job_name ?? ""}
+                                                  onChange={(e) => {
+                                                    const copyArr = [...talendData]
+                                                    const element = copyArr[index]
+                                                    const talendObj = {
+                                                      job_name: e.target.value,
+                                                      package_location: element.package_location,
+                                                    }
+                                                    copyArr[index] = talendObj
+                                                    setTalendData(copyArr)
+                                                  }}
+                                                />
+                                              </Td>
+                                              <Td>
+                                                <Input
+                                                  type="text"
+                                                  variant="filled"
+                                                  placeholder="Enter Package Location"
+                                                  defaultValue={item.package_location ?? ""}
+                                                  onChange={(e) => {
+                                                    const copyArr = [...talendData]
+                                                    const element = copyArr[index]
+                                                    const talendObj = {
+                                                      job_name: element.job_name,
+                                                      package_location: e.target.value,
+                                                    }
+                                                    copyArr[index] = talendObj
+                                                    setTalendData(copyArr)
+                                                  }}
+                                                />
+                                              </Td>
+                                            </Tr>
+                                          ))}
+                                          <Tr>
+                                            <Td>
+                                              <Button
+                                                onClick={() => {
+                                                  talendData[talendData.length - 1].job_name
+                                                    ? setTalendData((oldTalendData) => {
+                                                        return [
+                                                          ...oldTalendData,
+                                                          { job_name: "", package_location: "" },
+                                                        ]
+                                                      })
+                                                    : toast.error(
+                                                        "Please fill out the prior Job Name"
+                                                      )
+                                                }}
+                                              >
+                                                Add
+                                              </Button>
+                                            </Td>
+                                            <Td></Td>
+                                          </Tr>
+                                        </Tbody>
+
+                                        <Tfoot>
+                                          <Tr>
+                                            <Th>Job Name</Th>
+                                            <Th>Package Location</Th>
+                                          </Tr>
+                                        </Tfoot>
+                                      </Table>
+                                    </TableContainer>
+                                  </CardBody>
+                                </Card>
+                              </VStack>
+                            </Box>
                           )}
-                          serviceOptions={serviceOptions}
-                          sheetsDisabled={sheetsDisabled}
-                          onBranchTagChange={handleBranchTagChange}
-                        />
+                        </VStack>
                       )
                     )}
                   </>
@@ -700,6 +813,7 @@ export default function ManageReleasePage() {
                   release: {
                     name: response?.release_data.name ?? "",
                     items: data ?? [],
+                    talend_items: talendData.filter((item) => item.job_name),
                     start_window: DateTime.fromISO(startWindowDT!.toISOString())
                       .toFormat("yyyy-MM-dd HH:mm:ss")
                       .replace(" ", "T"),
@@ -730,6 +844,7 @@ export default function ManageReleasePage() {
                     release: {
                       name: response?.release_data.name ?? "",
                       items: data ?? [],
+                      talend_items: talendData.filter((item) => item.job_name),
                       start_window: DateTime.fromISO(startWindowDT!.toISOString())
                         .toFormat("yyyy-MM-dd HH:mm:ss")
                         .replace(" ", "T"),

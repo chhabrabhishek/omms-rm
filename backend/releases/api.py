@@ -1,6 +1,10 @@
 import logging
 import requests
 import uuid
+from django.conf import settings
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
 from django.db import transaction
 from django.db.models import Q
 from ninja import Router
@@ -16,6 +20,7 @@ from releases.models import Constant
 from releases.models import Release
 from releases.models import ReleaseItem
 from releases.models import RevokeApproval
+from releases.models import TalendReleaseItem
 from releases.models import Target
 
 router = Router(auth=CommonBearerTokenAuth())
@@ -23,7 +28,7 @@ logger = logging.getLogger("django.server")
 
 headers = {
     "user-agent": "release-api",
-    "Authorization": "Bearer auth_token",
+    "Authorization": "Bearer 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",
 }
 
 
@@ -72,6 +77,15 @@ class SimpleReleaseItemModelSchema(ModelSchema):
         )
 
 
+class SimpleTalendReleaseItemModelSchema(ModelSchema):
+    class Config:
+        model = TalendReleaseItem
+        include = (
+            "job_name",
+            "package_location",
+        )
+
+
 class SimpleAllConstantReleaseModelSchema(ModelSchema):
     items: list[SimpleReleaseItemModelSchema]
 
@@ -109,6 +123,7 @@ def get_constant_and_users(request):
 
 class SimpleReleaseModelSchema(ModelSchema):
     items: list[SimpleReleaseItemModelSchema]
+    talend_items: list[SimpleTalendReleaseItemModelSchema]
 
     class Config:
         model = Release
@@ -166,12 +181,43 @@ def create_release(request, form: CreateReleaseRequest):
                                 devops_notes=item.devops_notes,
                                 release=release,
                             )
+                        for item in form.release.talend_items:
+                            TalendReleaseItem.objects.create(
+                                job_name=item.job_name,
+                                package_location=item.package_location,
+                                release=release,
+                            )
                         for item in form.approvers:
                             Approver.objects.create(group=item, release=release)
                         Approver.objects.create(group=2, release=release)
                         Approver.objects.create(group=4, release=release)
                         for item in form.targets:
                             Target.objects.create(target=item, release=release)
+
+                        from_email_string = settings.EMAIL_FROM
+
+                        subject = f"{user} created a release, {form.release.name}"
+
+                        context = {"user": user, "release": form.release.name}
+
+                        html_content = render_to_string(
+                            "release/release_creation.html", context
+                        )
+
+                        text_content = strip_tags(html_content)
+
+                        msg = EmailMultiAlternatives(
+                            subject,
+                            text_content,
+                            from_email_string,
+                            [
+                                "OMMSDevOpsTeam_DL@ds.uhc.com",
+                                "OMMSDevLeads_DL@ds.uhc.com",
+                                "OMMS_RM@ds.uhc.com",
+                            ],
+                        )
+                        msg.attach_alternative(html_content, "text/html")
+                        msg.send()
 
                 return {"ok": True}
     except Exception as e:
@@ -191,6 +237,7 @@ def create_release(request, form: CreateReleaseRequest):
 
 class SimpleUpdateReleaseModelSchema(ModelSchema):
     items: list[SimpleReleaseItemModelSchema]
+    talend_items: list[SimpleTalendReleaseItemModelSchema]
     deployment_status: int
 
     class Config:
@@ -263,6 +310,16 @@ def update_release(request, form: UpdateReleaseRequest):
                         ]:
                             release_item.devops_notes = item.devops_notes
                         release_item.save()
+                    talend_release_items = TalendReleaseItem.objects.filter(
+                        release=release
+                    )
+                    talend_release_items.delete()
+                    for item in form.release.talend_items:
+                        TalendReleaseItem.objects.create(
+                            release=release,
+                            job_name=item.job_name,
+                            package_location=item.package_location,
+                        )
                     targets = Target.objects.filter(release=release)
                     targets.delete()
                     for item in form.targets:
@@ -340,6 +397,7 @@ def get_all_releases(request):
 
 class SimpleGetReleaseModelSchema(ModelSchema):
     items: list[SimpleReleaseItemModelSchema]
+    talend_items: list[SimpleTalendReleaseItemModelSchema]
     approvers: list[SimpleApproverModelSchema]
     targets: list[SimpleTargetModelSchema]
     deployment_status: int
@@ -391,6 +449,18 @@ def approve_release(request, uuid: uuid.UUID):
             if approver:
                 approver.approved = True
                 approver.save()
+
+    return {"ok": True}
+
+
+@router.post("/deleteReleaseItems", response=AckResponse)
+def delete_pending_release_items(request, uuid: uuid.UUID):
+    user = request.auth
+    release = Release.objects.get(uuid=uuid)
+    release_items = ReleaseItem.objects.filter(release=release)
+    for item in release_items:
+        if not item.release_branch:
+            item.delete()
 
     return {"ok": True}
 
