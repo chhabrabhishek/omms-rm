@@ -19,8 +19,8 @@ export default function DeploymentSnapshotPage() {
   const query = useAppQuery(api.queries.useReleasesApiDeploymentSnapshot, {
     autoRefetch: false,
     onOk(result) {
-        setTempSnapshotData(result.result?.snapshot_data!)
-        setSnapshotData(result.result?.snapshot_data!)
+      setTempSnapshotData(result.result?.snapshot_data!)
+      setSnapshotData(result.result?.snapshot_data!)
     },
   })
 
@@ -117,6 +117,9 @@ export default function DeploymentSnapshotPage() {
                       header: "Deployment Date",
                       accessorKey: "deployment_date",
                     },
+                  }}
+                  pagination={{
+                    size: 50,
                   }}
                 />
               </Box>

@@ -154,6 +154,9 @@ export default function ReleasesPage() {
                   onRowClick={(release) => {
                     push(reverse.user.manageRelease(release.uuid ?? ""))
                   }}
+                  pagination={{
+                    size: 50,
+                  }}
                 />
               </Box>
             )}
