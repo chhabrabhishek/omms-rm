@@ -334,6 +334,24 @@ def update_release(request, form: UpdateReleaseRequest):
     }
 
 
+class DeleteReleaseRequest(Schema):
+    uuid: uuid.UUID
+
+
+@router.post("/delete", response=AckResponse)
+def delete_release(request, form: DeleteReleaseRequest):
+    release = Release.objects.get(uuid=form.uuid)
+    with transaction.atomic():
+        Target.objects.filter(release=release).delete()
+        TalendReleaseItem.objects.filter(release=release).delete()
+        RevokeApproval.objects.filter(release=release).delete()
+        ReleaseItem.objects.filter(release=release).delete()
+        Approver.objects.filter(release=release).delete()
+        release.delete()
+
+    return {"ok": True}
+
+
 class SimpleApproverModelSchema(ModelSchema):
     group: int
 
