@@ -450,6 +450,40 @@
         ]
       }
     },
+    "/api/releases/delete": {
+      "post": {
+        "operationId": "releases_api_delete_release",
+        "summary": "Delete Release",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AckStructuredResponse"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteReleaseRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "CommonBearerTokenAuth": []
+          }
+        ]
+      }
+    },
     "/api/releases/all": {
       "get": {
         "operationId": "releases_api_get_all_releases",
@@ -1640,6 +1674,20 @@
         "required": [
           "release",
           "targets",
+          "uuid"
+        ]
+      },
+      "DeleteReleaseRequest": {
+        "title": "DeleteReleaseRequest",
+        "type": "object",
+        "properties": {
+          "uuid": {
+            "title": "Uuid",
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
           "uuid"
         ]
       },
