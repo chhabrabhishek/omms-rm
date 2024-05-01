@@ -1378,9 +1378,9 @@
             "maxLength": 1024,
             "type": "string"
           },
-          "hotfix_branch": {
-            "title": "Hotfix Branch",
-            "maxLength": 1024,
+          "feature_number": {
+            "title": "Feature Number",
+            "maxLength": 2048,
             "type": "string"
           },
           "tag": {

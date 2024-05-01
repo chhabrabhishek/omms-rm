@@ -207,7 +207,7 @@ export function Shell(props: {
           activeLink={props.page.name}
         />
 
-        <Container maxW="container.xl">
+        <Container w="full" m="0" maxW="full">
           <VStack as="main" px={["1", "1", "6"]} py={["2", "2", "8"]} spacing={["6", "6", "8"]}>
             {props.page?.banner && (
               <Box w="full">

@@ -32,7 +32,7 @@ class ReleaseItemAdmin(admin.ModelAdmin):
         "repo",
         "service",
         "release_branch",
-        "hotfix_branch",
+        "feature_number",
         "tag",
         "special_notes",
         "devops_notes",

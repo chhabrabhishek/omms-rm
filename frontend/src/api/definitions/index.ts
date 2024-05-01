@@ -167,7 +167,7 @@ export type SimpleReleaseItemModelSchema = {
   repo: string
   service: string
   release_branch?: string
-  hotfix_branch?: string
+  feature_number?: string
   tag?: string
   special_notes?: string
   devops_notes?: string

@@ -70,7 +70,7 @@ class SimpleReleaseItemModelSchema(ModelSchema):
             "repo",
             "service",
             "release_branch",
-            "hotfix_branch",
+            "feature_number",
             "tag",
             "special_notes",
             "devops_notes",
@@ -175,7 +175,7 @@ def create_release(request, form: CreateReleaseRequest):
                                 repo=item.repo,
                                 service=item.service,
                                 release_branch=item.release_branch,
-                                hotfix_branch=item.hotfix_branch,
+                                feature_number=item.feature_number,
                                 tag=item.tag,
                                 special_notes=item.special_notes,
                                 devops_notes=item.devops_notes,
@@ -302,7 +302,7 @@ def update_release(request, form: UpdateReleaseRequest):
                             service=item.service,
                         )
                         release_item.release_branch = item.release_branch
-                        release_item.hotfix_branch = item.hotfix_branch
+                        release_item.feature_number = item.feature_number
                         release_item.tag = item.tag
                         release_item.special_notes = item.special_notes
                         if Roles.Role.DevOps in [

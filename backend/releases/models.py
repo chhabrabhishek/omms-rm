@@ -52,13 +52,14 @@ class ReleaseItem(AppModel):
     release_branch = models.CharField(
         max_length=1024, null=True, default=None, blank=True
     )
-    hotfix_branch = models.CharField(
-        max_length=1024, null=True, default=None, blank=True
+    feature_number = models.CharField(
+        max_length=2048, null=True, default=None, blank=True
     )
     tag = models.CharField(max_length=1024, null=True, default=None, blank=True)
     special_notes = models.TextField(null=True, default=None)
     devops_notes = models.TextField(null=True, default=None)
     release = models.ForeignKey(Release, on_delete=models.PROTECT, related_name="items")
+
 
 class TalendReleaseItem(AppModel):
     """
@@ -67,7 +68,10 @@ class TalendReleaseItem(AppModel):
 
     job_name = models.CharField(max_length=1024)
     package_location = models.CharField(max_length=5120)
-    release = models.ForeignKey(Release, on_delete=models.PROTECT, related_name="talend_items")
+    release = models.ForeignKey(
+        Release, on_delete=models.PROTECT, related_name="talend_items"
+    )
+
 
 class Approver(AppModel):
     """

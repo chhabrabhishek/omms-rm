@@ -113,7 +113,7 @@ export default function CreateReleasePage() {
               repo: item.repo,
               service: item.service,
               release_branch: "",
-              hotfix_branch: "",
+              feature_number: "",
               tag: "",
               special_notes: "",
             } as SimpleReleaseItemModelSchema
@@ -177,7 +177,7 @@ export default function CreateReleasePage() {
             repo: item.repo,
             service: item.service,
             release_branch: "",
-            hotfix_branch: "",
+            feature_number: "",
             tag: "",
             special_notes: "",
           } as SimpleReleaseItemModelSchema
@@ -203,7 +203,7 @@ export default function CreateReleasePage() {
         {
           ...eventData,
           release_branch: updatedRow?.release_branch,
-          hotfix_branch: updatedRow?.hotfix_branch,
+          feature_number: updatedRow?.feature_number,
           special_notes: updatedRow?.special_notes,
           devops_notes: updatedRow?.devops_notes,
         } as SimpleReleaseItemModelSchema,
@@ -215,13 +215,13 @@ export default function CreateReleasePage() {
         {
           ...eventData,
           tag: updatedRow?.tag,
-          hotfix_branch: updatedRow?.hotfix_branch,
+          feature_number: updatedRow?.feature_number,
           special_notes: updatedRow?.special_notes,
           devops_notes: updatedRow?.devops_notes,
         } as SimpleReleaseItemModelSchema,
       ])
     }
-    if ("hotfix_branch" in eventData) {
+    if ("feature_number" in eventData) {
       setData((previousData) => [
         ...(previousData as SimpleReleaseItemModelSchema[]),
         {
@@ -240,7 +240,7 @@ export default function CreateReleasePage() {
           ...eventData,
           tag: updatedRow?.tag,
           release_branch: updatedRow?.release_branch,
-          hotfix_branch: updatedRow?.hotfix_branch,
+          feature_number: updatedRow?.feature_number,
           devops_notes: updatedRow?.devops_notes,
         } as SimpleReleaseItemModelSchema,
       ])
@@ -252,7 +252,7 @@ export default function CreateReleasePage() {
           ...eventData,
           tag: updatedRow?.tag,
           release_branch: updatedRow?.release_branch,
-          hotfix_branch: updatedRow?.hotfix_branch,
+          feature_number: updatedRow?.feature_number,
           special_notes: updatedRow?.special_notes,
         } as SimpleReleaseItemModelSchema,
       ])
@@ -274,7 +274,7 @@ export default function CreateReleasePage() {
         {
           ...eventData,
           release_branch: updatedRow?.release_branch,
-          hotfix_branch: updatedRow?.hotfix_branch,
+          feature_number: updatedRow?.feature_number,
           special_notes: updatedRow?.special_notes,
           devops_notes: updatedRow?.devops_notes,
         } as SimpleReleaseItemModelSchema,
@@ -286,13 +286,13 @@ export default function CreateReleasePage() {
         {
           ...eventData,
           tag: updatedRow?.tag,
-          hotfix_branch: updatedRow?.hotfix_branch,
+          feature_number: updatedRow?.feature_number,
           special_notes: updatedRow?.special_notes,
           devops_notes: updatedRow?.devops_notes,
         } as SimpleReleaseItemModelSchema,
       ])
     }
-    if ("hotfix_branch" in eventData) {
+    if ("feature_number" in eventData) {
       setInheritData((previousData) => [
         ...(previousData as SimpleReleaseItemModelSchema[]),
         {
@@ -311,7 +311,7 @@ export default function CreateReleasePage() {
           ...eventData,
           tag: updatedRow?.tag,
           release_branch: updatedRow?.release_branch,
-          hotfix_branch: updatedRow?.hotfix_branch,
+          feature_number: updatedRow?.feature_number,
           devops_notes: updatedRow?.devops_notes,
         } as SimpleReleaseItemModelSchema,
       ])
@@ -323,7 +323,7 @@ export default function CreateReleasePage() {
           ...eventData,
           tag: updatedRow?.tag,
           release_branch: updatedRow?.release_branch,
-          hotfix_branch: updatedRow?.hotfix_branch,
+          feature_number: updatedRow?.feature_number,
           special_notes: updatedRow?.special_notes,
         } as SimpleReleaseItemModelSchema,
       ])
@@ -1014,7 +1014,7 @@ function TableSheets(props: {
                   <Table
                     variant="simple"
                     size="md"
-                    __css={{ "table-layout": "fixed", "width": "150%" }}
+                    __css={{ "table-layout": "fixed", "width": "100%" }}
                   >
                     <TableCaption>
                       {
@@ -1028,7 +1028,7 @@ function TableSheets(props: {
                       <Tr>
                         <Th>Git Repo</Th>
                         <Th>Release Branches</Th>
-                        <Th>Hotfix Branches</Th>
+                        <Th>Feature Number</Th>
                         <Th>Tags</Th>
                         <Th>Special Notes</Th>
                         {JSON.parse(localStorage.getItem("$auth") ?? "").roles.find(
@@ -1072,10 +1072,10 @@ function TableSheets(props: {
                             <Input
                               type="text"
                               variant="filled"
-                              placeholder="Enter Hotfix Branch"
+                              placeholder="Enter Feature/Defect Number"
                               onChange={(e) =>
                                 props.onBranchTagChange({
-                                  hotfix_branch: e.target.value ?? "",
+                                  feature_number: e.target.value ?? "",
                                   service: item.service,
                                   repo: item.repo,
                                 } as SimpleReleaseItemModelSchema)
@@ -1133,7 +1133,7 @@ function TableSheets(props: {
                       <Tr>
                         <Th>Git Repo</Th>
                         <Th>Release Branches</Th>
-                        <Th>Hotfix Branches</Th>
+                        <Th>Feature Number</Th>
                         <Th>Tags</Th>
                         <Th>Special Notes</Th>
                         {JSON.parse(localStorage.getItem("$auth") ?? "").roles.find(
@@ -1165,7 +1165,7 @@ function TableSheets(props: {
                   <Table
                     variant="simple"
                     size="md"
-                    __css={{ "table-layout": "fixed", "width": "150%" }}
+                    __css={{ "table-layout": "fixed", "width": "100%" }}
                   >
                     <TableCaption>
                       {
@@ -1179,7 +1179,7 @@ function TableSheets(props: {
                       <Tr>
                         <Th>Git Repo</Th>
                         <Th>Release Branches</Th>
-                        <Th>Hotfix Branches</Th>
+                        <Th>Feature Number</Th>
                         <Th>Tags</Th>
                         <Th>Special Notes</Th>
                         {JSON.parse(localStorage.getItem("$auth") ?? "").roles.find(
@@ -1224,11 +1224,11 @@ function TableSheets(props: {
                             <Input
                               type="text"
                               variant="filled"
-                              placeholder="Enter Hotfix Branch"
-                              defaultValue={item.hotfix_branch}
+                              placeholder="Enter Feature/Defect Number"
+                              defaultValue={item.feature_number}
                               onChange={(e) =>
                                 props.onBranchTagChange({
-                                  hotfix_branch: e.target.value ?? "",
+                                  feature_number: e.target.value ?? "",
                                   service: item.service,
                                   repo: item.repo,
                                 } as SimpleReleaseItemModelSchema)
@@ -1289,7 +1289,7 @@ function TableSheets(props: {
                       <Tr>
                         <Th>Git Repo</Th>
                         <Th>Release Branches</Th>
-                        <Th>Hotfix Branches</Th>
+                        <Th>Feature Number</Th>
                         <Th>Tags</Th>
                         <Th>Special Notes</Th>
                         {JSON.parse(localStorage.getItem("$auth") ?? "").roles.find(

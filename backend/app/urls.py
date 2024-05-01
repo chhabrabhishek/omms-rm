@@ -14,6 +14,7 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
 from django.contrib import admin
 from django.urls import path
 from ninja import NinjaAPI
@@ -22,6 +23,7 @@ from app.api import router as general_router
 from releases.api import router as releases_router
 from tickets.api import router as tickets_router
 from app.exceptions import init_exception_handlers
+from releases.views import export_release_csv
 
 api = NinjaAPI()
 
@@ -34,4 +36,5 @@ api.add_router("/releases/", releases_router)
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/", api.urls),
+    path("export", export_release_csv, name="export_release_csv"),
 ]
