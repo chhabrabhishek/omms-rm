@@ -36,5 +36,5 @@ api.add_router("/releases/", releases_router)
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/", api.urls),
-    path("export", export_release_csv, name="export_release_csv"),
+    path("export/", export_release_csv, name="export_release_csv"),
 ]
