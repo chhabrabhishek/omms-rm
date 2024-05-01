@@ -217,9 +217,6 @@ export type UpdateReleaseRequest = {
   targets: string[]
   uuid: string
 }
-export type DeleteReleaseRequest = {
-  uuid: string
-}
 export type SimpleApproverModelSchema = {
   group: number
   approved?: boolean
@@ -469,14 +466,6 @@ function makeRequests(axios: AxiosInstance, config?: AxiosConfig) {
         .request<AckStructuredResponse>({
           method: "post",
           url: `/api/releases/update`,
-          data: payload,
-        })
-        .then((res) => res.data),
-    releasesApiDeleteRelease: (payload: DeleteReleaseRequest) =>
-      axios
-        .request<AckStructuredResponse>({
-          method: "post",
-          url: `/api/releases/delete`,
           data: payload,
         })
         .then((res) => res.data),
@@ -787,17 +776,6 @@ type MutationConfigs = {
     >,
     "onSuccess" | "onSettled" | "onError"
   >
-  useReleasesApiDeleteRelease?: (
-    queryClient: QueryClient
-  ) => Pick<
-    UseMutationOptions<
-      Response<"releasesApiDeleteRelease">,
-      unknown,
-      Parameters<Requests["releasesApiDeleteRelease"]>[0],
-      unknown
-    >,
-    "onSuccess" | "onSettled" | "onError"
-  >
   useReleasesApiApproveRelease?: (
     queryClient: QueryClient
   ) => Pick<
@@ -984,26 +962,6 @@ function makeMutations(requests: Requests, config?: Config["mutations"]) {
       >(
         (payload) => requests.releasesApiUpdateRelease(payload),
         config?.useReleasesApiUpdateRelease,
-        options
-      ),
-    useReleasesApiDeleteRelease: (
-      options?: Omit<
-        UseMutationOptions<
-          Response<"releasesApiDeleteRelease">,
-          unknown,
-          Parameters<Requests["releasesApiDeleteRelease"]>[0],
-          unknown
-        >,
-        "mutationFn"
-      >
-    ) =>
-      useRapiniMutation<
-        Response<"releasesApiDeleteRelease">,
-        unknown,
-        Parameters<Requests["releasesApiDeleteRelease"]>[0]
-      >(
-        (payload) => requests.releasesApiDeleteRelease(payload),
-        config?.useReleasesApiDeleteRelease,
         options
       ),
     useReleasesApiApproveRelease: (
