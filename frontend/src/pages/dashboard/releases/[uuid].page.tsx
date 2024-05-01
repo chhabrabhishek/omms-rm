@@ -7,7 +7,6 @@ import {
   CardHeader,
   Heading,
   Icon,
-  Select as ChakraSelect,
   Table,
   TableCaption,
   TableContainer,
@@ -33,7 +32,7 @@ import {
   SimpleGrid,
   Input,
 } from "@chakra-ui/react"
-import { IconCornerDownRight } from "@tabler/icons-react"
+import { IconCornerDownRight, IconFileExport } from "@tabler/icons-react"
 import { useAppMutation } from "@/hooks/useAppMutation"
 import { api } from "@/api"
 import { useRouter } from "next/router"
@@ -42,7 +41,6 @@ import { useMagicQueryHooks } from "@/hooks/useAppQuery"
 import WithQuery from "@/components/indicators/WithQuery"
 import {
   GetReleaseResponse,
-  SimpleConstantSchema,
   SimpleReleaseItemModelSchema,
   SimpleRolesSchema,
   SimpleTalendReleaseItemModelSchema,
@@ -60,6 +58,7 @@ import Datetime from "react-datetime"
 import { DateTime } from "luxon"
 import { Select } from "chakra-react-select"
 import "react-datetime/css/react-datetime.css"
+import { reverse } from "@/utils/reverse"
 
 // This page is only accessible by a User.
 ManageReleasePage.access = Access.User
@@ -75,7 +74,7 @@ const schema = zod.object({
 })
 
 export default function ManageReleasePage() {
-  const { asPath } = useRouter()
+  const { asPath, push } = useRouter()
   const [response, setResponse] = useState<GetReleaseResponse>()
   const [data, setData] = useState<Array<SimpleReleaseItemModelSchema>>()
   const [serviceOptions, setServiceOptions] = useState<Array<IServiceOptions>>([])
@@ -357,12 +356,24 @@ export default function ManageReleasePage() {
       page={{
         name: "releases",
         title: response?.release_data ? `Manage ${response?.release_data.name}` : "Manage Release",
-        banner: {
+        sliver: {
           title: response?.release_data
             ? `Manage ${response?.release_data.name}`
             : "Manage Release",
-          subtitle: "Manage, Modify and View the releases",
+          subtitle: "Manage, Modify and View the release",
         },
+      }}
+      actions={{
+        mainActions: [
+          {
+            label: response?.release_data
+              ? `Export ${response?.release_data.name}`
+              : "Export Release",
+            icon: <Icon as={IconFileExport} />,
+            onClick: () =>
+              push(reverse.user.exportRelease(asPath.split("/")[asPath.split("/").length - 1])),
+          },
+        ],
       }}
     >
       {data && asPath.split("/")[asPath.split("/").length - 1] != "[uuid]" ? (

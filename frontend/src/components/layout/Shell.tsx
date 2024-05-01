@@ -29,7 +29,7 @@ import {
   IconClipboardCheck,
   IconArrowLeft,
   IconThumbUp,
-  IconArchive
+  IconArchive,
 } from "@tabler/icons-react"
 import { isString } from "underscore"
 import Link from "next/link"

@@ -9,7 +9,7 @@ import { Access } from "@/types/Page"
 import { fromDjangoISO, toDateTimeString } from "@/utils/date"
 import { reverse } from "@/utils/reverse"
 import { Box, Card, CardBody, HStack, Icon, Tag, Text, VStack } from "@chakra-ui/react"
-import { IconPlus } from "@tabler/icons-react"
+import { IconPlus, IconFileExport } from "@tabler/icons-react"
 import { useRouter } from "next/router"
 import { Planet } from "react-kawaii"
 import { deploymentStatusOptions } from "./[uuid].page"
@@ -48,6 +48,13 @@ export default function ReleasesPage() {
               href: reverse.user.createRelease(),
             }
           : undefined,
+        mainActions: [
+          {
+            label: "Export All Releases",
+            icon: <Icon as={IconFileExport} />,
+            onClick: () => push(reverse.user.exportReleases()),
+          },
+        ],
       }}
     >
       <WithQuery
