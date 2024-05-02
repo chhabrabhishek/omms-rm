@@ -590,116 +590,110 @@ export default function CreateReleasePage() {
                       </Text>
                     )}
 
+                    {talendData.length && (
+                      <Box w="full">
+                        <VStack w="full" spacing="12">
+                          <Card w="full">
+                            <CardHeader>
+                              <Heading size="md">Talend</Heading>
+                            </CardHeader>
+
+                            <CardBody>
+                              <TableContainer w="full">
+                                <Table
+                                  variant="simple"
+                                  size="md"
+                                  __css={{ "table-layout": "fixed", "width": "100%" }}
+                                >
+                                  <TableCaption>Talend</TableCaption>
+
+                                  <Thead>
+                                    <Tr>
+                                      <Th>Job Name</Th>
+                                      <Th>Package Location</Th>
+                                    </Tr>
+                                  </Thead>
+
+                                  <Tbody>
+                                    {talendData.map((item, index) => (
+                                      <Tr key={index}>
+                                        <Td>
+                                          <Input
+                                            type="text"
+                                            variant="filled"
+                                            placeholder="Enter Job Name"
+                                            onChange={(e) => {
+                                              const copyArr = [...talendData]
+                                              const lastElement = copyArr.splice(-1)
+                                              copyArr.push({
+                                                job_name: e.target.value,
+                                                package_location: lastElement[0].package_location,
+                                              })
+                                              setTalendData(copyArr)
+                                            }}
+                                          />
+                                        </Td>
+                                        <Td>
+                                          <Input
+                                            type="text"
+                                            variant="filled"
+                                            placeholder="Enter Package Location"
+                                            onChange={(e) => {
+                                              const copyArr = [...talendData]
+                                              const lastElement = copyArr.splice(-1)
+                                              copyArr.push({
+                                                job_name: lastElement[0].job_name,
+                                                package_location: e.target.value,
+                                              })
+                                              setTalendData(copyArr)
+                                            }}
+                                          />
+                                        </Td>
+                                      </Tr>
+                                    ))}
+                                    <Tr>
+                                      <Td>
+                                        <Button
+                                          onClick={() => {
+                                            talendData[talendData.length - 1].job_name
+                                              ? setTalendData((oldTalendData) => {
+                                                  return [
+                                                    ...oldTalendData,
+                                                    { job_name: "", package_location: "" },
+                                                  ]
+                                                })
+                                              : toast.error("Please fill out the prior Job Name")
+                                          }}
+                                        >
+                                          Add
+                                        </Button>
+                                      </Td>
+                                      <Td></Td>
+                                    </Tr>
+                                  </Tbody>
+
+                                  <Tfoot>
+                                    <Tr>
+                                      <Th>Job Name</Th>
+                                      <Th>Package Location</Th>
+                                    </Tr>
+                                  </Tfoot>
+                                </Table>
+                              </TableContainer>
+                            </CardBody>
+                          </Card>
+                        </VStack>
+                      </Box>
+                    )}
+
                     {[...new Set(response.map((item) => item.service))].map((item, index) => (
-                      <VStack>
-                        <TableSheets
-                          key={item}
-                          response={[]}
-                          constant={response.filter(
-                            (responseItem) => responseItem.service === item
-                          )}
-                          onBranchTagChange={handleBranchTagChange}
-                          serviceOptions={serviceOptions}
-                        />
-                        {talendData.length && (
-                          <Box w="full">
-                            <VStack w="full" spacing="12">
-                              <Card w="full">
-                                <CardHeader>
-                                  <Heading size="md">Talend</Heading>
-                                </CardHeader>
-
-                                <CardBody>
-                                  <TableContainer w="full">
-                                    <Table
-                                      variant="simple"
-                                      size="md"
-                                      __css={{ "table-layout": "fixed", "width": "100%" }}
-                                    >
-                                      <TableCaption>Talend</TableCaption>
-
-                                      <Thead>
-                                        <Tr>
-                                          <Th>Job Name</Th>
-                                          <Th>Package Location</Th>
-                                        </Tr>
-                                      </Thead>
-
-                                      <Tbody>
-                                        {talendData.map((item, index) => (
-                                          <Tr key={index}>
-                                            <Td>
-                                              <Input
-                                                type="text"
-                                                variant="filled"
-                                                placeholder="Enter Job Name"
-                                                onChange={(e) => {
-                                                  const copyArr = [...talendData]
-                                                  const lastElement = copyArr.splice(-1)
-                                                  copyArr.push({
-                                                    job_name: e.target.value,
-                                                    package_location:
-                                                      lastElement[0].package_location,
-                                                  })
-                                                  setTalendData(copyArr)
-                                                }}
-                                              />
-                                            </Td>
-                                            <Td>
-                                              <Input
-                                                type="text"
-                                                variant="filled"
-                                                placeholder="Enter Package Location"
-                                                onChange={(e) => {
-                                                  const copyArr = [...talendData]
-                                                  const lastElement = copyArr.splice(-1)
-                                                  copyArr.push({
-                                                    job_name: lastElement[0].job_name,
-                                                    package_location: e.target.value,
-                                                  })
-                                                  setTalendData(copyArr)
-                                                }}
-                                              />
-                                            </Td>
-                                          </Tr>
-                                        ))}
-                                        <Tr>
-                                          <Td>
-                                            <Button
-                                              onClick={() => {
-                                                talendData[talendData.length - 1].job_name
-                                                  ? setTalendData((oldTalendData) => {
-                                                      return [
-                                                        ...oldTalendData,
-                                                        { job_name: "", package_location: "" },
-                                                      ]
-                                                    })
-                                                  : toast.error(
-                                                      "Please fill out the prior Job Name"
-                                                    )
-                                              }}
-                                            >
-                                              Add
-                                            </Button>
-                                          </Td>
-                                          <Td></Td>
-                                        </Tr>
-                                      </Tbody>
-
-                                      <Tfoot>
-                                        <Tr>
-                                          <Th>Job Name</Th>
-                                          <Th>Package Location</Th>
-                                        </Tr>
-                                      </Tfoot>
-                                    </Table>
-                                  </TableContainer>
-                                </CardBody>
-                              </Card>
-                            </VStack>
-                          </Box>
-                        )}
-                      </VStack>
+                      <TableSheets
+                        key={item}
+                        response={[]}
+                        constant={response.filter((responseItem) => responseItem.service === item)}
+                        onBranchTagChange={handleBranchTagChange}
+                        serviceOptions={serviceOptions}
+                      />
                     ))}
 
                     <Box w="full" textAlign="end" py="8">
@@ -846,122 +840,119 @@ export default function CreateReleasePage() {
                       </Text>
                     )}
 
+                    {talendData.length && (
+                      <Box w="full">
+                        <VStack w="full" spacing="12">
+                          <Card w="full">
+                            <CardHeader>
+                              <Heading size="md">Talend</Heading>
+                            </CardHeader>
+
+                            <CardBody>
+                              <TableContainer w="full">
+                                <Table
+                                  variant="simple"
+                                  size="md"
+                                  __css={{ "table-layout": "fixed", "width": "100%" }}
+                                >
+                                  <TableCaption>Talend</TableCaption>
+
+                                  <Thead>
+                                    <Tr>
+                                      <Th>Job Name</Th>
+                                      <Th>Package Location</Th>
+                                    </Tr>
+                                  </Thead>
+
+                                  <Tbody>
+                                    {talendData.map((item, index) => (
+                                      <Tr key={index}>
+                                        <Td>
+                                          <Input
+                                            type="text"
+                                            variant="filled"
+                                            placeholder="Enter Job Name"
+                                            defaultValue={item.job_name ?? ""}
+                                            onChange={(e) => {
+                                              const copyArr = [...talendData]
+                                              const element = copyArr[index]
+                                              const talendObj = {
+                                                job_name: e.target.value,
+                                                package_location: element.package_location,
+                                              }
+                                              copyArr[index] = talendObj
+                                              setTalendData(copyArr)
+                                            }}
+                                          />
+                                        </Td>
+                                        <Td>
+                                          <Input
+                                            type="text"
+                                            variant="filled"
+                                            placeholder="Enter Package Location"
+                                            defaultValue={item.package_location ?? ""}
+                                            onChange={(e) => {
+                                              const copyArr = [...talendData]
+                                              const element = copyArr[index]
+                                              const talendObj = {
+                                                job_name: element.job_name,
+                                                package_location: e.target.value,
+                                              }
+                                              copyArr[index] = talendObj
+                                              setTalendData(copyArr)
+                                            }}
+                                          />
+                                        </Td>
+                                      </Tr>
+                                    ))}
+                                    <Tr>
+                                      <Td>
+                                        <Button
+                                          onClick={() => {
+                                            talendData[talendData.length - 1].job_name
+                                              ? setTalendData((oldTalendData) => {
+                                                  return [
+                                                    ...oldTalendData,
+                                                    { job_name: "", package_location: "" },
+                                                  ]
+                                                })
+                                              : toast.error("Please fill out the prior Job Name")
+                                          }}
+                                        >
+                                          Add
+                                        </Button>
+                                      </Td>
+                                      <Td></Td>
+                                    </Tr>
+                                  </Tbody>
+
+                                  <Tfoot>
+                                    <Tr>
+                                      <Th>Job Name</Th>
+                                      <Th>Package Location</Th>
+                                    </Tr>
+                                  </Tfoot>
+                                </Table>
+                              </TableContainer>
+                            </CardBody>
+                          </Card>
+                        </VStack>
+                      </Box>
+                    )}
+
                     {[...new Set(result.release_data.items.map((item) => item.service))].map(
                       (item, index) => (
-                        <VStack>
-                          <TableSheets
-                            key={item}
-                            response={result.release_data.items.filter(
-                              (responseItem) => responseItem.service === item
-                            )}
-                            constant={result.constants.filter(
-                              (responseItem) => responseItem.service === item
-                            )}
-                            onBranchTagChange={handleInheritBranchTagChange}
-                            serviceOptions={serviceOptions}
-                          />
-                          {talendData.length && (
-                            <Box w="full">
-                              <VStack w="full" spacing="12">
-                                <Card w="full">
-                                  <CardHeader>
-                                    <Heading size="md">Talend</Heading>
-                                  </CardHeader>
-
-                                  <CardBody>
-                                    <TableContainer w="full">
-                                      <Table
-                                        variant="simple"
-                                        size="md"
-                                        __css={{ "table-layout": "fixed", "width": "100%" }}
-                                      >
-                                        <TableCaption>Talend</TableCaption>
-
-                                        <Thead>
-                                          <Tr>
-                                            <Th>Job Name</Th>
-                                            <Th>Package Location</Th>
-                                          </Tr>
-                                        </Thead>
-
-                                        <Tbody>
-                                          {talendData.map((item, index) => (
-                                            <Tr key={index}>
-                                              <Td>
-                                                <Input
-                                                  type="text"
-                                                  variant="filled"
-                                                  placeholder="Enter Job Name"
-                                                  defaultValue={item.job_name ?? ""}
-                                                  onChange={(e) => {
-                                                    const copyArr = [...talendData]
-                                                    const element = copyArr[index]
-                                                    const talendObj = {
-                                                      job_name: e.target.value,
-                                                      package_location: element.package_location,
-                                                    }
-                                                    copyArr[index] = talendObj
-                                                    setTalendData(copyArr)
-                                                  }}
-                                                />
-                                              </Td>
-                                              <Td>
-                                                <Input
-                                                  type="text"
-                                                  variant="filled"
-                                                  placeholder="Enter Package Location"
-                                                  defaultValue={item.package_location ?? ""}
-                                                  onChange={(e) => {
-                                                    const copyArr = [...talendData]
-                                                    const element = copyArr[index]
-                                                    const talendObj = {
-                                                      job_name: element.job_name,
-                                                      package_location: e.target.value,
-                                                    }
-                                                    copyArr[index] = talendObj
-                                                    setTalendData(copyArr)
-                                                  }}
-                                                />
-                                              </Td>
-                                            </Tr>
-                                          ))}
-                                          <Tr>
-                                            <Td>
-                                              <Button
-                                                onClick={() => {
-                                                  talendData[talendData.length - 1].job_name
-                                                    ? setTalendData((oldTalendData) => {
-                                                        return [
-                                                          ...oldTalendData,
-                                                          { job_name: "", package_location: "" },
-                                                        ]
-                                                      })
-                                                    : toast.error(
-                                                        "Please fill out the prior Job Name"
-                                                      )
-                                                }}
-                                              >
-                                                Add
-                                              </Button>
-                                            </Td>
-                                            <Td></Td>
-                                          </Tr>
-                                        </Tbody>
-
-                                        <Tfoot>
-                                          <Tr>
-                                            <Th>Job Name</Th>
-                                            <Th>Package Location</Th>
-                                          </Tr>
-                                        </Tfoot>
-                                      </Table>
-                                    </TableContainer>
-                                  </CardBody>
-                                </Card>
-                              </VStack>
-                            </Box>
+                        <TableSheets
+                          key={item}
+                          response={result.release_data.items.filter(
+                            (responseItem) => responseItem.service === item
                           )}
-                        </VStack>
+                          constant={result.constants.filter(
+                            (responseItem) => responseItem.service === item
+                          )}
+                          onBranchTagChange={handleInheritBranchTagChange}
+                          serviceOptions={serviceOptions}
+                        />
                       )
                     )}
 
