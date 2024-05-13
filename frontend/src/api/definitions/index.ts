@@ -287,6 +287,9 @@ export type GetDeploymentSnapshotStructuredResponse = {
   error?: Error
   result?: GetDeploymentSnapshotResponse
 }
+export type DeleteSnapshotRequest = {
+  docker_tag: string
+}
 export type AxiosConfig = {
   paramsSerializer?: AxiosRequestConfig["paramsSerializer"]
 }
@@ -537,6 +540,14 @@ function makeRequests(axios: AxiosInstance, config?: AxiosConfig) {
         .request<GetDeploymentSnapshotStructuredResponse>({
           method: "get",
           url: `/api/releases/snapshots`,
+        })
+        .then((res) => res.data),
+    releasesApiDeleteSnapshot: (payload: DeleteSnapshotRequest) =>
+      axios
+        .request<AckStructuredResponse>({
+          method: "post",
+          url: `/api/releases/delete-snapshot`,
+          data: payload,
         })
         .then((res) => res.data),
   } as const
@@ -816,6 +827,17 @@ type MutationConfigs = {
     UseMutationOptions<Response<"releasesApiRevokeApproval">, unknown, unknown, unknown>,
     "onSuccess" | "onSettled" | "onError"
   >
+  useReleasesApiDeleteSnapshot?: (
+    queryClient: QueryClient
+  ) => Pick<
+    UseMutationOptions<
+      Response<"releasesApiDeleteSnapshot">,
+      unknown,
+      Parameters<Requests["releasesApiDeleteSnapshot"]>[0],
+      unknown
+    >,
+    "onSuccess" | "onSettled" | "onError"
+  >
 }
 function makeMutations(requests: Requests, config?: Config["mutations"]) {
   return {
@@ -1046,6 +1068,26 @@ function makeMutations(requests: Requests, config?: Config["mutations"]) {
       useRapiniMutation<Response<"releasesApiRevokeApproval">, unknown, unknown>(
         () => requests.releasesApiRevokeApproval(uuid, reason),
         config?.useReleasesApiRevokeApproval,
+        options
+      ),
+    useReleasesApiDeleteSnapshot: (
+      options?: Omit<
+        UseMutationOptions<
+          Response<"releasesApiDeleteSnapshot">,
+          unknown,
+          Parameters<Requests["releasesApiDeleteSnapshot"]>[0],
+          unknown
+        >,
+        "mutationFn"
+      >
+    ) =>
+      useRapiniMutation<
+        Response<"releasesApiDeleteSnapshot">,
+        unknown,
+        Parameters<Requests["releasesApiDeleteSnapshot"]>[0]
+      >(
+        (payload) => requests.releasesApiDeleteSnapshot(payload),
+        config?.useReleasesApiDeleteSnapshot,
         options
       ),
   } as const

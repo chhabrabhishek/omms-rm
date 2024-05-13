@@ -525,3 +525,19 @@ def deployment_snapshot(request):
         "ok": True,
         "result": {"snapshot_data": snapshot_response.json()["data"]},
     }
+
+
+class DeleteSnapshotRequest(Schema):
+    docker_tag: str
+
+
+@router.post("/delete-snapshot", response=AckResponse)
+def delete_snapshot(request, form: DeleteSnapshotRequest):
+    try:
+        requests.get(f"http://rn000133847:3000/delete?dockerTag={form.docker_tag}")
+    except Exception as e:
+        print(e)
+
+    return {
+        "ok": True,
+    }

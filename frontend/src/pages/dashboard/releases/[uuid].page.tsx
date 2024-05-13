@@ -387,7 +387,11 @@ export default function ManageReleasePage() {
             onOk={(response?: GetReleaseResponse) => (
               <If
                 value={response}
-                condition={(response) => (response?.release_data.items.length ?? 0) > 0}
+                condition={(response) =>
+                  ((response?.release_data.items.length ||
+                    response?.release_data.talend_items.length) ??
+                    0) > 0
+                }
                 then={(response) => (
                   <>
                     <HStack w="full" spacing="6" align="center" justify="space-evenly">

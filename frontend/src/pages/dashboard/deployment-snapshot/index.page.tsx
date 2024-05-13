@@ -1,13 +1,32 @@
 import { api } from "@/api"
-import { GetDeploymentSnapshotResponse, SimpleGetDeploymentSnapshotSchema } from "@/api/definitions"
+import {
+  GetDeploymentSnapshotResponse,
+  SimpleGetDeploymentSnapshotSchema,
+  SimpleRolesSchema,
+} from "@/api/definitions"
 import WithQuery from "@/components/indicators/WithQuery"
 import { Shell } from "@/components/layout/Shell"
 import If from "@/components/logic/If"
 import DataTable from "@/components/table/Table"
+import { useAppMutation } from "@/hooks/useAppMutation"
 import { useAppQuery } from "@/hooks/useAppQuery"
 import { Access } from "@/types/Page"
 import { reverse } from "@/utils/reverse"
-import { Box, Card, CardBody, Input, Text, VStack } from "@chakra-ui/react"
+import {
+  Box,
+  Card,
+  CardBody,
+  Icon,
+  IconButton,
+  Input,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
+  Text,
+  VStack,
+} from "@chakra-ui/react"
+import { IconMenu, IconTrash } from "@tabler/icons-react"
 import { ChangeEvent, useState } from "react"
 import { Planet } from "react-kawaii"
 
@@ -15,6 +34,12 @@ DeploymentSnapshotPage.access = Access.User
 export default function DeploymentSnapshotPage() {
   const [tempSnapshotData, setTempSnapshotData] = useState<SimpleGetDeploymentSnapshotSchema[]>([])
   const [snapshotData, setSnapshotData] = useState<SimpleGetDeploymentSnapshotSchema[]>([])
+
+  const deleteMutation = useAppMutation(api.mutations.useReleasesApiDeleteSnapshot, {
+    onOk() {
+      query.refetch()
+    },
+  })
 
   const query = useAppQuery(api.queries.useReleasesApiDeploymentSnapshot, {
     autoRefetch: false,
@@ -117,6 +142,39 @@ export default function DeploymentSnapshotPage() {
                       header: "Deployment Date",
                       accessorKey: "deployment_date",
                     },
+                    actions: JSON.parse(localStorage.getItem("$auth") ?? "").roles.find(
+                      (item: SimpleRolesSchema) => item.role === 4
+                    )
+                      ? {
+                          id: "actions",
+                          header: "Actions",
+                          cell: (cell) => (
+                            <Menu>
+                              <MenuButton
+                                as={IconButton}
+                                size="sm"
+                                aria-label="Options"
+                                icon={<Icon as={IconMenu} />}
+                                variant="outline"
+                                onClick={(e) => e.stopPropagation()}
+                              />
+                              <MenuList>
+                                <MenuItem
+                                  icon={<Icon as={IconTrash} />}
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    deleteMutation.mutate({
+                                      docker_tag: cell.row.original.docker_tag ?? "",
+                                    })
+                                  }}
+                                >
+                                  Delete {cell.row.original.docker_tag}
+                                </MenuItem>
+                              </MenuList>
+                            </Menu>
+                          ),
+                        }
+                      : { id: "actions" },
                   }}
                   pagination={{
                     size: 50,

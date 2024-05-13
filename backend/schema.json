@@ -680,6 +680,40 @@
           }
         ]
       }
+    },
+    "/api/releases/delete-snapshot": {
+      "post": {
+        "operationId": "releases_api_delete_snapshot",
+        "summary": "Delete Snapshot",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AckStructuredResponse"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteSnapshotRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "CommonBearerTokenAuth": []
+          }
+        ]
+      }
     }
   },
   "components": {
@@ -2017,6 +2051,19 @@
         },
         "required": [
           "ok"
+        ]
+      },
+      "DeleteSnapshotRequest": {
+        "title": "DeleteSnapshotRequest",
+        "type": "object",
+        "properties": {
+          "docker_tag": {
+            "title": "Docker Tag",
+            "type": "string"
+          }
+        },
+        "required": [
+          "docker_tag"
         ]
       }
     },
