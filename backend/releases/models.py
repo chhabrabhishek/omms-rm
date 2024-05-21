@@ -68,6 +68,10 @@ class TalendReleaseItem(AppModel):
 
     job_name = models.CharField(max_length=1024)
     package_location = models.CharField(max_length=5120)
+    feature_number = models.CharField(
+        max_length=2048, null=True, default=None, blank=True
+    )
+    special_notes = models.TextField(null=True, default=None, blank=True)
     release = models.ForeignKey(
         Release, on_delete=models.PROTECT, related_name="talend_items"
     )

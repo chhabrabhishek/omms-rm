@@ -83,7 +83,7 @@ export default function ManageReleasePage() {
   const [approvedBy, setApprovedBy] = useState<Array<number>>([])
   const [pendingBy, setPendingBy] = useState<Array<number>>([])
   const [talendData, setTalendData] = useState<Array<SimpleTalendReleaseItemModelSchema>>([
-    { job_name: "", package_location: "" },
+    { job_name: "", package_location: "", feature_number: "", special_notes: "" },
   ])
 
   const { isOpen, onOpen, onClose } = useDisclosure()
@@ -188,7 +188,7 @@ export default function ManageReleasePage() {
         setTalendData(
           (responseData.result as GetReleaseResponse).release_data.talend_items.length
             ? (responseData.result as GetReleaseResponse).release_data.talend_items
-            : [{ job_name: "", package_location: "" }]
+            : [{ job_name: "", package_location: "", feature_number: "", special_notes: "" }]
         )
       }
     },
@@ -632,6 +632,8 @@ export default function ManageReleasePage() {
                                     <Tr>
                                       <Th>Job Name</Th>
                                       <Th>Package Location</Th>
+                                      <Th>Feature Number</Th>
+                                      <Th>Special Notes</Th>
                                     </Tr>
                                   </Thead>
 
@@ -651,6 +653,8 @@ export default function ManageReleasePage() {
                                               const talendObj = {
                                                 job_name: e.target.value,
                                                 package_location: element.package_location,
+                                                feature_number: element.feature_number,
+                                                special_notes: element.special_notes,
                                               }
                                               copyArr[index] = talendObj
                                               setTalendData(copyArr)
@@ -670,6 +674,50 @@ export default function ManageReleasePage() {
                                               const talendObj = {
                                                 job_name: element.job_name,
                                                 package_location: e.target.value,
+                                                feature_number: element.feature_number,
+                                                special_notes: element.special_notes,
+                                              }
+                                              copyArr[index] = talendObj
+                                              setTalendData(copyArr)
+                                            }}
+                                          />
+                                        </Td>
+                                        <Td>
+                                          <Input
+                                            type="text"
+                                            variant="filled"
+                                            placeholder="Enter Feature Number"
+                                            defaultValue={item.feature_number ?? ""}
+                                            disabled={sheetsDisabled}
+                                            onChange={(e) => {
+                                              const copyArr = [...talendData]
+                                              const element = copyArr[index]
+                                              const talendObj = {
+                                                job_name: element.job_name,
+                                                package_location: element.package_location,
+                                                feature_number: e.target.value,
+                                                special_notes: element.special_notes,
+                                              }
+                                              copyArr[index] = talendObj
+                                              setTalendData(copyArr)
+                                            }}
+                                          />
+                                        </Td>
+                                        <Td>
+                                          <Input
+                                            type="text"
+                                            variant="filled"
+                                            placeholder="Enter Special Notes"
+                                            defaultValue={item.special_notes ?? ""}
+                                            disabled={sheetsDisabled}
+                                            onChange={(e) => {
+                                              const copyArr = [...talendData]
+                                              const element = copyArr[index]
+                                              const talendObj = {
+                                                job_name: element.job_name,
+                                                package_location: element.package_location,
+                                                feature_number: element.feature_number,
+                                                special_notes: e.target.value,
                                               }
                                               copyArr[index] = talendObj
                                               setTalendData(copyArr)
@@ -687,7 +735,12 @@ export default function ManageReleasePage() {
                                                 ? setTalendData((oldTalendData) => {
                                                     return [
                                                       ...oldTalendData,
-                                                      { job_name: "", package_location: "" },
+                                                      {
+                                                        job_name: "",
+                                                        package_location: "",
+                                                        feature_number: "",
+                                                        special_notes: "",
+                                                      },
                                                     ]
                                                   })
                                                 : toast.error("Please fill out the prior Job Name")
@@ -705,6 +758,8 @@ export default function ManageReleasePage() {
                                     <Tr>
                                       <Th>Job Name</Th>
                                       <Th>Package Location</Th>
+                                      <Th>Feature Number</Th>
+                                      <Th>Special Notes</Th>
                                     </Tr>
                                   </Tfoot>
                                 </Table>
@@ -961,7 +1016,7 @@ function TableSheets(props: {
                         <Td>
                           <Tooltip label={`https://github.com/${item.repo}`}>
                             <Text
-                              overflow="auto"
+                              whiteSpace="initial"
                               css={{
                                 "&::-webkit-scrollbar": {
                                   display: "none",

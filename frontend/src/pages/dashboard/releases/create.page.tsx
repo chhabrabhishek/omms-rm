@@ -90,7 +90,7 @@ export default function CreateReleasePage() {
   const [endWindowDT, setEndWindowDT] = useState<Date>(new Date())
   const [falseBranches, setFalseBranches] = useState<Array<string>>([])
   const [talendData, setTalendData] = useState<Array<SimpleTalendReleaseItemModelSchema>>([
-    { job_name: "", package_location: "" },
+    { job_name: "", package_location: "", feature_number: "", special_notes: "" },
   ])
 
   const query = useAppQuery(api.queries.useReleasesApiGetConstantAndUsers, {
@@ -167,7 +167,9 @@ export default function CreateReleasePage() {
       if (!selectedOptions.includes("oil-talend-api")) {
         setTalendData([])
       } else {
-        setTalendData([{ job_name: "", package_location: "" }])
+        setTalendData([
+          { job_name: "", package_location: "", feature_number: "", special_notes: "" },
+        ])
       }
       setSpin(false)
       setResponse(data.result?.constants ?? [])
@@ -611,6 +613,8 @@ export default function CreateReleasePage() {
                                     <Tr>
                                       <Th>Job Name</Th>
                                       <Th>Package Location</Th>
+                                      <Th>Feature Number</Th>
+                                      <Th>Special Notes</Th>
                                     </Tr>
                                   </Thead>
 
@@ -628,6 +632,8 @@ export default function CreateReleasePage() {
                                               copyArr.push({
                                                 job_name: e.target.value,
                                                 package_location: lastElement[0].package_location,
+                                                feature_number: lastElement[0].feature_number,
+                                                special_notes: lastElement[0].special_notes,
                                               })
                                               setTalendData(copyArr)
                                             }}
@@ -644,6 +650,44 @@ export default function CreateReleasePage() {
                                               copyArr.push({
                                                 job_name: lastElement[0].job_name,
                                                 package_location: e.target.value,
+                                                feature_number: lastElement[0].feature_number,
+                                                special_notes: lastElement[0].special_notes,
+                                              })
+                                              setTalendData(copyArr)
+                                            }}
+                                          />
+                                        </Td>
+                                        <Td>
+                                          <Input
+                                            type="text"
+                                            variant="filled"
+                                            placeholder="Enter Feature/Defect Number"
+                                            onChange={(e) => {
+                                              const copyArr = [...talendData]
+                                              const lastElement = copyArr.splice(-1)
+                                              copyArr.push({
+                                                job_name: lastElement[0].job_name,
+                                                package_location: lastElement[0].package_location,
+                                                feature_number: e.target.value,
+                                                special_notes: lastElement[0].special_notes,
+                                              })
+                                              setTalendData(copyArr)
+                                            }}
+                                          />
+                                        </Td>
+                                        <Td>
+                                          <Input
+                                            type="text"
+                                            variant="filled"
+                                            placeholder="Enter Special Notes"
+                                            onChange={(e) => {
+                                              const copyArr = [...talendData]
+                                              const lastElement = copyArr.splice(-1)
+                                              copyArr.push({
+                                                job_name: lastElement[0].job_name,
+                                                package_location: lastElement[0].package_location,
+                                                feature_number: lastElement[0].feature_number,
+                                                special_notes: e.target.value,
                                               })
                                               setTalendData(copyArr)
                                             }}
@@ -659,7 +703,12 @@ export default function CreateReleasePage() {
                                               ? setTalendData((oldTalendData) => {
                                                   return [
                                                     ...oldTalendData,
-                                                    { job_name: "", package_location: "" },
+                                                    {
+                                                      job_name: "",
+                                                      package_location: "",
+                                                      feature_number: "",
+                                                      special_notes: "",
+                                                    },
                                                   ]
                                                 })
                                               : toast.error("Please fill out the prior Job Name")
@@ -676,6 +725,8 @@ export default function CreateReleasePage() {
                                     <Tr>
                                       <Th>Job Name</Th>
                                       <Th>Package Location</Th>
+                                      <Th>Feature Number</Th>
+                                      <Th>Special Notes</Th>
                                     </Tr>
                                   </Tfoot>
                                 </Table>
@@ -861,6 +912,8 @@ export default function CreateReleasePage() {
                                     <Tr>
                                       <Th>Job Name</Th>
                                       <Th>Package Location</Th>
+                                      <Th>Feature Number</Th>
+                                      <Th>Special Notes</Th>
                                     </Tr>
                                   </Thead>
 
@@ -879,6 +932,8 @@ export default function CreateReleasePage() {
                                               const talendObj = {
                                                 job_name: e.target.value,
                                                 package_location: element.package_location,
+                                                feature_number: element.feature_number,
+                                                special_notes: element.special_notes,
                                               }
                                               copyArr[index] = talendObj
                                               setTalendData(copyArr)
@@ -897,6 +952,48 @@ export default function CreateReleasePage() {
                                               const talendObj = {
                                                 job_name: element.job_name,
                                                 package_location: e.target.value,
+                                                feature_number: element.feature_number,
+                                                special_notes: element.special_notes,
+                                              }
+                                              copyArr[index] = talendObj
+                                              setTalendData(copyArr)
+                                            }}
+                                          />
+                                        </Td>
+                                        <Td>
+                                          <Input
+                                            type="text"
+                                            variant="filled"
+                                            placeholder="Enter Feature/Defect Number"
+                                            defaultValue={item.feature_number ?? ""}
+                                            onChange={(e) => {
+                                              const copyArr = [...talendData]
+                                              const element = copyArr[index]
+                                              const talendObj = {
+                                                job_name: element.job_name,
+                                                package_location: element.package_location,
+                                                feature_number: e.target.value,
+                                                special_notes: element.special_notes,
+                                              }
+                                              copyArr[index] = talendObj
+                                              setTalendData(copyArr)
+                                            }}
+                                          />
+                                        </Td>
+                                        <Td>
+                                          <Input
+                                            type="text"
+                                            variant="filled"
+                                            placeholder="Enter Special Notes"
+                                            defaultValue={item.special_notes ?? ""}
+                                            onChange={(e) => {
+                                              const copyArr = [...talendData]
+                                              const element = copyArr[index]
+                                              const talendObj = {
+                                                job_name: element.job_name,
+                                                package_location: element.package_location,
+                                                feature_number: element.feature_number,
+                                                special_notes: e.target.value,
                                               }
                                               copyArr[index] = talendObj
                                               setTalendData(copyArr)
@@ -913,7 +1010,12 @@ export default function CreateReleasePage() {
                                               ? setTalendData((oldTalendData) => {
                                                   return [
                                                     ...oldTalendData,
-                                                    { job_name: "", package_location: "" },
+                                                    {
+                                                      job_name: "",
+                                                      package_location: "",
+                                                      feature_number: "",
+                                                      special_notes: "",
+                                                    },
                                                   ]
                                                 })
                                               : toast.error("Please fill out the prior Job Name")
@@ -930,6 +1032,8 @@ export default function CreateReleasePage() {
                                     <Tr>
                                       <Th>Job Name</Th>
                                       <Th>Package Location</Th>
+                                      <Th>Feature Number</Th>
+                                      <Th>Special Notes</Th>
                                     </Tr>
                                   </Tfoot>
                                 </Table>
@@ -1034,7 +1138,7 @@ function TableSheets(props: {
                           <Td>
                             <Tooltip label={`https://github.com/${item.repo}`}>
                               <Text
-                                overflow="auto"
+                                whiteSpace="initial"
                                 css={{
                                   "&::-webkit-scrollbar": {
                                     display: "none",
@@ -1185,7 +1289,7 @@ function TableSheets(props: {
                           <Td>
                             <Tooltip label={`https://github.com/${item.repo}`}>
                               <Text
-                                overflow="auto"
+                                whiteSpace="initial"
                                 css={{
                                   "&::-webkit-scrollbar": {
                                     display: "none",

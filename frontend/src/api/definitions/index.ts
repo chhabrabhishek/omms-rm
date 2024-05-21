@@ -190,6 +190,8 @@ export type ConstantUserStructuredResponse = {
 export type SimpleTalendReleaseItemModelSchema = {
   job_name: string
   package_location: string
+  feature_number?: string
+  special_notes?: string
 }
 export type SimpleReleaseModelSchema = {
   items: SimpleReleaseItemModelSchema[]

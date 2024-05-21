@@ -80,10 +80,7 @@ class SimpleReleaseItemModelSchema(ModelSchema):
 class SimpleTalendReleaseItemModelSchema(ModelSchema):
     class Config:
         model = TalendReleaseItem
-        include = (
-            "job_name",
-            "package_location",
-        )
+        include = ("job_name", "package_location", "feature_number", "special_notes")
 
 
 class SimpleAllConstantReleaseModelSchema(ModelSchema):
@@ -185,6 +182,8 @@ def create_release(request, form: CreateReleaseRequest):
                             TalendReleaseItem.objects.create(
                                 job_name=item.job_name,
                                 package_location=item.package_location,
+                                feature_number=item.feature_number,
+                                special_notes=item.special_notes,
                                 release=release,
                             )
                         for item in form.approvers:
@@ -319,6 +318,8 @@ def update_release(request, form: UpdateReleaseRequest):
                             release=release,
                             job_name=item.job_name,
                             package_location=item.package_location,
+                            feature_number=item.feature_number,
+                            special_notes=item.special_notes,
                         )
                     targets = Target.objects.filter(release=release)
                     targets.delete()

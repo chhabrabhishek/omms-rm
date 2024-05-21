@@ -1561,6 +1561,15 @@
             "title": "Package Location",
             "maxLength": 5120,
             "type": "string"
+          },
+          "feature_number": {
+            "title": "Feature Number",
+            "maxLength": 2048,
+            "type": "string"
+          },
+          "special_notes": {
+            "title": "Special Notes",
+            "type": "string"
           }
         },
         "required": [

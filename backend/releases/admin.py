@@ -48,6 +48,8 @@ class ReleaseItemAdmin(admin.ModelAdmin):
         "pk",
         "job_name",
         "package_location",
+        "feature_number",
+        "special_notes",
         "release",
     )
 
