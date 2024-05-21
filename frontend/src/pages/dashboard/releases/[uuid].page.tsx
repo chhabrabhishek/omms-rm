@@ -994,9 +994,7 @@ function TableSheets(props: {
                     <Th>Feature Number</Th>
                     <Th>Tags</Th>
                     <Th>Special Notes</Th>
-                    {JSON.parse(localStorage.getItem("$auth") ?? "").roles.find(
-                      (item: SimpleRolesSchema) => item.role === 4
-                    ) && <Th>DevOps Notes</Th>}
+                    <Th>DevOps Notes</Th>
                   </Tr>
                 </Thead>
 
@@ -1092,24 +1090,25 @@ function TableSheets(props: {
                             }
                           />
                         </Td>
-                        {JSON.parse(localStorage.getItem("$auth") ?? "").roles.find(
-                          (item: SimpleRolesSchema) => item.role === 4
-                        ) && (
-                          <Td>
-                            <Textarea
-                              defaultValue={item.devops_notes}
-                              onChange={(e) =>
-                                props.onBranchTagChange({
-                                  devops_notes: e.target.value,
-                                  service: item.service,
-                                  repo: item.repo,
-                                } as SimpleReleaseItemModelSchema)
-                              }
-                              placeholder="Notes"
-                              size="md"
-                            />
-                          </Td>
-                        )}
+                        <Td>
+                          <Textarea
+                            defaultValue={item.devops_notes}
+                            onChange={(e) =>
+                              props.onBranchTagChange({
+                                devops_notes: e.target.value,
+                                service: item.service,
+                                repo: item.repo,
+                              } as SimpleReleaseItemModelSchema)
+                            }
+                            placeholder="Notes"
+                            size="md"
+                            disabled={
+                              !JSON.parse(localStorage.getItem("$auth") ?? "").roles.find(
+                                (item: SimpleRolesSchema) => item.role === 4
+                              )
+                            }
+                          />
+                        </Td>
                       </Tr>
                     ))}
                 </Tbody>
@@ -1121,9 +1120,7 @@ function TableSheets(props: {
                     <Th>Feature Number</Th>
                     <Th>Tags</Th>
                     <Th>Special Notes</Th>
-                    {JSON.parse(localStorage.getItem("$auth") ?? "").roles.find(
-                      (item: SimpleRolesSchema) => item.role === 4
-                    ) && <Th>DevOps Notes</Th>}
+                    <Th>DevOps Notes</Th>
                   </Tr>
                 </Tfoot>
               </Table>
