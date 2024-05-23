@@ -390,7 +390,7 @@ export default function ManageReleasePage() {
                 condition={(response) =>
                   ((response?.release_data.items.length ||
                     response?.release_data.talend_items.length) ??
-                    0) > 0
+                    0) >= 0
                 }
                 then={(response) => (
                   <>
@@ -616,7 +616,13 @@ export default function ManageReleasePage() {
                         <VStack w="full" spacing="12">
                           <Card w="full">
                             <CardHeader>
-                              <Heading size="md">Talend</Heading>
+                              <Heading size="md">
+                                {response.release_data.targets.find(
+                                  (item) => item.target.toLowerCase() == "salesforce"
+                                )
+                                  ? "Salesforce"
+                                  : "Talend"}
+                              </Heading>
                             </CardHeader>
 
                             <CardBody>
@@ -626,12 +632,24 @@ export default function ManageReleasePage() {
                                   size="md"
                                   __css={{ "table-layout": "fixed", "width": "100%" }}
                                 >
-                                  <TableCaption>Talend</TableCaption>
+                                  <TableCaption>
+                                    {response.release_data.targets.find(
+                                      (item) => item.target.toLowerCase() == "salesforce"
+                                    )
+                                      ? "Salesforce"
+                                      : "Talend"}
+                                  </TableCaption>
 
                                   <Thead>
                                     <Tr>
                                       <Th>Job Name</Th>
-                                      <Th>Package Location</Th>
+                                      <Th>
+                                        {response.release_data.targets.find(
+                                          (item) => item.target.toLowerCase() == "salesforce"
+                                        )
+                                          ? "Repo URL Location"
+                                          : "Package Location"}
+                                      </Th>
                                       <Th>Feature Number</Th>
                                       <Th>Special Notes</Th>
                                     </Tr>
@@ -665,7 +683,13 @@ export default function ManageReleasePage() {
                                           <Input
                                             type="text"
                                             variant="filled"
-                                            placeholder="Enter Package Location"
+                                            placeholder={
+                                              response.release_data.targets.find(
+                                                (item) => item.target.toLowerCase() == "salesforce"
+                                              )
+                                                ? "Enter Repo URL Location"
+                                                : "Enter Package Location"
+                                            }
                                             defaultValue={item.package_location ?? ""}
                                             disabled={sheetsDisabled}
                                             onChange={(e) => {
@@ -750,6 +774,8 @@ export default function ManageReleasePage() {
                                           </Button>
                                         </Td>
                                         <Td></Td>
+                                        <Td></Td>
+                                        <Td></Td>
                                       </Tr>
                                     )}
                                   </Tbody>
@@ -757,7 +783,13 @@ export default function ManageReleasePage() {
                                   <Tfoot>
                                     <Tr>
                                       <Th>Job Name</Th>
-                                      <Th>Package Location</Th>
+                                      <Th>
+                                        {response.release_data.targets.find(
+                                          (item) => item.target.toLowerCase() == "salesforce"
+                                        )
+                                          ? "Repo URL Location"
+                                          : "Package Location"}
+                                      </Th>
                                       <Th>Feature Number</Th>
                                       <Th>Special Notes</Th>
                                     </Tr>

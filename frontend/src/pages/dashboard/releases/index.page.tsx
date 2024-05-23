@@ -112,6 +112,7 @@ export default function ReleasesPage() {
                           ))}
                         </>
                       ),
+                      accessorFn: (cell) => (cell.targets.length ? cell.targets[0].target : ""),
                     },
                     status: {
                       id: "status",
@@ -123,6 +124,10 @@ export default function ReleasesPage() {
                             : "Completed"}
                         </Tag>
                       ),
+                      accessorFn: (cell) =>
+                        cell.approvers.filter((item) => !item.approved).length
+                          ? "Draft"
+                          : "Completed",
                     },
                     deployment_status: {
                       id: "deployment_status",
@@ -136,6 +141,10 @@ export default function ReleasesPage() {
                           }
                         </Tag>
                       ),
+                      accessorFn: (cell) =>
+                        deploymentStatusOptions.find(
+                          (item) => item.value === cell.deployment_status
+                        )?.label,
                     },
                     release_window: {
                       id: "release_window",
@@ -155,6 +164,7 @@ export default function ReleasesPage() {
                           </Tag>
                         </HStack>
                       ),
+                      accessorFn: (cell) => Date.parse(cell.start_window ?? ""),
                     },
                     created_at: {
                       id: "created_at",

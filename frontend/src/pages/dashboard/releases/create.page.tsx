@@ -77,7 +77,7 @@ export default function CreateReleasePage() {
   })
 
   const { replace } = useRouter()
-  const [selectedOptions, setSelectedOptions] = useState<Array<string>>([])
+  const [selectedOptions, setSelectedOptions] = useState<Array<string>>(["oil-talend-api"])
   const [selectedApprovers, setSelectedApprovers] = useState<Array<number>>([])
   const [response, setResponse] = useState<Array<SimpleConstantSchema>>([])
   const [data, setData] = useState<Array<SimpleReleaseItemModelSchema>>()
@@ -101,7 +101,10 @@ export default function CreateReleasePage() {
         const tempConstants = [
           ...new Map(response.result?.constants.map((item) => [item["service"], item])).values(),
         ]
-        let tempServiceOptions = [{ label: "OIL-Talend-APIs", value: "oil-talend-api" }]
+        let tempServiceOptions = [
+          { label: "OIL-Talend-APIs", value: "oil-talend-api" },
+          { label: "Salesforce", value: "salesforce-api" },
+        ]
         tempServiceOptions = tempServiceOptions.concat(
           tempConstants.map((item) => ({ label: item.name, value: item.service }))
         )
@@ -136,7 +139,10 @@ export default function CreateReleasePage() {
             ])
           ).values(),
         ]
-        let tempServiceOptions = [{ label: "OIL-Talend-APIs", value: "oil-talend-api" }]
+        let tempServiceOptions = [
+          { label: "OIL-Talend-APIs", value: "oil-talend-api" },
+          { label: "Salesforce", value: "salesforce-api" },
+        ]
         tempServiceOptions = tempServiceOptions.concat(
           tempConstants.map((item) => ({ label: item.name, value: item.service }))
         )
@@ -164,7 +170,10 @@ export default function CreateReleasePage() {
 
   const mutation = useAppMutation(api.mutations.useReleasesApiPostConstant, {
     onOk(data) {
-      if (!selectedOptions.includes("oil-talend-api")) {
+      if (
+        !selectedOptions.includes("oil-talend-api") &&
+        !selectedOptions.includes("salesforce-api")
+      ) {
         setTalendData([])
       } else {
         setTalendData([
@@ -481,7 +490,7 @@ export default function CreateReleasePage() {
                     w="full"
                     spacing={["6", "6", "8"]}
                     onSubmit={form.handleSubmit((form) => {
-                      if (selectedApprovers.length) {
+                      if (selectedApprovers.length || selectedOptions.includes("salesforce-api")) {
                         createReleaseMutation.mutate({
                           release: {
                             name: form.name,
@@ -597,7 +606,11 @@ export default function CreateReleasePage() {
                         <VStack w="full" spacing="12">
                           <Card w="full">
                             <CardHeader>
-                              <Heading size="md">Talend</Heading>
+                              <Heading size="md">
+                                {selectedOptions.includes("salesforce-api")
+                                  ? "Salesforce"
+                                  : "Talend"}
+                              </Heading>
                             </CardHeader>
 
                             <CardBody>
@@ -607,12 +620,20 @@ export default function CreateReleasePage() {
                                   size="md"
                                   __css={{ "table-layout": "fixed", "width": "100%" }}
                                 >
-                                  <TableCaption>Talend</TableCaption>
+                                  <TableCaption>
+                                    {selectedOptions.includes("salesforce-api")
+                                      ? "Salesforce"
+                                      : "Talend"}
+                                  </TableCaption>
 
                                   <Thead>
                                     <Tr>
                                       <Th>Job Name</Th>
-                                      <Th>Package Location</Th>
+                                      <Th>
+                                        {selectedOptions.includes("salesforce-api")
+                                          ? "Repo URL Location"
+                                          : "Package Location"}
+                                      </Th>
                                       <Th>Feature Number</Th>
                                       <Th>Special Notes</Th>
                                     </Tr>
@@ -643,7 +664,11 @@ export default function CreateReleasePage() {
                                           <Input
                                             type="text"
                                             variant="filled"
-                                            placeholder="Enter Package Location"
+                                            placeholder={
+                                              selectedOptions.includes("salesforce-api")
+                                                ? "Enter Repo URL Location"
+                                                : "Enter Package Location"
+                                            }
                                             onChange={(e) => {
                                               const copyArr = [...talendData]
                                               const lastElement = copyArr.splice(-1)
@@ -718,13 +743,19 @@ export default function CreateReleasePage() {
                                         </Button>
                                       </Td>
                                       <Td></Td>
+                                      <Td></Td>
+                                      <Td></Td>
                                     </Tr>
                                   </Tbody>
 
                                   <Tfoot>
                                     <Tr>
                                       <Th>Job Name</Th>
-                                      <Th>Package Location</Th>
+                                      <Th>
+                                        {selectedOptions.includes("salesforce-api")
+                                          ? "Repo URL Location"
+                                          : "Package Location"}
+                                      </Th>
                                       <Th>Feature Number</Th>
                                       <Th>Special Notes</Th>
                                     </Tr>
@@ -772,7 +803,10 @@ export default function CreateReleasePage() {
           onOk={(result?: GetReleaseResponse) => (
             <If
               value={result}
-              condition={(result) => (result?.release_data.items.length ?? 0) > 0}
+              condition={(result) =>
+                ((result?.release_data.items.length || result?.release_data.talend_items.length) ??
+                  0) > 0
+              }
               then={(result) => (
                 <>
                   <VStack
@@ -780,7 +814,12 @@ export default function CreateReleasePage() {
                     w="full"
                     spacing={["6", "6", "8"]}
                     onSubmit={form.handleSubmit((form) => {
-                      if (selectedApprovers.length) {
+                      if (
+                        selectedApprovers.length ||
+                        result.release_data.targets.find(
+                          (item) => item.target.toLowerCase() == "salesforce"
+                        )
+                      ) {
                         createReleaseMutation.mutate({
                           release: {
                             name: form.name,
@@ -856,6 +895,11 @@ export default function CreateReleasePage() {
                           controller={{
                             name: "targetEnvs",
                             control: form.control,
+                            defaultValue: result.release_data.targets.find(
+                              (item) => item.target.toLowerCase() == "salesforce"
+                            )
+                              ? ["Salesforce"]
+                              : [],
                           }}
                           variant="filled"
                           placeholder="Enter all the target envs"
@@ -896,7 +940,13 @@ export default function CreateReleasePage() {
                         <VStack w="full" spacing="12">
                           <Card w="full">
                             <CardHeader>
-                              <Heading size="md">Talend</Heading>
+                              <Heading size="md">
+                                {result.release_data.targets.find(
+                                  (item) => item.target.toLowerCase() == "salesforce"
+                                )
+                                  ? "Salesforce"
+                                  : "Talend"}
+                              </Heading>
                             </CardHeader>
 
                             <CardBody>
@@ -906,12 +956,24 @@ export default function CreateReleasePage() {
                                   size="md"
                                   __css={{ "table-layout": "fixed", "width": "100%" }}
                                 >
-                                  <TableCaption>Talend</TableCaption>
+                                  <TableCaption>
+                                    {result.release_data.targets.find(
+                                      (item) => item.target.toLowerCase() == "salesforce"
+                                    )
+                                      ? "Salesforce"
+                                      : "Talend"}
+                                  </TableCaption>
 
                                   <Thead>
                                     <Tr>
                                       <Th>Job Name</Th>
-                                      <Th>Package Location</Th>
+                                      <Th>
+                                        {result.release_data.targets.find(
+                                          (item) => item.target.toLowerCase() == "salesforce"
+                                        )
+                                          ? "Repo URL Location"
+                                          : "Package Location"}
+                                      </Th>
                                       <Th>Feature Number</Th>
                                       <Th>Special Notes</Th>
                                     </Tr>
@@ -944,7 +1006,13 @@ export default function CreateReleasePage() {
                                           <Input
                                             type="text"
                                             variant="filled"
-                                            placeholder="Enter Package Location"
+                                            placeholder={
+                                              result.release_data.targets.find(
+                                                (item) => item.target.toLowerCase() == "salesforce"
+                                              )
+                                                ? "Enter Repo URL Location"
+                                                : "Enter Package Location"
+                                            }
                                             defaultValue={item.package_location ?? ""}
                                             onChange={(e) => {
                                               const copyArr = [...talendData]
@@ -1025,13 +1093,21 @@ export default function CreateReleasePage() {
                                         </Button>
                                       </Td>
                                       <Td></Td>
+                                      <Td></Td>
+                                      <Td></Td>
                                     </Tr>
                                   </Tbody>
 
                                   <Tfoot>
                                     <Tr>
                                       <Th>Job Name</Th>
-                                      <Th>Package Location</Th>
+                                      <Th>
+                                        {result.release_data.targets.find(
+                                          (item) => item.target.toLowerCase() == "salesforce"
+                                        )
+                                          ? "Repo URL Location"
+                                          : "Package Location"}
+                                      </Th>
                                       <Th>Feature Number</Th>
                                       <Th>Special Notes</Th>
                                     </Tr>
