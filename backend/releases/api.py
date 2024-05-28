@@ -209,11 +209,21 @@ def create_release(request, form: CreateReleaseRequest):
                             subject,
                             text_content,
                             from_email_string,
-                            [
-                                "OMMSDevOpsTeam_DL@ds.uhc.com",
-                                "OMMSDevLeads_DL@ds.uhc.com",
-                                "OMMS_RM@ds.uhc.com",
-                            ],
+                            (
+                                [
+                                    "gopal_shakti@optum.com",
+                                    "mubaid@optum.com",
+                                    "shubham.singh@optum.com",
+                                ]
+                                if [
+                                    x for x in form.targets if x.lower() == "salesforce"
+                                ]
+                                else [
+                                    "OMMSDevOpsTeam_DL@ds.uhc.com",
+                                    "OMMSDevLeads_DL@ds.uhc.com",
+                                    "OMMS_RM@ds.uhc.com",
+                                ]
+                            ),
                         )
                         msg.attach_alternative(html_content, "text/html")
                         msg.send()
