@@ -678,7 +678,10 @@ def get_deployment_status(request, uuid: uuid.UUID):
                     break
 
         if item.job_status != "FAILED":
-            item.job_logs = f"The status of the job is {item.job_status}. Please go to Jenkins for further information. CURRENT_STAGE={response.json()['stages'][-1]['name']}"
+            if response.json()["stages"]:
+                item.job_logs = f"The status of the job is {item.job_status}. Please go to Jenkins for further information. CURRENT_STAGE={response.json()['stages'][-1]['name']}"
+            else:
+                item.job_logs = f"The status of the job is {item.job_status}. Please go to Jenkins for further information. CURRENT_STAGE=Jenkins"
 
         item.save()
     return {"ok": True}
