@@ -590,7 +590,7 @@ def deploy_release(request, form: SimpleDeployModelSchema):
                     elif item.platform == "onprem":
                         jenkins_url = f"{JENKINS_URL}PEP-MT/job/{item.repo.split('/')[1]}/job/{urllib.parse.quote_plus(item.release_branch)}/buildWithParameters?releaseenv={item.azure_env}"
                     else:
-                        jenkins_url = f"{JENKINS_URL}OIL/job/{item.repo.split('/')[1]}/job/{urllib.parse.quote_plus(item.release_branch)}/buildWithParameters?releaseenv={item.azure_env}"
+                        jenkins_url = f"{JENKINS_URL}OIL/job/{item.repo.split('/')[1]}/job/{urllib.parse.quote_plus(item.release_branch)}/buildWithParameters?environment={item.azure_env}&tenant={item.azure_tenant}"
 
                     r = requests.post(
                         jenkins_url,
