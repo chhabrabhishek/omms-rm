@@ -1557,7 +1557,9 @@ function TableSheets(props: {
                 }
                 children={
                   currentJobLogs.logs
-                    ? currentJobLogs.logs.split("CURRENT_STAGE=")[0]
+                    ? currentJobLogs.status == "FAILED"
+                      ? currentJobLogs.logs.split("CURRENT_STAGE=")[0]
+                      : `The status of the job is ${currentJobLogs.status}. Please go to Jenkins for further information.`
                     : "The status of the job is Unknown. Please go to Jenkins for further information."
                 }
               />
