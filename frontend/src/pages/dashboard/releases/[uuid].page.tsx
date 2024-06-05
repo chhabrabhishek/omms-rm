@@ -1450,15 +1450,15 @@ function TableSheets(props: {
                                       if (item.platform == "azure") {
                                         jenkinsUrl = `https://jenkins-omms-sgs.optum.com/view/GitHub_Organizations/job/PEP-Azure/job/${
                                           item.repo.split("/")[1]
-                                        }/job/${item.release_branch}`
+                                        }/job/${encodeURIComponent(item.release_branch ?? "")}`
                                       } else if (item.platform == "onprem") {
                                         jenkinsUrl = `https://jenkins-omms-sgs.optum.com/view/GitHub_Organizations/job/PEP-MT/job/${
                                           item.repo.split("/")[1]
-                                        }/job/${item.release_branch}`
+                                        }/job/${encodeURIComponent(item.release_branch ?? "")}`
                                       } else {
                                         jenkinsUrl = `https://jenkins-omms-sgs.optum.com/view/GitHub_Organizations/job/OIL/job/${
                                           item.repo.split("/")[1]
-                                        }/job/${item.release_branch}`
+                                        }/job/${encodeURIComponent(item.release_branch ?? "")}`
                                       }
                                     } else {
                                       if (
@@ -1467,17 +1467,17 @@ function TableSheets(props: {
                                       ) {
                                         jenkinsUrl = `https://jenkins-omms-sgs.optum.com/view/GitHub_Organizations/job/PEP-Azure/job/${
                                           item.repo.split("/")[1]
-                                        }/job/${item.release_branch}`
+                                        }/job/${encodeURIComponent(item.release_branch ?? "")}`
                                       } else if (
                                         platform[`${item.repo}${item.service}`] == "onprem"
                                       ) {
                                         jenkinsUrl = `https://jenkins-omms-sgs.optum.com/view/GitHub_Organizations/job/PEP-MT/job/${
                                           item.repo.split("/")[1]
-                                        }/job/${item.release_branch}`
+                                        }/job/${encodeURIComponent(item.release_branch ?? "")}`
                                       } else {
                                         jenkinsUrl = `https://jenkins-omms-sgs.optum.com/view/GitHub_Organizations/job/OIL/job/${
                                           item.repo.split("/")[1]
-                                        }/job/${item.release_branch}`
+                                        }/job/${encodeURIComponent(item.release_branch ?? "")}`
                                       }
                                     }
                                     setCurrentJobLogs({

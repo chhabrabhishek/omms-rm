@@ -1,6 +1,7 @@
 import logging
 import re
 import requests
+import urllib.parse
 import uuid
 from base64 import b64encode
 from typing import Optional
@@ -585,11 +586,11 @@ def deploy_release(request, form: SimpleDeployModelSchema):
 
                     headers = {"Authorization": basic_auth()}
                     if item.platform == "azure":
-                        jenkins_url = f"{JENKINS_URL}PEP-Azure/job/{item.repo.split('/')[1]}/job/{item.release_branch}/buildWithParameters?azure_env={item.azure_env}&azure_tenant={item.azure_tenant}"
+                        jenkins_url = f"{JENKINS_URL}PEP-Azure/job/{item.repo.split('/')[1]}/job/{urllib.parse.quote_plus(item.release_branch)}/buildWithParameters?azure_env={item.azure_env}&azure_tenant={item.azure_tenant}"
                     elif item.platform == "onprem":
-                        jenkins_url = f"{JENKINS_URL}PEP-MT/job/{item.repo.split('/')[1]}/job/{item.release_branch}/buildWithParameters?releaseenv={item.azure_env}"
+                        jenkins_url = f"{JENKINS_URL}PEP-MT/job/{item.repo.split('/')[1]}/job/{urllib.parse.quote_plus(item.release_branch)}/buildWithParameters?releaseenv={item.azure_env}"
                     else:
-                        jenkins_url = f"{JENKINS_URL}OIL/job/{item.repo.split('/')[1]}/job/{item.release_branch}/buildWithParameters?releaseenv={item.azure_env}"
+                        jenkins_url = f"{JENKINS_URL}OIL/job/{item.repo.split('/')[1]}/job/{urllib.parse.quote_plus(item.release_branch)}/buildWithParameters?releaseenv={item.azure_env}"
 
                     r = requests.post(
                         jenkins_url,
@@ -620,11 +621,11 @@ def get_deployment_status(request, uuid: uuid.UUID):
 
     for item in list(release.items.all()):
         if item.platform == "azure":
-            jenkins_url = f"{JENKINS_URL}PEP-Azure/job/{item.repo.split('/')[1]}/job/{item.release_branch}/api/json?tree=builds[number,timestamp,queueId]&depth=2"
+            jenkins_url = f"{JENKINS_URL}PEP-Azure/job/{item.repo.split('/')[1]}/job/{urllib.parse.quote_plus(item.release_branch)}/api/json?tree=builds[number,timestamp,queueId]&depth=2"
         elif item.platform == "onprem":
-            jenkins_url = f"{JENKINS_URL}PEP-MT/job/{item.repo.split('/')[1]}/job/{item.release_branch}/api/json?tree=builds[number,timestamp,queueId]&depth=2"
+            jenkins_url = f"{JENKINS_URL}PEP-MT/job/{item.repo.split('/')[1]}/job/{urllib.parse.quote_plus(item.release_branch)}/api/json?tree=builds[number,timestamp,queueId]&depth=2"
         else:
-            jenkins_url = f"{JENKINS_URL}OIL/job/{item.repo.split('/')[1]}/job/{item.release_branch}/api/json?tree=builds[number,timestamp,queueId]&depth=2"
+            jenkins_url = f"{JENKINS_URL}OIL/job/{item.repo.split('/')[1]}/job/{urllib.parse.quote_plus(item.release_branch)}/api/json?tree=builds[number,timestamp,queueId]&depth=2"
 
         try:
             r = requests.get(
@@ -650,11 +651,11 @@ def get_deployment_status(request, uuid: uuid.UUID):
         build_number = builds_list[0]["number"]
 
         if item.platform == "azure":
-            jenkins_url = f"{JENKINS_URL}PEP-Azure/job/{item.repo.split('/')[1]}/job/{item.release_branch}/{build_number}/wfapi/describe"
+            jenkins_url = f"{JENKINS_URL}PEP-Azure/job/{item.repo.split('/')[1]}/job/{urllib.parse.quote_plus(item.release_branch)}/{build_number}/wfapi/describe"
         elif item.platform == "onprem":
-            jenkins_url = f"{JENKINS_URL}PEP-MT/job/{item.repo.split('/')[1]}/job/{item.release_branch}/{build_number}/wfapi/describe"
+            jenkins_url = f"{JENKINS_URL}PEP-MT/job/{item.repo.split('/')[1]}/job/{urllib.parse.quote_plus(item.release_branch)}/{build_number}/wfapi/describe"
         else:
-            jenkins_url = f"{JENKINS_URL}OIL/job/{item.repo.split('/')[1]}/job/{item.release_branch}/{build_number}/wfapi/describe"
+            jenkins_url = f"{JENKINS_URL}OIL/job/{item.repo.split('/')[1]}/job/{urllib.parse.quote_plus(item.release_branch)}/{build_number}/wfapi/describe"
 
         try:
             response = requests.get(
