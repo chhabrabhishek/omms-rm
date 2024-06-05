@@ -1,6 +1,8 @@
 import logging
+import re
 import requests
 import uuid
+from base64 import b64encode
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
@@ -28,8 +30,12 @@ logger = logging.getLogger("django.server")
 
 headers = {
     "user-agent": "release-api",
-    "Authorization": "Bearer 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",
+    "Authorization": "Bearer token",
 }
+
+JENKINS_URL = (
+    "https://jenkins-omms-sgs.optum.com/view/GitHub_Organizations/job/"
+)
 
 
 class SimpleConstantSchema(ModelSchema):
@@ -74,6 +80,11 @@ class SimpleReleaseItemModelSchema(ModelSchema):
             "tag",
             "special_notes",
             "devops_notes",
+            "platform",
+            "azure_env",
+            "azure_tenant",
+            "job_status",
+            "job_logs"
         )
 
 
@@ -381,6 +392,7 @@ class SimpleAllReleaseModelSchema(ModelSchema):
     approvers: list[SimpleApproverModelSchema]
     created_by: SimpleUserSchema
     updated_by: SimpleUserSchema
+    deployed_by: SimpleUserSchema | None
     targets: list[SimpleTargetModelSchema]
     deployment_status: int
 
@@ -393,6 +405,7 @@ class SimpleAllReleaseModelSchema(ModelSchema):
             "updated_at",
             "created_by",
             "updated_by",
+            "deployed_by",
             "start_window",
             "end_window",
             "deployment_status",
@@ -430,6 +443,7 @@ class SimpleGetReleaseModelSchema(ModelSchema):
     approvers: list[SimpleApproverModelSchema]
     targets: list[SimpleTargetModelSchema]
     deployment_status: int
+    deployed_by: SimpleUserSchema | None
 
     class Config:
         model = Release
@@ -438,6 +452,7 @@ class SimpleGetReleaseModelSchema(ModelSchema):
             "start_window",
             "end_window",
             "deployment_comment",
+            "deployed_by",
         )
 
 
@@ -484,7 +499,6 @@ def approve_release(request, uuid: uuid.UUID):
 
 @router.post("/deleteReleaseItems", response=AckResponse)
 def delete_pending_release_items(request, uuid: uuid.UUID):
-    user = request.auth
     release = Release.objects.get(uuid=uuid)
     release_items = ReleaseItem.objects.filter(release=release)
     for item in release_items:
@@ -508,6 +522,154 @@ def revoke_approval(request, uuid: uuid.UUID, reason: str):
 
     return {"ok": True}
 
+
+class SimpleDeployReleaseItemModelSchema(ModelSchema):
+    repo: str
+
+    class Config:
+        model = ReleaseItem
+        include = ("repo", "service", "release_branch", "platform", "azure_env", "azure_tenant")
+
+
+class SimpleDeployModelSchema(ModelSchema):
+    items: list[SimpleDeployReleaseItemModelSchema]
+    uuid: uuid.UUID
+
+
+@router.post("/deploy", response=AckResponse)
+def deploy_release(request, form: SimpleDeployModelSchema):
+    user = request.auth
+    release = Release.objects.get(uuid=form.uuid)
+    jenkins_url = None
+    for approver in list(release.approvers.all()):
+        if not approver.approved:
+            return {
+                "ok": False,
+                "error": {
+                    "reason": "release_not_approved",
+                },
+            }
+    if release.deployed_by:
+        return {
+                "ok": False,
+                "error": {
+                    "reason": "deployment_already_started",
+                },
+            }
+    if Roles.Role.DevOps in [
+        role.role for role in list(user.roles.all())
+    ]:
+        with transaction.atomic():
+            release.deployed_by = user
+            release.deployment_status = 4
+            release.save()
+            for item in form.items:
+                release_item = ReleaseItem.objects.get(
+                    release=release, repo=item.repo, service=item.service
+                )
+                release_item.platform = item.platform
+                release_item.azure_env = item.azure_env
+                release_item.azure_tenant = item.azure_tenant
+                
+                try:
+                    def basic_auth():
+                        token = b64encode(
+                            "achhabr9:token".encode("utf-8")
+                        ).decode("ascii")
+                        return f"Basic {token}"
+
+                    headers = {"Authorization": basic_auth()}
+                    if item.platform == "azure":
+                        jenkins_url = f"{JENKINS_URL}PEP-Azure/job/{item.repo.split("/")[1]}/job/{item.release_branch}/buildWithParameters?azure_env={item.azure_env}&azure_tenant={item.azure_tenant}"
+                    elif item.platform == "onprem":
+                        jenkins_url = f"{JENKINS_URL}PEP-MT/job/{item.repo.split("/")[1]}/job/{item.release_branch}/buildWithParameters?releaseenv={item.azure_env}"
+                    else:
+                        jenkins_url = f"{JENKINS_URL}OIL/job/{item.repo.split("/")[1]}/job/{item.release_branch}/buildWithParameters?releaseenv={item.azure_env}"
+
+                    r = requests.post(
+                        jenkins_url,
+                        headers=headers,
+                        verify=False,
+                    )
+                    queue_id = re.match(r"http.+(queue.+)\/", r.headers['Location']).group(1)
+                    release_item.queue_id = str(queue_id).split("/")[-1]
+                    release_item.job_status = "Started"
+                except Exception as e:
+                    print(e)
+                release_item.save()
+            return {"ok": True}
+    return {
+        "ok": False,
+        "error": {
+            "reason": "devops_role_not_found",
+        },
+    }
+
+
+@router.get("/jobstatus", response=AckResponse)
+def get_deployment_status(request, uuid: uuid.UUID):
+    release = Release.objects.get(uuid=uuid)
+    jenkins_url = None
+
+    for item in list(release.items.all()):
+        if item.platform == "azure":
+            jenkins_url = f"{JENKINS_URL}PEP-Azure/job/{item.repo.split("/")[1]}/job/{item.release_branch}/api/json?tree=builds[number,timestamp,queueId]&depth=2"
+        elif item.platform == "onprem":
+            jenkins_url = f"{JENKINS_URL}PEP-MT/job/{item.repo.split("/")[1]}/job/{item.release_branch}/api/json?tree=builds[number,timestamp,queueId]&depth=2"
+        else:
+            jenkins_url = f"{JENKINS_URL}OIL/job/{item.repo.split("/")[1]}/job/{item.release_branch}/api/json?tree=builds[number,timestamp,queueId]&depth=2"
+
+        try: 
+            r = requests.get(
+                jenkins_url,
+                headers=headers,
+                verify=False,
+            )
+        except Exception as e:
+            return {"ok": True}
+
+        if r.status_code == 404:
+            return {"ok": True}
+
+        builds_list = list(filter(lambda build: str(build["queueId"]) == item.queue_id, r.json()["builds"]))
+
+        if not builds_list:
+            return {"ok": True}
+
+        build_number = builds_list[0]["number"]
+
+        if item.platform == "azure":
+            jenkins_url = f"{JENKINS_URL}PEP-Azure/job/{item.repo.split("/")[1]}/job/{item.release_branch}/{build_number}/wfapi/describe"
+        elif item.platform == "onprem":
+            jenkins_url = f"{JENKINS_URL}PEP-MT/job/{item.repo.split("/")[1]}/job/{item.release_branch}/{build_number}/wfapi/describe"
+        else:
+            jenkins_url = f"{JENKINS_URL}OIL/job/{item.repo.split("/")[1]}/job/{item.release_branch}/{build_number}/wfapi/describe"
+
+        try:
+            response = requests.get(
+                jenkins_url,
+                headers=headers,
+                verify=False,
+            )
+        except Exception as e:
+            return {"ok": True}
+
+        if response.status_code == 404:
+            return {"ok": True}
+        
+        item.job_status = response.json()["status"]
+
+        if item.job_status == "FAILED":
+            for stage in response.json()["stages"]:
+                if stage["status"] == "FAILED":
+                    item.job_logs = f"{stage["error"]["message"]}. Please go to Jenkins for further information. CURRENT_STAGE={stage["name"]}"
+                    break
+        
+        if item.job_status != "FAILED":
+            item.job_logs = f"The status of the job is {item.job_status}. Please go to Jenkins for further information. CURRENT_STAGE={response.json()["stages"][-1]["name"]}"
+
+        item.save()
+    return {"ok": True}
 
 class SimpleGetDeploymentSnapshotSchema(Schema):
     azure_repo: str

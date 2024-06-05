@@ -657,6 +657,75 @@
         ]
       }
     },
+    "/api/releases/deploy": {
+      "post": {
+        "operationId": "releases_api_deploy_release",
+        "summary": "Deploy Release",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AckStructuredResponse"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SimpleDeployModelSchema"
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "CommonBearerTokenAuth": []
+          }
+        ]
+      }
+    },
+    "/api/releases/jobstatus": {
+      "get": {
+        "operationId": "releases_api_get_deployment_status",
+        "summary": "Get Deployment Status",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "uuid",
+            "schema": {
+              "title": "Uuid",
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AckStructuredResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "CommonBearerTokenAuth": []
+          }
+        ]
+      }
+    },
     "/api/releases/snapshots": {
       "get": {
         "operationId": "releases_api_deployment_snapshot",
@@ -1463,6 +1532,30 @@
           "devops_notes": {
             "title": "Devops Notes",
             "type": "string"
+          },
+          "platform": {
+            "title": "Platform",
+            "maxLength": 100,
+            "type": "string"
+          },
+          "azure_env": {
+            "title": "Azure Env",
+            "maxLength": 100,
+            "type": "string"
+          },
+          "azure_tenant": {
+            "title": "Azure Tenant",
+            "maxLength": 100,
+            "type": "string"
+          },
+          "job_status": {
+            "title": "Job Status",
+            "maxLength": 100,
+            "type": "string"
+          },
+          "job_logs": {
+            "title": "Job Logs",
+            "type": "string"
           }
         },
         "required": [
@@ -1783,6 +1876,9 @@
           "updated_by": {
             "$ref": "#/components/schemas/SimpleUserSchema"
           },
+          "deployed_by": {
+            "$ref": "#/components/schemas/SimpleUserSchema"
+          },
           "targets": {
             "title": "Targets",
             "type": "array",
@@ -1911,6 +2007,9 @@
             "title": "Deployment Status",
             "type": "integer"
           },
+          "deployed_by": {
+            "$ref": "#/components/schemas/SimpleUserSchema"
+          },
           "name": {
             "title": "Name",
             "maxLength": 1024,
@@ -1977,6 +2076,67 @@
         },
         "required": [
           "ok"
+        ]
+      },
+      "SimpleDeployReleaseItemModelSchema": {
+        "title": "SimpleDeployReleaseItemModelSchema",
+        "type": "object",
+        "properties": {
+          "repo": {
+            "title": "Repo",
+            "type": "string"
+          },
+          "service": {
+            "title": "Service",
+            "maxLength": 1024,
+            "type": "string"
+          },
+          "release_branch": {
+            "title": "Release Branch",
+            "maxLength": 1024,
+            "type": "string"
+          },
+          "platform": {
+            "title": "Platform",
+            "maxLength": 100,
+            "type": "string"
+          },
+          "azure_env": {
+            "title": "Azure Env",
+            "maxLength": 100,
+            "type": "string"
+          },
+          "azure_tenant": {
+            "title": "Azure Tenant",
+            "maxLength": 100,
+            "type": "string"
+          }
+        },
+        "required": [
+          "repo",
+          "service"
+        ]
+      },
+      "SimpleDeployModelSchema": {
+        "title": "SimpleDeployModelSchema",
+        "type": "object",
+        "properties": {
+          "items": {
+            "title": "Items",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SimpleDeployReleaseItemModelSchema"
+            }
+          },
+          "uuid": {
+            "title": "Uuid",
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "items",
+          "uuid"
         ]
       },
       "SimpleGetDeploymentSnapshotSchema": {

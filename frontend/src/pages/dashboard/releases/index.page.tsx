@@ -146,6 +146,12 @@ export default function ReleasesPage() {
                           (item) => item.value === cell.deployment_status
                         )?.label,
                     },
+                    deployed_by: {
+                      id: "deployed_by",
+                      header: "Deployed By",
+                      accessorFn: (cell) =>
+                        cell.deployed_by? `${cell.deployed_by.first_name} ${cell.deployed_by.last_name}`: "Unknown",
+                    },
                     release_window: {
                       id: "release_window",
                       header: "Release Window",
@@ -165,16 +171,6 @@ export default function ReleasesPage() {
                         </HStack>
                       ),
                       accessorFn: (cell) => Date.parse(cell.start_window ?? ""),
-                    },
-                    created_at: {
-                      id: "created_at",
-                      header: "Created At",
-                      accessorFn: (cell) => toDateTimeString(fromDjangoISO(cell.created_at)),
-                    },
-                    updated_at: {
-                      id: "updated_at",
-                      header: "Updated At",
-                      accessorFn: (cell) => toDateTimeString(fromDjangoISO(cell.updated_at)),
                     },
                     created_by: {
                       id: "created_by",

@@ -22,6 +22,7 @@ class ReleaseAdmin(admin.ModelAdmin):
         "end_window",
         "deployment_status",
         "deployment_comment",
+        "deployed_by",
     )
 
 
@@ -36,6 +37,12 @@ class ReleaseItemAdmin(admin.ModelAdmin):
         "tag",
         "special_notes",
         "devops_notes",
+        "platform",
+        "azure_env",
+        "azure_tenant",
+        "queue_id",
+        "job_status",
+        "job_logs",
         "created_at",
         "updated_at",
         "release",

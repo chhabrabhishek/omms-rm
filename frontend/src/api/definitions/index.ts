@@ -171,6 +171,11 @@ export type SimpleReleaseItemModelSchema = {
   tag?: string
   special_notes?: string
   devops_notes?: string
+  platform?: string
+  azure_env?: string
+  azure_tenant?: string
+  job_status?: string
+  job_logs?: string
 }
 export type SimpleAllConstantReleaseModelSchema = {
   items: SimpleReleaseItemModelSchema[]
@@ -233,6 +238,7 @@ export type SimpleAllReleaseModelSchema = {
   approvers: SimpleApproverModelSchema[]
   created_by: SimpleUserSchema
   updated_by: SimpleUserSchema
+  deployed_by?: SimpleUserSchema
   targets: SimpleTargetModelSchema[]
   deployment_status: number
   created_at: string
@@ -257,6 +263,7 @@ export type SimpleGetReleaseModelSchema = {
   approvers: SimpleApproverModelSchema[]
   targets: SimpleTargetModelSchema[]
   deployment_status: number
+  deployed_by?: SimpleUserSchema
   name: string
   start_window?: string
   end_window?: string
@@ -270,6 +277,18 @@ export type GetReleaseStructuredResponse = {
   ok: boolean
   error?: Error
   result?: GetReleaseResponse
+}
+export type SimpleDeployReleaseItemModelSchema = {
+  repo: string
+  service: string
+  release_branch?: string
+  platform?: string
+  azure_env?: string
+  azure_tenant?: string
+}
+export type SimpleDeployModelSchema = {
+  items: SimpleDeployReleaseItemModelSchema[]
+  uuid: string
 }
 export type SimpleGetDeploymentSnapshotSchema = {
   azure_repo: string
@@ -359,6 +378,8 @@ export const queryKeys = {
   releasesApiGetConstantAndUsers: () => ["releasesApiGetConstantAndUsers"] as const,
   releasesApiGetAllReleases: () => ["releasesApiGetAllReleases"] as const,
   releasesApiGetReleaseWithUuid: (uuid: string) => ["releasesApiGetReleaseWithUuid", uuid] as const,
+  releasesApiGetDeploymentStatus: (uuid: string) =>
+    ["releasesApiGetDeploymentStatus", uuid] as const,
   releasesApiDeploymentSnapshot: () => ["releasesApiDeploymentSnapshot"] as const,
 } as const
 export type QueryKeys = typeof queryKeys
@@ -537,6 +558,25 @@ function makeRequests(axios: AxiosInstance, config?: AxiosConfig) {
           paramsSerializer: config?.paramsSerializer,
         })
         .then((res) => res.data),
+    releasesApiDeployRelease: (payload: SimpleDeployModelSchema) =>
+      axios
+        .request<AckStructuredResponse>({
+          method: "post",
+          url: `/api/releases/deploy`,
+          data: payload,
+        })
+        .then((res) => res.data),
+    releasesApiGetDeploymentStatus: (uuid: string) =>
+      axios
+        .request<AckStructuredResponse>({
+          method: "get",
+          url: `/api/releases/jobstatus`,
+          params: {
+            uuid,
+          },
+          paramsSerializer: config?.paramsSerializer,
+        })
+        .then((res) => res.data),
     releasesApiDeploymentSnapshot: () =>
       axios
         .request<GetDeploymentSnapshotStructuredResponse>({
@@ -687,6 +727,23 @@ function makeQueries(requests: Requests) {
         queryFn: () => requests.releasesApiGetReleaseWithUuid(uuid),
         ...options,
       }),
+    useReleasesApiGetDeploymentStatus: (
+      uuid: string,
+      options?: Omit<
+        UseQueryOptions<
+          Response<"releasesApiGetDeploymentStatus">,
+          unknown,
+          Response<"releasesApiGetDeploymentStatus">,
+          ReturnType<QueryKeys["releasesApiGetDeploymentStatus"]>
+        >,
+        "queryKey" | "queryFn"
+      >
+    ): UseQueryResult<Response<"releasesApiGetDeploymentStatus">, unknown> =>
+      useQuery({
+        queryKey: queryKeys.releasesApiGetDeploymentStatus(uuid),
+        queryFn: () => requests.releasesApiGetDeploymentStatus(uuid),
+        ...options,
+      }),
     useReleasesApiDeploymentSnapshot: (
       options?: Omit<
         UseQueryOptions<
@@ -827,6 +884,17 @@ type MutationConfigs = {
     queryClient: QueryClient
   ) => Pick<
     UseMutationOptions<Response<"releasesApiRevokeApproval">, unknown, unknown, unknown>,
+    "onSuccess" | "onSettled" | "onError"
+  >
+  useReleasesApiDeployRelease?: (
+    queryClient: QueryClient
+  ) => Pick<
+    UseMutationOptions<
+      Response<"releasesApiDeployRelease">,
+      unknown,
+      Parameters<Requests["releasesApiDeployRelease"]>[0],
+      unknown
+    >,
     "onSuccess" | "onSettled" | "onError"
   >
   useReleasesApiDeleteSnapshot?: (
@@ -1070,6 +1138,26 @@ function makeMutations(requests: Requests, config?: Config["mutations"]) {
       useRapiniMutation<Response<"releasesApiRevokeApproval">, unknown, unknown>(
         () => requests.releasesApiRevokeApproval(uuid, reason),
         config?.useReleasesApiRevokeApproval,
+        options
+      ),
+    useReleasesApiDeployRelease: (
+      options?: Omit<
+        UseMutationOptions<
+          Response<"releasesApiDeployRelease">,
+          unknown,
+          Parameters<Requests["releasesApiDeployRelease"]>[0],
+          unknown
+        >,
+        "mutationFn"
+      >
+    ) =>
+      useRapiniMutation<
+        Response<"releasesApiDeployRelease">,
+        unknown,
+        Parameters<Requests["releasesApiDeployRelease"]>[0]
+      >(
+        (payload) => requests.releasesApiDeployRelease(payload),
+        config?.useReleasesApiDeployRelease,
         options
       ),
     useReleasesApiDeleteSnapshot: (

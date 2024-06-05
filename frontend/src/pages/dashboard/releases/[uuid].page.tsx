@@ -31,8 +31,11 @@ import {
   Tooltip,
   SimpleGrid,
   Input,
+  Select as ChakraSelect,
+  Tag,
+  Code,
 } from "@chakra-ui/react"
-import { IconCornerDownRight, IconFileExport } from "@tabler/icons-react"
+import { IconCornerDownRight, IconDrone, IconFileExport } from "@tabler/icons-react"
 import { useAppMutation } from "@/hooks/useAppMutation"
 import { api } from "@/api"
 import { useRouter } from "next/router"
@@ -80,6 +83,7 @@ export default function ManageReleasePage() {
   const [serviceOptions, setServiceOptions] = useState<Array<IServiceOptions>>([])
   const [checked, setChecked] = useState<boolean>(false)
   const [sheetsDisabled, setSheetsDisabled] = useState<boolean>(false)
+  const [deploymentStarted, setDeploymentStarted] = useState<boolean>(false)
   const [approvedBy, setApprovedBy] = useState<Array<number>>([])
   const [pendingBy, setPendingBy] = useState<Array<number>>([])
   const [talendData, setTalendData] = useState<Array<SimpleTalendReleaseItemModelSchema>>([
@@ -91,6 +95,9 @@ export default function ManageReleasePage() {
 
   const revokeApprovalModal = useDisclosure()
   const revokeApprovalCancelRef = useRef(null)
+
+  const deployModal = useDisclosure()
+  const deployCancelRef = useRef(null)
 
   const [reason, setReason] = useState("")
 
@@ -201,6 +208,20 @@ export default function ManageReleasePage() {
     }
   )
 
+  const jobStatusMagic = useMagicQueryHooks({
+    autoRefetch: false,
+    onOk(responseData) {
+      query.refetch()
+    },
+  })
+
+  const jobStatus = api.queries.useReleasesApiGetDeploymentStatus(
+    asPath.split("/")[asPath.split("/").length - 1],
+    {
+      ...jobStatusMagic.hooks,
+    }
+  )
+
   const handleBranchTagChange = (eventData: SimpleReleaseItemModelSchema) => {
     const updatedRow = data?.find(
       (item) => item.service == eventData.service && item.repo == eventData.repo
@@ -209,62 +230,82 @@ export default function ManageReleasePage() {
       data?.filter((item) => !(item.service == eventData.service && item.repo == eventData.repo))
     )
     if ("tag" in eventData) {
+      const { tag, repo, service, ...rest } = updatedRow ?? {}
       setData((previousData) => [
         ...(previousData as SimpleReleaseItemModelSchema[]),
         {
           ...eventData,
-          release_branch: updatedRow?.release_branch,
-          feature_number: updatedRow?.feature_number,
-          special_notes: updatedRow?.special_notes,
-          devops_notes: updatedRow?.devops_notes,
+          ...rest,
         } as SimpleReleaseItemModelSchema,
       ])
     }
     if ("release_branch" in eventData) {
+      const { release_branch, repo, service, ...rest } = updatedRow ?? {}
       setData((previousData) => [
         ...(previousData as SimpleReleaseItemModelSchema[]),
         {
           ...eventData,
-          tag: updatedRow?.tag,
-          feature_number: updatedRow?.feature_number,
-          special_notes: updatedRow?.special_notes,
-          devops_notes: updatedRow?.devops_notes,
+          ...rest,
         } as SimpleReleaseItemModelSchema,
       ])
     }
     if ("feature_number" in eventData) {
+      const { feature_number, repo, service, ...rest } = updatedRow ?? {}
       setData((previousData) => [
         ...(previousData as SimpleReleaseItemModelSchema[]),
         {
           ...eventData,
-          tag: updatedRow?.tag,
-          release_branch: updatedRow?.release_branch,
-          special_notes: updatedRow?.special_notes,
-          devops_notes: updatedRow?.devops_notes,
+          ...rest,
         } as SimpleReleaseItemModelSchema,
       ])
     }
     if ("special_notes" in eventData) {
+      const { special_notes, repo, service, ...rest } = updatedRow ?? {}
       setData((previousData) => [
         ...(previousData as SimpleReleaseItemModelSchema[]),
         {
           ...eventData,
-          tag: updatedRow?.tag,
-          release_branch: updatedRow?.release_branch,
-          feature_number: updatedRow?.feature_number,
-          devops_notes: updatedRow?.devops_notes,
+          ...rest,
         } as SimpleReleaseItemModelSchema,
       ])
     }
     if ("devops_notes" in eventData) {
+      const { devops_notes, repo, service, ...rest } = updatedRow ?? {}
       setData((previousData) => [
         ...(previousData as SimpleReleaseItemModelSchema[]),
         {
           ...eventData,
-          tag: updatedRow?.tag,
-          release_branch: updatedRow?.release_branch,
-          feature_number: updatedRow?.feature_number,
-          special_notes: updatedRow?.special_notes,
+          ...rest,
+        } as SimpleReleaseItemModelSchema,
+      ])
+    }
+    if ("azure_env" in eventData) {
+      const { azure_env, repo, service, ...rest } = updatedRow ?? {}
+      setData((previousData) => [
+        ...(previousData as SimpleReleaseItemModelSchema[]),
+        {
+          ...eventData,
+          ...rest,
+        } as SimpleReleaseItemModelSchema,
+      ])
+    }
+    if ("azure_tenant" in eventData) {
+      const { azure_tenant, repo, service, ...rest } = updatedRow ?? {}
+      setData((previousData) => [
+        ...(previousData as SimpleReleaseItemModelSchema[]),
+        {
+          ...eventData,
+          ...rest,
+        } as SimpleReleaseItemModelSchema,
+      ])
+    }
+    if ("platform" in eventData) {
+      const { platform, repo, service, ...rest } = updatedRow ?? {}
+      setData((previousData) => [
+        ...(previousData as SimpleReleaseItemModelSchema[]),
+        {
+          ...eventData,
+          ...rest,
         } as SimpleReleaseItemModelSchema,
       ])
     }
@@ -354,6 +395,28 @@ export default function ManageReleasePage() {
     reason,
     magicQueryHooks.hooks
   )
+
+  const deployMutation = useAppMutation(api.mutations.useReleasesApiDeployRelease, {
+    onOk() {
+      toast.success("Deployment Started")
+    },
+    onNotOk(response) {
+      if (response.error?.reason === "devops_role_not_found") {
+        toast.error(`You can only deploy if you have Devops role.`)
+      } else if (response.error?.reason === "release_not_approved") {
+        toast.error(
+          `This release is still pending approvals. Please get all the approvals before deployment.`
+        )
+      } else if (response.error?.reason === "deployment_already_started") {
+        toast.error(`This deployment has already been started for this release. Please refresh.`)
+      } else {
+        toast.error(
+          "Something went wrong while triggering builds. Please check in Jenkins for more information."
+        )
+        setDeploymentStarted(false)
+      }
+    },
+  })
 
   return (
     <Shell
@@ -600,6 +663,29 @@ export default function ManageReleasePage() {
                       </AppFormControl>
                     </SimpleGrid>
 
+                    {response.release_data.deployed_by && (
+                      <SimpleGrid
+                        w="full"
+                        columns={[1, 1, 2]}
+                        spacing={[6, 8]}
+                        display="flex"
+                        flexDirection={["column", "column", "row"]}
+                        alignItems="flex-start"
+                      >
+                        <AppFormControl w={["full", "full", "50%"]} label="Deployed By">
+                          <Input
+                            type="text"
+                            variant="filled"
+                            defaultValue={`${response.release_data.deployed_by?.first_name} ${response.release_data.deployed_by?.last_name}`}
+                            disabled={true}
+                          />
+                        </AppFormControl>
+                        <AppFormControl w={["full", "full", "50%"]} label="Job Status">
+                          <Button>Poll Job Status</Button>
+                        </AppFormControl>
+                      </SimpleGrid>
+                    )}
+
                     {falseBranches.length > 0 && (
                       <Text color="red.800">
                         Release branch you entered in <strong>`{falseBranches.join(", ")}`</strong>{" "}
@@ -812,6 +898,9 @@ export default function ManageReleasePage() {
                           serviceOptions={serviceOptions}
                           sheetsDisabled={sheetsDisabled}
                           onBranchTagChange={handleBranchTagChange}
+                          deploymentStarted={
+                            response.release_data.deployed_by ? true : deploymentStarted
+                          }
                         />
                       )
                     )}
@@ -888,7 +977,7 @@ export default function ManageReleasePage() {
                 </AlertDialogBody>
 
                 <AlertDialogFooter>
-                  <Button ref={cancelRef} onClick={revokeApprovalModal.onClose}>
+                  <Button ref={revokeApprovalCancelRef} onClick={revokeApprovalModal.onClose}>
                     Cancel
                   </Button>
                   <Button
@@ -903,6 +992,62 @@ export default function ManageReleasePage() {
                     ml={3}
                   >
                     Revoke
+                  </Button>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialogOverlay>
+          </AlertDialog>
+
+          <AlertDialog
+            isOpen={deployModal.isOpen}
+            leastDestructiveRef={deployCancelRef}
+            onClose={deployModal.onClose}
+            closeOnEsc={false}
+            closeOnOverlayClick={false}
+          >
+            <AlertDialogOverlay>
+              <AlertDialogContent>
+                <AlertDialogHeader fontSize="lg" fontWeight="bold">
+                  Deploy {response?.release_data.name} Items
+                </AlertDialogHeader>
+
+                <AlertDialogBody>
+                  Are you sure you want to deploy all the release items? Please check all the build
+                  parameters carefully.
+                </AlertDialogBody>
+
+                <AlertDialogFooter>
+                  <Button
+                    ref={deployCancelRef}
+                    onClick={() => {
+                      deployModal.onClose()
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    colorScheme="red"
+                    onClick={() => {
+                      setDeploymentStarted(true)
+                      deployModal.onClose()
+                      const deployData = data.map((item) => {
+                        return {
+                          repo: item.repo,
+                          service: item.service,
+                          release_branch: item.release_branch,
+                          platform: item.platform ? item.platform : "azure",
+                          azure_env: item.azure_env ? item.azure_env : "pat",
+                          azure_tenant: item.azure_tenant ? item.azure_tenant : "at",
+                        }
+                      })
+                      deployMutation.mutate({
+                        items: deployData,
+                        uuid: asPath.split("/")[asPath.split("/").length - 1],
+                      })
+                    }}
+                    ml={3}
+                  >
+                    Deploy
                   </Button>
                 </AlertDialogFooter>
               </AlertDialogContent>
@@ -946,6 +1091,7 @@ export default function ManageReleasePage() {
             ) && (
               <Button
                 w={["full", "full", "auto"]}
+                mr={2}
                 colorScheme="blue"
                 rightIcon={<Icon as={IconCornerDownRight} />}
                 isLoading={updateReleaseMutation.isLoading}
@@ -973,6 +1119,26 @@ export default function ManageReleasePage() {
                 Save Devops
               </Button>
             )}
+            {JSON.parse(localStorage.getItem("$auth") ?? "").roles.find(
+              (item: SimpleRolesSchema) => item.role === 4
+            ) &&
+              sheetsDisabled && (
+                <Button
+                  w={["full", "full", "auto"]}
+                  colorScheme="blue"
+                  rightIcon={<Icon as={IconDrone} />}
+                  isDisabled={
+                    !sheetsDisabled ||
+                    deploymentStarted ||
+                    (response?.release_data.deployed_by ? true : false)
+                  }
+                  isLoading={deployMutation.isLoading}
+                  loadingText="Deploying"
+                  onClick={deployModal.onOpen}
+                >
+                  Start Deployment
+                </Button>
+              )}
           </Box>
         </>
       ) : (
@@ -987,6 +1153,7 @@ export const deploymentStatusOptions = [
   { label: "Success", value: 1 },
   { label: "Partial Success", value: 2 },
   { label: "Fail", value: 3 },
+  { label: "Started", value: 4 },
 ]
 
 function TableSheets(props: {
@@ -994,7 +1161,14 @@ function TableSheets(props: {
   serviceOptions: Array<IServiceOptions>
   sheetsDisabled: boolean
   onBranchTagChange: (data: SimpleReleaseItemModelSchema) => void
+  deploymentStarted: boolean
 }) {
+  const [platform, setPlatform] = useState<any>({})
+  const [currentJobLogs, setCurrentJobLogs] = useState<any>({})
+
+  const { isOpen, onOpen, onClose } = useDisclosure()
+  const cancelRef = useRef(null)
+
   return (
     <Box w="full">
       <VStack w="full" spacing="12">
@@ -1010,7 +1184,7 @@ function TableSheets(props: {
               <Table
                 variant="simple"
                 size="md"
-                __css={{ "table-layout": "fixed", "width": "100%" }}
+                __css={{ "table-layout": "fixed", "width": props.sheetsDisabled ? "150%" : "100%" }}
               >
                 <TableCaption>
                   {
@@ -1027,6 +1201,14 @@ function TableSheets(props: {
                     <Th>Tags</Th>
                     <Th>Special Notes</Th>
                     <Th>DevOps Notes</Th>
+                    {props.sheetsDisabled && (
+                      <>
+                        <Th>Platform</Th>
+                        <Th>Environment</Th>
+                        <Th>Tenant</Th>
+                        <Th>Job Status</Th>
+                      </>
+                    )}
                   </Tr>
                 </Thead>
 
@@ -1141,6 +1323,188 @@ function TableSheets(props: {
                             }
                           />
                         </Td>
+                        {props.sheetsDisabled && (
+                          <>
+                            <Td>
+                              <ChakraSelect
+                                defaultValue={props.deploymentStarted ? item.platform : "azure"}
+                                variant="filled"
+                                onChange={(e) => {
+                                  setPlatform({
+                                    ...platform,
+                                    [`${item.repo}${item.service}`]:
+                                      e.target.selectedOptions[0].value,
+                                  })
+                                  props.onBranchTagChange({
+                                    platform: e.target.selectedOptions[0].value,
+                                    service: item.service,
+                                    repo: item.repo,
+                                  } as SimpleReleaseItemModelSchema)
+                                }}
+                                isDisabled={
+                                  props.deploymentStarted ||
+                                  !JSON.parse(localStorage.getItem("$auth") ?? "").roles.find(
+                                    (item: SimpleRolesSchema) => item.role === 4
+                                  )
+                                }
+                              >
+                                {["azure", "onprem", "mule"].map((item) => (
+                                  <option key={item} value={item}>
+                                    {item.toUpperCase()}
+                                  </option>
+                                ))}
+                              </ChakraSelect>
+                            </Td>
+                            <Td>
+                              <ChakraSelect
+                                defaultValue={props.deploymentStarted ? item.azure_env : "pat"}
+                                variant="filled"
+                                onChange={(e) =>
+                                  props.onBranchTagChange({
+                                    azure_env: e.target.selectedOptions[0].value,
+                                    service: item.service,
+                                    repo: item.repo,
+                                  } as SimpleReleaseItemModelSchema)
+                                }
+                                isDisabled={
+                                  props.deploymentStarted ||
+                                  !JSON.parse(localStorage.getItem("$auth") ?? "").roles.find(
+                                    (item: SimpleRolesSchema) => item.role === 4
+                                  )
+                                }
+                              >
+                                {(!platform[`${item.repo}${item.service}`] ||
+                                platform[`${item.repo}${item.service}`] == "azure"
+                                  ? [
+                                      "pat",
+                                      "demo",
+                                      "dev",
+                                      "test",
+                                      "dev2",
+                                      "test2",
+                                      "dev3",
+                                      "test3",
+                                      "dc",
+                                      "jpas",
+                                      "sitconv",
+                                      "sitdi",
+                                    ]
+                                  : platform[`${item.repo}${item.service}`] == "onprem"
+                                  ? ["pat", "demo", "mttest", "mttest2", "mtps", "mtsb", "mtdev"]
+                                  : [
+                                      "dev",
+                                      "test",
+                                      "dev2",
+                                      "test2",
+                                      "dev3",
+                                      "test3",
+                                      "pat",
+                                      "demo",
+                                      "dc",
+                                      "jpas",
+                                      "sitconv",
+                                      "sitdi",
+                                      "ps",
+                                      "sb",
+                                    ]
+                                ).map((item) => (
+                                  <option key={item} value={item}>
+                                    {item.toUpperCase()}
+                                  </option>
+                                ))}
+                              </ChakraSelect>
+                            </Td>
+                            <Td>
+                              <ChakraSelect
+                                defaultValue={props.deploymentStarted ? item.azure_tenant : "at"}
+                                variant="filled"
+                                onChange={(e) =>
+                                  props.onBranchTagChange({
+                                    azure_tenant: e.target.selectedOptions[0].value,
+                                    service: item.service,
+                                    repo: item.repo,
+                                  } as SimpleReleaseItemModelSchema)
+                                }
+                                isDisabled={
+                                  props.deploymentStarted ||
+                                  !JSON.parse(localStorage.getItem("$auth") ?? "").roles.find(
+                                    (item: SimpleRolesSchema) => item.role === 4
+                                  ) ||
+                                  platform[`${item.repo}${item.service}`] == "onprem"
+                                }
+                              >
+                                {["at", "om", "nc", "mt"].map((item) => (
+                                  <option key={item} value={item}>
+                                    {item.toUpperCase()}
+                                  </option>
+                                ))}
+                              </ChakraSelect>
+                            </Td>
+                            <Td>
+                              <Tooltip label="Click to see the job logs.">
+                                <Tag
+                                  cursor="pointer"
+                                  onClick={() => {
+                                    let jenkinsUrl
+                                    if (item.platform) {
+                                      if (item.platform == "azure") {
+                                        jenkinsUrl = `https://jenkins-omms-sgs.optum.com/view/GitHub_Organizations/job/PEP-Azure/job/${
+                                          item.repo.split("/")[1]
+                                        }/job/${item.release_branch}`
+                                      } else if (item.platform == "onprem") {
+                                        jenkinsUrl = `https://jenkins-omms-sgs.optum.com/view/GitHub_Organizations/job/PEP-MT/job/${
+                                          item.repo.split("/")[1]
+                                        }/job/${item.release_branch}`
+                                      } else {
+                                        jenkinsUrl = `https://jenkins-omms-sgs.optum.com/view/GitHub_Organizations/job/OIL/job/${
+                                          item.repo.split("/")[1]
+                                        }/job/${item.release_branch}`
+                                      }
+                                    } else {
+                                      if (
+                                        !platform[`${item.repo}${item.service}`] ||
+                                        platform[`${item.repo}${item.service}`] == "azure"
+                                      ) {
+                                        jenkinsUrl = `https://jenkins-omms-sgs.optum.com/view/GitHub_Organizations/job/PEP-Azure/job/${
+                                          item.repo.split("/")[1]
+                                        }/job/${item.release_branch}`
+                                      } else if (
+                                        platform[`${item.repo}${item.service}`] == "onprem"
+                                      ) {
+                                        jenkinsUrl = `https://jenkins-omms-sgs.optum.com/view/GitHub_Organizations/job/PEP-MT/job/${
+                                          item.repo.split("/")[1]
+                                        }/job/${item.release_branch}`
+                                      } else {
+                                        jenkinsUrl = `https://jenkins-omms-sgs.optum.com/view/GitHub_Organizations/job/OIL/job/${
+                                          item.repo.split("/")[1]
+                                        }/job/${item.release_branch}`
+                                      }
+                                    }
+                                    setCurrentJobLogs({
+                                      logs: item.job_logs,
+                                      url: jenkinsUrl,
+                                      status: item.job_status,
+                                    })
+                                    onOpen()
+                                  }}
+                                  colorScheme={
+                                    item.job_status == "Started"
+                                      ? "blue"
+                                      : item.job_status == "PAUSED_PENDING_INPUT"
+                                      ? "orange"
+                                      : item.job_status == "IN_PROGRESS"
+                                      ? "yellow"
+                                      : item.job_status == "SUCCESS"
+                                      ? "green"
+                                      : "red"
+                                  }
+                                >
+                                  {item.job_status ? item.job_status : "Unknown"}
+                                </Tag>
+                              </Tooltip>
+                            </Td>
+                          </>
+                        )}
                       </Tr>
                     ))}
                 </Tbody>
@@ -1153,6 +1517,14 @@ function TableSheets(props: {
                     <Th>Tags</Th>
                     <Th>Special Notes</Th>
                     <Th>DevOps Notes</Th>
+                    {props.sheetsDisabled && (
+                      <>
+                        <Th>Platform</Th>
+                        <Th>Environment</Th>
+                        <Th>Tenant</Th>
+                        <Th>Job Status</Th>
+                      </>
+                    )}
                   </Tr>
                 </Tfoot>
               </Table>
@@ -1160,6 +1532,59 @@ function TableSheets(props: {
           </CardBody>
         </Card>
       </VStack>
+      <AlertDialog isOpen={isOpen} leastDestructiveRef={cancelRef} onClose={onClose} size="full">
+        <AlertDialogOverlay>
+          <AlertDialogContent>
+            <AlertDialogHeader fontSize="lg" fontWeight="bold">
+              {currentJobLogs.logs
+                ? currentJobLogs.logs.split("CURRENT_STAGE=")[1]
+                : "Job Logs (Jenkins)"}
+            </AlertDialogHeader>
+
+            <AlertDialogBody>
+              <Code
+                p={4}
+                colorScheme={
+                  currentJobLogs.status == "Started"
+                    ? "blue"
+                    : currentJobLogs.status == "PAUSED_PENDING_INPUT"
+                    ? "orange"
+                    : currentJobLogs.status == "IN_PROGRESS"
+                    ? "yellow"
+                    : currentJobLogs.status == "SUCCESS"
+                    ? "green"
+                    : "red"
+                }
+                children={
+                  currentJobLogs.logs
+                    ? currentJobLogs.logs.split("CURRENT_STAGE=")[0]
+                    : "The status of the job is Unknown. Please go to Jenkins for further information."
+                }
+              />
+            </AlertDialogBody>
+
+            <AlertDialogFooter>
+              <Button
+                ref={cancelRef}
+                onClick={() => {
+                  onClose()
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                colorScheme="red"
+                onClick={() => {
+                  window.open(currentJobLogs.url)
+                }}
+                ml={3}
+              >
+                Take me to Jenkins
+              </Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialogOverlay>
+      </AlertDialog>
     </Box>
   )
 }

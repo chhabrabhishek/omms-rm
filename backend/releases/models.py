@@ -25,6 +25,7 @@ class Release(AppModel):
         Success = 1
         PartialSuccess = 2
         Fail = 3
+        Started = 4
 
     uuid = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
     name = models.CharField(max_length=1024)
@@ -40,6 +41,14 @@ class Release(AppModel):
         DeploymentStatus, default=DeploymentStatus.Unknown
     )
     deployment_comment = models.TextField(null=True, default=None, blank=True)
+    deployed_by = models.ForeignKey(
+        "accounts.Account",
+        on_delete=models.PROTECT,
+        related_name="release_deployed_by",
+        null=True,
+        default=None,
+        blank=True,
+    )
 
 
 class ReleaseItem(AppModel):
@@ -56,8 +65,14 @@ class ReleaseItem(AppModel):
         max_length=2048, null=True, default=None, blank=True
     )
     tag = models.CharField(max_length=1024, null=True, default=None, blank=True)
-    special_notes = models.TextField(null=True, default=None)
-    devops_notes = models.TextField(null=True, default=None)
+    special_notes = models.TextField(null=True, default=None, blank=True)
+    devops_notes = models.TextField(null=True, default=None, blank=True)
+    platform = models.CharField(max_length=100, null=True, default=None, blank=True)
+    azure_env = models.CharField(max_length=100, null=True, default=None, blank=True)
+    azure_tenant = models.CharField(max_length=100, null=True, default=None, blank=True)
+    queue_id = models.CharField(max_length=100, null=True, default=None, blank=True)
+    job_status = models.CharField(max_length=100, null=True, default=None, blank=True)
+    job_logs = models.TextField(null=True, default=None, blank=True)
     release = models.ForeignKey(Release, on_delete=models.PROTECT, related_name="items")
 
 
