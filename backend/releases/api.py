@@ -3,6 +3,7 @@ import re
 import requests
 import uuid
 from base64 import b64encode
+from typing import Optional
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
@@ -390,7 +391,7 @@ class SimpleAllReleaseModelSchema(ModelSchema):
     approvers: list[SimpleApproverModelSchema]
     created_by: SimpleUserSchema
     updated_by: SimpleUserSchema
-    deployed_by: SimpleUserSchema | None
+    deployed_by: Optional[SimpleUserSchema]
     targets: list[SimpleTargetModelSchema]
     deployment_status: int
 
@@ -441,7 +442,7 @@ class SimpleGetReleaseModelSchema(ModelSchema):
     approvers: list[SimpleApproverModelSchema]
     targets: list[SimpleTargetModelSchema]
     deployment_status: int
-    deployed_by: SimpleUserSchema | None
+    deployed_by: Optional[SimpleUserSchema]
 
     class Config:
         model = Release
