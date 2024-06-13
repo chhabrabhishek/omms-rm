@@ -150,22 +150,18 @@ export default function ReleasesPage() {
                       id: "deployed_by",
                       header: "Deployed By",
                       accessorFn: (cell) =>
-                        cell.deployed_by? `${cell.deployed_by.first_name} ${cell.deployed_by.last_name}`: "Unknown",
+                        cell.deployed_by
+                          ? `${cell.deployed_by.first_name} ${cell.deployed_by.last_name}`
+                          : "Unknown",
                     },
                     release_window: {
                       id: "release_window",
-                      header: "Release Window",
+                      header: "Start Window",
                       cell: (cell) => (
                         <HStack>
                           <Tag>
                             {DateTime.fromISO(
                               cell.row.original.start_window!.replace("Z", "")
-                            ).toLocaleString(DateTime.DATETIME_MED)}
-                          </Tag>
-                          <Text>~</Text>
-                          <Tag>
-                            {DateTime.fromISO(
-                              cell.row.original.end_window!.replace("Z", "")
                             ).toLocaleString(DateTime.DATETIME_MED)}
                           </Tag>
                         </HStack>
@@ -180,9 +176,11 @@ export default function ReleasesPage() {
                     },
                     updated_by: {
                       id: "updated_by",
-                      header: "Updated By",
+                      header: "Last Updated",
                       accessorFn: (cell) =>
-                        `${cell.updated_by.first_name} ${cell.updated_by.last_name}`,
+                        `${cell.updated_by.first_name} ${
+                          cell.updated_by.last_name
+                        } (${toDateTimeString(fromDjangoISO(cell.updated_at))})`,
                     },
                     actions: JSON.parse(localStorage.getItem("$auth") ?? "").roles.find(
                       (item: SimpleRolesSchema) => item.role === 2

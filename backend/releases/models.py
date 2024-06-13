@@ -99,6 +99,15 @@ class Approver(AppModel):
 
     approved = models.BooleanField(default=False)
     group = enum.EnumField(Roles.Role)
+    approved_by = models.ForeignKey(
+        "accounts.Account",
+        on_delete=models.PROTECT,
+        related_name="release_approved_by",
+        null=True,
+        default=None,
+        blank=True,
+    )
+    approved_at = models.DateTimeField(auto_now=True)
     release = models.ForeignKey(
         Release, on_delete=models.PROTECT, related_name="approvers"
     )

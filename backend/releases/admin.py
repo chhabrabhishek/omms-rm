@@ -68,7 +68,7 @@ class ConstantAdmin(admin.ModelAdmin):
 
 @admin.register(Approver)
 class ApproverAdmin(admin.ModelAdmin):
-    list_display = ("group", "release", "approved")
+    list_display = ("group", "release", "approved", "approved_by", "approved_at")
 
 
 @admin.register(Target)

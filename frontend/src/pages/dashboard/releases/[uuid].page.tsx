@@ -43,7 +43,9 @@ import { Access } from "@/types/Page"
 import { useMagicQueryHooks } from "@/hooks/useAppQuery"
 import WithQuery from "@/components/indicators/WithQuery"
 import {
+  ApprovedByResponse,
   GetReleaseResponse,
+  SimpleApproverModelSchema,
   SimpleReleaseItemModelSchema,
   SimpleRolesSchema,
   SimpleTalendReleaseItemModelSchema,
@@ -84,7 +86,7 @@ export default function ManageReleasePage() {
   const [checked, setChecked] = useState<boolean>(false)
   const [sheetsDisabled, setSheetsDisabled] = useState<boolean>(false)
   const [deploymentStarted, setDeploymentStarted] = useState<boolean>(false)
-  const [approvedBy, setApprovedBy] = useState<Array<number>>([])
+  const [approvedBy, setApprovedBy] = useState<Array<SimpleApproverModelSchema>>([])
   const [pendingBy, setPendingBy] = useState<Array<number>>([])
   const [talendData, setTalendData] = useState<Array<SimpleTalendReleaseItemModelSchema>>([
     { job_name: "", package_location: "", feature_number: "", special_notes: "" },
@@ -187,7 +189,7 @@ export default function ManageReleasePage() {
         )
         for (let approver of (responseData.result as GetReleaseResponse).release_data.approvers) {
           if (approver.approved) {
-            setApprovedBy((previousApprovedBy) => [...previousApprovedBy, approver.group])
+            setApprovedBy((previousApprovedBy) => [...previousApprovedBy, approver])
           } else {
             setPendingBy((previousPendingBy) => [...previousPendingBy, approver.group])
           }
@@ -336,7 +338,7 @@ export default function ManageReleasePage() {
   )
 
   const { hooks } = useMagicQueryHooks({
-    onOk() {
+    onOk(response) {
       toast.success("Approved")
       onClose()
       setChecked(true)
@@ -348,15 +350,7 @@ export default function ManageReleasePage() {
               .includes(item)
         )
       )
-      setApprovedBy([
-        ...new Set(
-          approvedBy
-            .concat(
-              JSON.parse(localStorage.getItem("$auth") ?? "").roles.map((item: any) => item.role)
-            )
-            .filter((item) => item !== 1 && item !== 3)
-        ),
-      ])
+      setApprovedBy((response.result as ApprovedByResponse).approved_by)
       if (
         !pendingBy.filter(
           (item) =>
@@ -384,7 +378,7 @@ export default function ManageReleasePage() {
       revokeApprovalModal.onClose()
       setChecked(false)
       setSheetsDisabled(false)
-      setApprovedBy(approvedBy.filter((item) => item !== 2))
+      setApprovedBy(approvedBy.filter((item) => item.group !== 2))
       setPendingBy([2])
     },
     autoRefetch: false,
@@ -507,18 +501,17 @@ export default function ManageReleasePage() {
                       <Text fontSize="md" textAlign="center">
                         This release has been approved by :{" "}
                         <strong>
-                          {approvedBy.map((item, index) =>
-                            index === approvedBy.length - 1
-                              ? `${
-                                  rolesOptions.find(
-                                    (roleoption) => Number.parseInt(roleoption.value) === item
-                                  )?.label
-                                }`
-                              : `${
-                                  rolesOptions.find(
-                                    (roleoption) => Number.parseInt(roleoption.value) === item
-                                  )?.label
-                                }, `
+                          {approvedBy.map(
+                            (item, index) =>
+                              `${
+                                rolesOptions.find(
+                                  (roleoption) => Number.parseInt(roleoption.value) === item.group
+                                )?.label
+                              } (${
+                                item.approved_by
+                                  ? item.approved_by?.first_name + " " + item.approved_by?.last_name
+                                  : "Unknown"
+                              })${index == approvedBy.length - 1 ? "" : ", "}`
                           )}
                         </strong>
                       </Text>

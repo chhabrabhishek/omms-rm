@@ -565,7 +565,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AckStructuredResponse"
+                  "$ref": "#/components/schemas/ApprovedByStructuredResponse"
                 }
               }
             }
@@ -1835,14 +1835,23 @@
             "title": "Group",
             "type": "integer"
           },
+          "approved_by": {
+            "$ref": "#/components/schemas/SimpleUserSchema"
+          },
           "approved": {
             "title": "Approved",
             "default": false,
             "type": "boolean"
+          },
+          "approved_at": {
+            "title": "Approved At",
+            "type": "string",
+            "format": "date-time"
           }
         },
         "required": [
-          "group"
+          "group",
+          "approved_at"
         ]
       },
       "SimpleTargetModelSchema": {
@@ -2072,6 +2081,41 @@
           },
           "result": {
             "$ref": "#/components/schemas/GetReleaseResponse"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      },
+      "ApprovedByResponse": {
+        "title": "ApprovedByResponse",
+        "type": "object",
+        "properties": {
+          "approved_by": {
+            "title": "Approved By",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SimpleApproverModelSchema"
+            }
+          }
+        },
+        "required": [
+          "approved_by"
+        ]
+      },
+      "ApprovedByStructuredResponse": {
+        "title": "ApprovedByStructuredResponse",
+        "type": "object",
+        "properties": {
+          "ok": {
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "error": {
+            "$ref": "#/components/schemas/Error"
+          },
+          "result": {
+            "$ref": "#/components/schemas/ApprovedByResponse"
           }
         },
         "required": [

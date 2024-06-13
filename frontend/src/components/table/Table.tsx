@@ -211,6 +211,7 @@ export default function DataTable<D extends Record<string, unknown>>(props: {
                     <td
                       key={cell.id}
                       style={{
+                        whiteSpace: getWhitespace(column),
                         ...(column.condensed && condensedStyle),
                         ...(column.light && lightStyle),
                       }}
@@ -251,6 +252,10 @@ export default function DataTable<D extends Record<string, unknown>>(props: {
       )}
     </>
   )
+}
+
+function getWhitespace(column: any) {
+  return ["name", "deployed_by", "created_by", "updated_by"].includes(column.id) ? "initial" : "pre"
 }
 
 function ColumnSortIndicator(props: { direction: false | SortDirection }) {

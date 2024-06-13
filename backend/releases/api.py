@@ -376,10 +376,11 @@ def delete_release(request, form: DeleteReleaseRequest):
 
 class SimpleApproverModelSchema(ModelSchema):
     group: int
+    approved_by: Optional[SimpleUserSchema]
 
     class Config:
         model = Approver
-        include = ("approved", "group")
+        include = ("approved", "group", "approved_by", "approved_at")
 
 
 class SimpleTargetModelSchema(ModelSchema):
@@ -481,7 +482,12 @@ def get_release_with_uuid(request, uuid: uuid.UUID):
     }
 
 
-@router.post("/approve", response=AckResponse)
+@response_schema
+class ApprovedByResponse(Schema):
+    approved_by: list[SimpleApproverModelSchema]
+
+
+@router.post("/approve", response=ApprovedByResponse)
 def approve_release(request, uuid: uuid.UUID):
     user = request.auth
     release = Release.objects.get(uuid=uuid)
@@ -490,11 +496,19 @@ def approve_release(request, uuid: uuid.UUID):
             continue
         else:
             approver = Approver.objects.filter(release=release, group=role.role).first()
-            if approver:
+            if approver and not approver.approved:
                 approver.approved = True
+                approver.approved_by = user
                 approver.save()
 
-    return {"ok": True}
+    return {
+        "ok": True,
+        "result": {
+            "approved_by": list(
+                Approver.objects.filter(release=release, approved=True).all()
+            )
+        },
+    }
 
 
 @router.post("/deleteReleaseItems", response=AckResponse)

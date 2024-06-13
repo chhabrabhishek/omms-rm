@@ -229,7 +229,9 @@ export type DeleteReleaseRequest = {
 }
 export type SimpleApproverModelSchema = {
   group: number
+  approved_by?: SimpleUserSchema
   approved?: boolean
+  approved_at: string
 }
 export type SimpleTargetModelSchema = {
   target: string
@@ -277,6 +279,14 @@ export type GetReleaseStructuredResponse = {
   ok: boolean
   error?: Error
   result?: GetReleaseResponse
+}
+export type ApprovedByResponse = {
+  approved_by: SimpleApproverModelSchema[]
+}
+export type ApprovedByStructuredResponse = {
+  ok: boolean
+  error?: Error
+  result?: ApprovedByResponse
 }
 export type SimpleDeployReleaseItemModelSchema = {
   repo: string
@@ -526,7 +536,7 @@ function makeRequests(axios: AxiosInstance, config?: AxiosConfig) {
         .then((res) => res.data),
     releasesApiApproveRelease: (uuid: string) =>
       axios
-        .request<AckStructuredResponse>({
+        .request<ApprovedByStructuredResponse>({
           method: "post",
           url: `/api/releases/approve`,
           params: {
