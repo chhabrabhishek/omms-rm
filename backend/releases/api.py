@@ -154,10 +154,10 @@ def create_release(request, form: CreateReleaseRequest):
             if role.role == Roles.Role.ReleaseAdmin:
                 with transaction.atomic():
                     for item in form.release.items:
-                        if not item.release_branch:
+                        if not item.tag:
                             continue
                         git_response = requests.get(
-                            f"https://api.github.com/repos/{item.repo}/branches/{item.release_branch}",
+                            f"https://api.github.com/repos/{item.repo}/git/ref/tags/{item.tag}",
                             headers=headers,
                         )
                         if git_response.status_code == 404:
@@ -292,10 +292,10 @@ def update_release(request, form: UpdateReleaseRequest):
         else:
             with transaction.atomic():
                 for item in form.release.items:
-                    if not item.release_branch:
+                    if not item.tag:
                         continue
                     git_response = requests.get(
-                        f"https://api.github.com/repos/{item.repo}/branches/{item.release_branch}",
+                        f"https://api.github.com/repos/{item.repo}/git/ref/tags/{item.tag}",
                         headers=headers,
                     )
                     if git_response.status_code == 404:

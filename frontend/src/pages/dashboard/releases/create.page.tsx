@@ -350,7 +350,7 @@ export default function CreateReleasePage() {
       if (response.error?.reason === "branch_not_found") {
         setFalseBranches(response.error.detail?.split(", ") ?? [])
         toast.error(
-          `Release branch you entered in ${response.error.detail} does not exist. Please verify the branches and try again`,
+          `Tag you entered in ${response.error.detail} does not exist. Please verify the tags and try again`,
           { duration: 5000 }
         )
       } else {
@@ -1198,9 +1198,9 @@ function TableSheets(props: {
                     <Thead>
                       <Tr>
                         <Th>Git Repo</Th>
-                        <Th>Release Branches</Th>
-                        <Th>Feature Number</Th>
                         <Th>Tags</Th>
+                        <Th>Feature Number</Th>
+                        <Th>Release Branches</Th>
                         <Th>Special Notes</Th>
                         {JSON.parse(localStorage.getItem("$auth") ?? "").roles.find(
                           (item: SimpleRolesSchema) => item.role === 4
@@ -1229,10 +1229,10 @@ function TableSheets(props: {
                             <Input
                               type="text"
                               variant="filled"
-                              placeholder="Enter Release Branch"
+                              placeholder="Enter Tag"
                               onChange={(e) =>
                                 props.onBranchTagChange({
-                                  release_branch: e.target.value ?? "",
+                                  tag: e.target.value ?? "",
                                   service: item.service,
                                   repo: item.repo,
                                 } as SimpleReleaseItemModelSchema)
@@ -1257,10 +1257,10 @@ function TableSheets(props: {
                             <Input
                               type="text"
                               variant="filled"
-                              placeholder="Enter Tag"
+                              placeholder="Enter Release Branch"
                               onChange={(e) =>
                                 props.onBranchTagChange({
-                                  tag: e.target.value ?? "",
+                                  release_branch: e.target.value ?? "",
                                   service: item.service,
                                   repo: item.repo,
                                 } as SimpleReleaseItemModelSchema)
@@ -1303,9 +1303,9 @@ function TableSheets(props: {
                     <Tfoot>
                       <Tr>
                         <Th>Git Repo</Th>
-                        <Th>Release Branches</Th>
-                        <Th>Feature Number</Th>
                         <Th>Tags</Th>
+                        <Th>Feature Number</Th>
+                        <Th>Release Branches</Th>
                         <Th>Special Notes</Th>
                         {JSON.parse(localStorage.getItem("$auth") ?? "").roles.find(
                           (item: SimpleRolesSchema) => item.role === 4
@@ -1349,9 +1349,9 @@ function TableSheets(props: {
                     <Thead>
                       <Tr>
                         <Th>Git Repo</Th>
-                        <Th>Release Branches</Th>
-                        <Th>Feature Number</Th>
                         <Th>Tags</Th>
+                        <Th>Feature Number</Th>
+                        <Th>Release Branches</Th>
                         <Th>Special Notes</Th>
                         {JSON.parse(localStorage.getItem("$auth") ?? "").roles.find(
                           (item: SimpleRolesSchema) => item.role === 4
@@ -1380,11 +1380,11 @@ function TableSheets(props: {
                             <Input
                               type="text"
                               variant="filled"
-                              placeholder="Enter Release Branch"
-                              defaultValue={item.release_branch}
+                              placeholder="Enter Tag"
+                              defaultValue={item.tag}
                               onChange={(e) =>
                                 props.onBranchTagChange({
-                                  release_branch: e.target.value ?? "",
+                                  tag: e.target.value ?? "",
                                   service: item.service,
                                   repo: item.repo,
                                 } as SimpleReleaseItemModelSchema)
@@ -1410,11 +1410,11 @@ function TableSheets(props: {
                             <Input
                               type="text"
                               variant="filled"
-                              placeholder="Enter Tag"
-                              defaultValue={item.tag}
+                              placeholder="Enter Release Branch"
+                              defaultValue={item.release_branch}
                               onChange={(e) =>
                                 props.onBranchTagChange({
-                                  tag: e.target.value ?? "",
+                                  release_branch: e.target.value ?? "",
                                   service: item.service,
                                   repo: item.repo,
                                 } as SimpleReleaseItemModelSchema)
@@ -1459,9 +1459,9 @@ function TableSheets(props: {
                     <Tfoot>
                       <Tr>
                         <Th>Git Repo</Th>
-                        <Th>Release Branches</Th>
-                        <Th>Feature Number</Th>
                         <Th>Tags</Th>
+                        <Th>Feature Number</Th>
+                        <Th>Release Branches</Th>
                         <Th>Special Notes</Th>
                         {JSON.parse(localStorage.getItem("$auth") ?? "").roles.find(
                           (item: SimpleRolesSchema) => item.role === 4

@@ -321,7 +321,7 @@ export default function ManageReleasePage() {
       if (response.error?.reason === "branch_not_found") {
         setFalseBranches(response.error.detail?.split(", ") ?? [])
         toast.error(
-          `Release branch you entered in ${response.error.detail} does not exist. Please verify the branches and try again`,
+          `Tag you entered in ${response.error.detail} does not exist. Please verify the tags and try again`,
           { duration: 5000 }
         )
       } else {
@@ -1189,9 +1189,9 @@ function TableSheets(props: {
                 <Thead>
                   <Tr>
                     <Th>Git Repo</Th>
-                    <Th>Release Branches</Th>
-                    <Th>Feature Number</Th>
                     <Th>Tags</Th>
+                    <Th>Feature Number</Th>
+                    <Th>Release Branches</Th>
                     <Th>Special Notes</Th>
                     <Th>DevOps Notes</Th>
                     {props.sheetsDisabled && (
@@ -1229,7 +1229,7 @@ function TableSheets(props: {
                               }}
                               p={2}
                               borderRadius="md"
-                              bg={item.release_branch ? "green.100" : "red.100"}
+                              bg={item.tag ? "green.100" : "red.100"}
                             >
                               https://github.com/{item.repo}
                             </Text>
@@ -1239,12 +1239,12 @@ function TableSheets(props: {
                           <Input
                             type="text"
                             variant="filled"
-                            placeholder="Enter Release Branch"
-                            defaultValue={item.release_branch}
+                            placeholder="Enter Tag"
+                            defaultValue={item.tag}
                             disabled={props.sheetsDisabled}
                             onChange={(e) =>
                               props.onBranchTagChange({
-                                release_branch: e.target.value ?? "",
+                                tag: e.target.value ?? "",
                                 service: item.service,
                                 repo: item.repo,
                               } as SimpleReleaseItemModelSchema)
@@ -1271,12 +1271,12 @@ function TableSheets(props: {
                           <Input
                             type="text"
                             variant="filled"
-                            placeholder="Enter Tag"
-                            defaultValue={item.tag}
+                            placeholder="Enter Release Branch"
+                            defaultValue={item.release_branch}
                             disabled={props.sheetsDisabled}
                             onChange={(e) =>
                               props.onBranchTagChange({
-                                tag: e.target.value ?? "",
+                                release_branch: e.target.value ?? "",
                                 service: item.service,
                                 repo: item.repo,
                               } as SimpleReleaseItemModelSchema)
@@ -1505,9 +1505,9 @@ function TableSheets(props: {
                 <Tfoot>
                   <Tr>
                     <Th>Git Repo</Th>
-                    <Th>Release Branches</Th>
-                    <Th>Feature Number</Th>
                     <Th>Tags</Th>
+                    <Th>Feature Number</Th>
+                    <Th>Release Branches</Th>
                     <Th>Special Notes</Th>
                     <Th>DevOps Notes</Th>
                     {props.sheetsDisabled && (
