@@ -1028,6 +1028,7 @@ export default function ManageReleasePage() {
                           repo: item.repo,
                           service: item.service,
                           release_branch: item.release_branch,
+                          tag: item.tag,
                           platform: item.platform ? item.platform : "azure",
                           azure_env: item.azure_env ? item.azure_env : "pat",
                           azure_tenant: item.azure_tenant ? item.azure_tenant : "at",
@@ -1443,15 +1444,15 @@ function TableSheets(props: {
                                       if (item.platform == "azure") {
                                         jenkinsUrl = `https://jenkins-omms-sgs.optum.com/view/GitHub_Organizations/job/PEP-Azure/job/${
                                           item.repo.split("/")[1]
-                                        }/job/${encodeURIComponent(item.release_branch ?? "")}`
+                                        }/view/tags/job/${encodeURIComponent(item.tag ?? "")}`
                                       } else if (item.platform == "onprem") {
                                         jenkinsUrl = `https://jenkins-omms-sgs.optum.com/view/GitHub_Organizations/job/PEP-MT/job/${
                                           item.repo.split("/")[1]
-                                        }/job/${encodeURIComponent(item.release_branch ?? "")}`
+                                        }/view/tags/job/${encodeURIComponent(item.tag ?? "")}`
                                       } else {
                                         jenkinsUrl = `https://jenkins-omms-sgs.optum.com/view/GitHub_Organizations/job/OIL/job/${
                                           item.repo.split("/")[1]
-                                        }/job/${encodeURIComponent(item.release_branch ?? "")}`
+                                        }/view/tags/job/${encodeURIComponent(item.tag ?? "")}`
                                       }
                                     } else {
                                       if (
@@ -1460,17 +1461,17 @@ function TableSheets(props: {
                                       ) {
                                         jenkinsUrl = `https://jenkins-omms-sgs.optum.com/view/GitHub_Organizations/job/PEP-Azure/job/${
                                           item.repo.split("/")[1]
-                                        }/job/${encodeURIComponent(item.release_branch ?? "")}`
+                                        }/view/tags/job/${encodeURIComponent(item.tag ?? "")}`
                                       } else if (
                                         platform[`${item.repo}${item.service}`] == "onprem"
                                       ) {
                                         jenkinsUrl = `https://jenkins-omms-sgs.optum.com/view/GitHub_Organizations/job/PEP-MT/job/${
                                           item.repo.split("/")[1]
-                                        }/job/${encodeURIComponent(item.release_branch ?? "")}`
+                                        }/view/tags/job/${encodeURIComponent(item.tag ?? "")}`
                                       } else {
                                         jenkinsUrl = `https://jenkins-omms-sgs.optum.com/view/GitHub_Organizations/job/OIL/job/${
                                           item.repo.split("/")[1]
-                                        }/job/${encodeURIComponent(item.release_branch ?? "")}`
+                                        }/view/tags/job/${encodeURIComponent(item.tag ?? "")}`
                                       }
                                     }
                                     setCurrentJobLogs({

@@ -292,6 +292,7 @@ export type SimpleDeployReleaseItemModelSchema = {
   repo: string
   service: string
   release_branch?: string
+  tag?: string
   platform?: string
   azure_env?: string
   azure_tenant?: string

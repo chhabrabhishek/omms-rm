@@ -2140,6 +2140,11 @@
             "maxLength": 1024,
             "type": "string"
           },
+          "tag": {
+            "title": "Tag",
+            "maxLength": 1024,
+            "type": "string"
+          },
           "platform": {
             "title": "Platform",
             "maxLength": 100,
