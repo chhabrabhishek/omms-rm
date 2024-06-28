@@ -605,7 +605,7 @@ export default function CreateReleasePage() {
                     {talendData.length && (
                       <Box w="full">
                         <VStack w="full" spacing="12">
-                          <Card w="full">
+                          <Card w="full" borderWidth="6px" borderColor="gray.100">
                             <CardHeader>
                               <Heading size="md">
                                 {selectedOptions.includes("salesforce-api")
@@ -940,7 +940,7 @@ export default function CreateReleasePage() {
                     {talendData.length && (
                       <Box w="full">
                         <VStack w="full" spacing="12">
-                          <Card w="full">
+                          <Card w="full" borderWidth="6px" borderColor="gray.100">
                             <CardHeader>
                               <Heading size="md">
                                 {result.release_data.targets.find(
@@ -1172,7 +1172,7 @@ function TableSheets(props: {
       {!props.response.length ? (
         <Box w="full">
           <VStack w="full" spacing="12">
-            <Card w="full">
+            <Card w="full" borderWidth="6px" borderColor="gray.100">
               <CardHeader>
                 <Heading size="md">
                   {
@@ -1323,7 +1323,7 @@ function TableSheets(props: {
       ) : (
         <Box w="full">
           <VStack w="full" spacing="12">
-            <Card w="full">
+            <Card w="full" borderWidth="6px" borderColor="gray.100">
               <CardHeader>
                 <Heading size="md">
                   {

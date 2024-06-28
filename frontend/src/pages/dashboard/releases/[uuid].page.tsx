@@ -690,7 +690,7 @@ export default function ManageReleasePage() {
                     ) && (
                       <Box w="full">
                         <VStack w="full" spacing="12">
-                          <Card w="full">
+                          <Card w="full" borderWidth="6px" borderColor="gray.100">
                             <CardHeader>
                               <Heading size="md">
                                 {response.release_data.targets.find(
@@ -1164,7 +1164,7 @@ function TableSheets(props: {
   return (
     <Box w="full">
       <VStack w="full" spacing="12">
-        <Card w="full">
+        <Card w="full" borderWidth="6px" borderColor="gray.100">
           <CardHeader>
             <Heading size="md">
               {props.serviceOptions.find((item) => item.value === props.response[0].service)?.label}

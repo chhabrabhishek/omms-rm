@@ -25,7 +25,7 @@ import {
 } from "@chakra-ui/react"
 import { IconPlus, IconFileExport, IconMenu, IconTrash } from "@tabler/icons-react"
 import { useRouter } from "next/router"
-import { Planet } from "react-kawaii"
+import { Browser, Folder, Mug, Planet } from "react-kawaii"
 import { deploymentStatusOptions } from "./[uuid].page"
 import { DateTime } from "luxon"
 import { useAppMutation } from "@/hooks/useAppMutation"
@@ -85,7 +85,14 @@ export default function ReleasesPage() {
             value={response?.release_list}
             condition={(release_list) => (release_list?.length ?? 0) > 0}
             then={(release_list) => (
-              <Box w="full" border="default" borderRadius="md" shadow="sm" bg="white">
+              <Box
+                w="full"
+                border="6px solid"
+                borderColor="gray.100"
+                borderRadius="md"
+                shadow="sm"
+                bg="white"
+              >
                 <DataTable
                   rows={release_list}
                   columns={{
@@ -118,7 +125,13 @@ export default function ReleasesPage() {
                       id: "status",
                       header: "Checklist Status",
                       cell: (cell) => (
-                        <Tag>
+                        <Tag
+                          bg={
+                            cell.row.original.approvers.filter((item) => !item.approved).length
+                              ? "yellow.100"
+                              : "green.100"
+                          }
+                        >
                           {cell.row.original.approvers.filter((item) => !item.approved).length
                             ? "Draft"
                             : "Completed"}
@@ -133,7 +146,19 @@ export default function ReleasesPage() {
                       id: "deployment_status",
                       header: "Deployment Status",
                       cell: (cell) => (
-                        <Tag>
+                        <Tag
+                          bg={
+                            cell.row.original.deployment_status == 1
+                              ? "green.100"
+                              : cell.row.original.deployment_status == 2
+                              ? "yellow.100"
+                              : cell.row.original.deployment_status == 3
+                              ? "red.100"
+                              : cell.row.original.deployment_status == 4
+                              ? "blue.100"
+                              : "gray.100"
+                          }
+                        >
                           {
                             deploymentStatusOptions.find(
                               (item) => item.value === cell.row.original.deployment_status
@@ -223,6 +248,35 @@ export default function ReleasesPage() {
                     size: 50,
                   }}
                 />
+                <Card w="full" border="default" shadow="none">
+                  <CardBody py="24">
+                    <HStack justify="space-around">
+                      <VStack spacing="4">
+                        <Box justifySelf="center">
+                          <Mug mood="blissful" size={64} />
+                        </Box>
+
+                        <Text color="muted">Don't forget to smile today</Text>
+                      </VStack>
+
+                      <VStack spacing="4">
+                        <Box justifySelf="center">
+                          <Browser mood="excited" size={64} />
+                        </Box>
+
+                        <Text color="muted">You are all caught up. Keep RelEasing</Text>
+                      </VStack>
+
+                      <VStack spacing="4">
+                        <Box justifySelf="center">
+                          <Folder mood="lovestruck" size={64} />
+                        </Box>
+
+                        <Text color="muted">Made with ❤ by Team Release</Text>
+                      </VStack>
+                    </HStack>
+                  </CardBody>
+                </Card>
               </Box>
             )}
             else={() => (

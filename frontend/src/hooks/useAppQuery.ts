@@ -47,6 +47,9 @@ export function useAppQuery<A, E, R extends Response, Q extends QueryKey>(
       refetchOnReconnect: false,
       refetchIntervalInBackground: false,
       refetchInterval: false,
+      refetchOnMount: false,
+      retry: false,
+      staleTime: 1000 * 60,
     }),
   })
 
