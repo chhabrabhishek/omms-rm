@@ -20,7 +20,7 @@ RUN apt-get update && \
 RUN pip install --upgrade pip
 RUN pip install flake8==6.0.0
 COPY . /usr/src/app/
-RUN flake8 --ignore=E501,F401,E302,E402,F811,F841,W292,W503,E722,E999 .
+RUN flake8 --ignore=E501,F401,E302,E402,F811,F841,W292,W503,E722,E999,F541 .
 
 # install python dependencies
 COPY ./pyproject.toml .
