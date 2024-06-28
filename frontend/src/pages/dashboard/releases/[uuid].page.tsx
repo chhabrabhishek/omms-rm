@@ -316,12 +316,13 @@ export default function ManageReleasePage() {
   const updateReleaseMutation = useAppMutation(api.mutations.useReleasesApiUpdateRelease, {
     onOk() {
       toast.success("Updated")
+      setFalseBranches([])
     },
     onNotOk(response) {
       if (response.error?.reason === "branch_not_found") {
         setFalseBranches(response.error.detail?.split(", ") ?? [])
         toast.error(
-          `Tag you entered in ${response.error.detail} does not exist. Please verify the tags and try again`,
+          `Tag or Release Branch you entered in ${response.error.detail} does not exist. Please verify and try again`,
           { duration: 5000 }
         )
       } else {
@@ -681,8 +682,9 @@ export default function ManageReleasePage() {
 
                     {falseBranches.length > 0 && (
                       <Text color="red.800">
-                        Release branch you entered in <strong>`{falseBranches.join(", ")}`</strong>{" "}
-                        does not exist. Please verify the branches and try again
+                        Tag or Release Branch you entered in{" "}
+                        <strong>`{falseBranches.join(", ")}`</strong> does not exist. Please verify
+                        and try again
                       </Text>
                     )}
 
@@ -1230,7 +1232,7 @@ function TableSheets(props: {
                               }}
                               p={2}
                               borderRadius="md"
-                              bg={item.tag ? "green.100" : "red.100"}
+                              bg={item.tag || item.release_branch ? "green.100" : "red.100"}
                             >
                               https://github.com/{item.repo}
                             </Text>
@@ -1350,89 +1352,112 @@ function TableSheets(props: {
                               </ChakraSelect>
                             </Td>
                             <Td>
-                              <ChakraSelect
-                                defaultValue={props.deploymentStarted ? item.azure_env : "pat"}
-                                variant="filled"
-                                onChange={(e) =>
-                                  props.onBranchTagChange({
-                                    azure_env: e.target.selectedOptions[0].value,
-                                    service: item.service,
-                                    repo: item.repo,
-                                  } as SimpleReleaseItemModelSchema)
-                                }
-                                isDisabled={
-                                  props.deploymentStarted ||
-                                  !JSON.parse(localStorage.getItem("$auth") ?? "").roles.find(
-                                    (item: SimpleRolesSchema) => item.role === 4
-                                  )
-                                }
-                              >
-                                {(!platform[`${item.repo}${item.service}`] ||
-                                platform[`${item.repo}${item.service}`] == "azure"
-                                  ? [
-                                      "pat",
-                                      "demo",
-                                      "dev",
-                                      "test",
-                                      "dev2",
-                                      "test2",
-                                      "dev3",
-                                      "test3",
-                                      "dc",
-                                      "jpas",
-                                      "sitconv",
-                                      "sitdi",
-                                    ]
-                                  : platform[`${item.repo}${item.service}`] == "onprem"
-                                  ? ["pat", "demo", "mttest", "mttest2", "mtps", "mtsb", "mtdev"]
-                                  : [
-                                      "dev",
-                                      "test",
-                                      "dev2",
-                                      "test2",
-                                      "dev3",
-                                      "test3",
-                                      "pat",
-                                      "demo",
-                                      "dc",
-                                      "jpas",
-                                      "sitconv",
-                                      "sitdi",
-                                      "ps",
-                                      "sb",
-                                    ]
-                                ).map((item) => (
-                                  <option key={item} value={item}>
-                                    {item.toUpperCase()}
-                                  </option>
-                                ))}
-                              </ChakraSelect>
+                              {props.deploymentStarted ? (
+                                <Input
+                                  type="text"
+                                  variant="filled"
+                                  defaultValue={item.azure_env?.toUpperCase()}
+                                  disabled
+                                />
+                              ) : (
+                                <ChakraSelect
+                                  defaultValue={props.deploymentStarted ? item.azure_env : "pat"}
+                                  variant="filled"
+                                  onChange={(e) =>
+                                    props.onBranchTagChange({
+                                      azure_env: e.target.selectedOptions[0].value,
+                                      service: item.service,
+                                      repo: item.repo,
+                                    } as SimpleReleaseItemModelSchema)
+                                  }
+                                  isDisabled={
+                                    props.deploymentStarted ||
+                                    !JSON.parse(localStorage.getItem("$auth") ?? "").roles.find(
+                                      (item: SimpleRolesSchema) => item.role === 4
+                                    )
+                                  }
+                                >
+                                  {(!platform[`${item.repo}${item.service}`] ||
+                                  platform[`${item.repo}${item.service}`] == "azure"
+                                    ? [
+                                        "pat",
+                                        "demo",
+                                        "dev",
+                                        "test",
+                                        "dev2",
+                                        "test2",
+                                        "dev3",
+                                        "test3",
+                                        "dc",
+                                        "jpas",
+                                        "sitconv",
+                                        "sitdi",
+                                      ]
+                                    : platform[`${item.repo}${item.service}`] == "onprem"
+                                    ? ["pat", "demo", "mttest", "mttest2", "mtps", "mtsb", "mtdev"]
+                                    : [
+                                        "dev",
+                                        "test",
+                                        "dev2",
+                                        "test2",
+                                        "dev3",
+                                        "test3",
+                                        "pat",
+                                        "demo",
+                                        "dc",
+                                        "jpas",
+                                        "sitconv",
+                                        "sitdi",
+                                        "ps",
+                                        "sb",
+                                        "uat",
+                                      ]
+                                  ).map((item) => (
+                                    <option key={item} value={item}>
+                                      {item.toUpperCase()}
+                                    </option>
+                                  ))}
+                                </ChakraSelect>
+                              )}
                             </Td>
                             <Td>
-                              <ChakraSelect
-                                defaultValue={props.deploymentStarted ? item.azure_tenant : "at"}
-                                variant="filled"
-                                onChange={(e) =>
-                                  props.onBranchTagChange({
-                                    azure_tenant: e.target.selectedOptions[0].value,
-                                    service: item.service,
-                                    repo: item.repo,
-                                  } as SimpleReleaseItemModelSchema)
-                                }
-                                isDisabled={
-                                  props.deploymentStarted ||
-                                  !JSON.parse(localStorage.getItem("$auth") ?? "").roles.find(
-                                    (item: SimpleRolesSchema) => item.role === 4
-                                  ) ||
-                                  platform[`${item.repo}${item.service}`] == "onprem"
-                                }
-                              >
-                                {["at", "om", "nc", "mt"].map((item) => (
-                                  <option key={item} value={item}>
-                                    {item.toUpperCase()}
-                                  </option>
-                                ))}
-                              </ChakraSelect>
+                              {props.deploymentStarted ? (
+                                <Input
+                                  type="text"
+                                  variant="filled"
+                                  defaultValue={item.azure_tenant?.toUpperCase()}
+                                  disabled
+                                />
+                              ) : (
+                                <ChakraSelect
+                                  defaultValue={props.deploymentStarted ? item.azure_tenant : "at"}
+                                  variant="filled"
+                                  onChange={(e) =>
+                                    props.onBranchTagChange({
+                                      azure_tenant: e.target.selectedOptions[0].value,
+                                      service: item.service,
+                                      repo: item.repo,
+                                    } as SimpleReleaseItemModelSchema)
+                                  }
+                                  isDisabled={
+                                    props.deploymentStarted ||
+                                    !JSON.parse(localStorage.getItem("$auth") ?? "").roles.find(
+                                      (item: SimpleRolesSchema) => item.role === 4
+                                    ) ||
+                                    platform[`${item.repo}${item.service}`] == "onprem"
+                                  }
+                                >
+                                  {(!platform[`${item.repo}${item.service}`] ||
+                                  platform[`${item.repo}${item.service}`] == "azure"
+                                    ? ["at", "om", "nc"]
+                                    : ["at", "om", "nc", "mt", "pt", "oc"]
+                                  ).map((item) => (
+                                    <option key={item} value={item}>
+                                      {item.toUpperCase()}
+                                    </option>
+                                  ))}
+                                </ChakraSelect>
+                              )}
                             </Td>
                             <Td>
                               <Tooltip label="Click to see the job logs.">
@@ -1442,36 +1467,60 @@ function TableSheets(props: {
                                     let jenkinsUrl
                                     if (item.platform) {
                                       if (item.platform == "azure") {
-                                        jenkinsUrl = `https://jenkins-omms-sgs.optum.com/view/GitHub_Organizations/job/PEP-Azure/job/${
-                                          item.repo.split("/")[1]
-                                        }/view/tags/job/${encodeURIComponent(item.tag ?? "")}`
+                                        jenkinsUrl = item.tag
+                                          ? `https://jenkins-omms-sgs.optum.com/view/GitHub_Organizations/job/PEP-Azure/job/${
+                                              item.repo.split("/")[1]
+                                            }/view/tags/job/${encodeURIComponent(item.tag ?? "")}`
+                                          : `https://jenkins-omms-sgs.optum.com/view/GitHub_Organizations/job/PEP-Azure/job/${
+                                              item.repo.split("/")[1]
+                                            }/job/${encodeURIComponent(item.release_branch ?? "")}`
                                       } else if (item.platform == "onprem") {
-                                        jenkinsUrl = `https://jenkins-omms-sgs.optum.com/view/GitHub_Organizations/job/PEP-MT/job/${
-                                          item.repo.split("/")[1]
-                                        }/view/tags/job/${encodeURIComponent(item.tag ?? "")}`
+                                        jenkinsUrl = item.tag
+                                          ? `https://jenkins-omms-sgs.optum.com/view/GitHub_Organizations/job/PEP-MT/job/${
+                                              item.repo.split("/")[1]
+                                            }/view/tags/job/${encodeURIComponent(item.tag ?? "")}`
+                                          : `https://jenkins-omms-sgs.optum.com/view/GitHub_Organizations/job/PEP-MT/job/${
+                                              item.repo.split("/")[1]
+                                            }/job/${encodeURIComponent(item.release_branch ?? "")}`
                                       } else {
-                                        jenkinsUrl = `https://jenkins-omms-sgs.optum.com/view/GitHub_Organizations/job/OIL/job/${
-                                          item.repo.split("/")[1]
-                                        }/view/tags/job/${encodeURIComponent(item.tag ?? "")}`
+                                        jenkinsUrl = item.tag
+                                          ? `https://jenkins-omms-sgs.optum.com/view/GitHub_Organizations/job/OIL/job/${
+                                              item.repo.split("/")[1]
+                                            }/view/tags/job/${encodeURIComponent(item.tag ?? "")}`
+                                          : `https://jenkins-omms-sgs.optum.com/view/GitHub_Organizations/job/OIL/job/${
+                                              item.repo.split("/")[1]
+                                            }/job/${encodeURIComponent(item.release_branch ?? "")}`
                                       }
                                     } else {
                                       if (
                                         !platform[`${item.repo}${item.service}`] ||
                                         platform[`${item.repo}${item.service}`] == "azure"
                                       ) {
-                                        jenkinsUrl = `https://jenkins-omms-sgs.optum.com/view/GitHub_Organizations/job/PEP-Azure/job/${
-                                          item.repo.split("/")[1]
-                                        }/view/tags/job/${encodeURIComponent(item.tag ?? "")}`
+                                        jenkinsUrl = item.tag
+                                          ? `https://jenkins-omms-sgs.optum.com/view/GitHub_Organizations/job/PEP-Azure/job/${
+                                              item.repo.split("/")[1]
+                                            }/view/tags/job/${encodeURIComponent(item.tag ?? "")}`
+                                          : `https://jenkins-omms-sgs.optum.com/view/GitHub_Organizations/job/PEP-Azure/job/${
+                                              item.repo.split("/")[1]
+                                            }/job/${encodeURIComponent(item.release_branch ?? "")}`
                                       } else if (
                                         platform[`${item.repo}${item.service}`] == "onprem"
                                       ) {
-                                        jenkinsUrl = `https://jenkins-omms-sgs.optum.com/view/GitHub_Organizations/job/PEP-MT/job/${
-                                          item.repo.split("/")[1]
-                                        }/view/tags/job/${encodeURIComponent(item.tag ?? "")}`
+                                        jenkinsUrl = item.tag
+                                          ? `https://jenkins-omms-sgs.optum.com/view/GitHub_Organizations/job/PEP-MT/job/${
+                                              item.repo.split("/")[1]
+                                            }/view/tags/job/${encodeURIComponent(item.tag ?? "")}`
+                                          : `https://jenkins-omms-sgs.optum.com/view/GitHub_Organizations/job/PEP-MT/job/${
+                                              item.repo.split("/")[1]
+                                            }/job/${encodeURIComponent(item.release_branch ?? "")}`
                                       } else {
-                                        jenkinsUrl = `https://jenkins-omms-sgs.optum.com/view/GitHub_Organizations/job/OIL/job/${
-                                          item.repo.split("/")[1]
-                                        }/view/tags/job/${encodeURIComponent(item.tag ?? "")}`
+                                        jenkinsUrl = item.tag
+                                          ? `https://jenkins-omms-sgs.optum.com/view/GitHub_Organizations/job/OIL/job/${
+                                              item.repo.split("/")[1]
+                                            }/view/tags/job/${encodeURIComponent(item.tag ?? "")}`
+                                          : `https://jenkins-omms-sgs.optum.com/view/GitHub_Organizations/job/OIL/job/${
+                                              item.repo.split("/")[1]
+                                            }/job/${encodeURIComponent(item.release_branch ?? "")}`
                                       }
                                     }
                                     setCurrentJobLogs({

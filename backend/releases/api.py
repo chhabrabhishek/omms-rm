@@ -154,19 +154,26 @@ def create_release(request, form: CreateReleaseRequest):
             if role.role == Roles.Role.ReleaseAdmin:
                 with transaction.atomic():
                     for item in form.release.items:
-                        if not item.tag:
-                            continue
-                        git_response = requests.get(
-                            f"https://api.github.com/repos/{item.repo}/git/ref/tags/{item.tag}",
-                            headers=headers,
-                        )
-                        if git_response.status_code == 404:
-                            false_branches.append(item.repo)
+                        if item.tag:
+                            git_response = requests.get(
+                                f"https://api.github.com/repos/{item.repo}/git/ref/tags/{item.tag}",
+                                headers=headers,
+                            )
+                            if git_response.status_code == 404:
+                                false_branches.append(item.repo)
+                                continue
+                        if item.release_branch:
+                            git_response = requests.get(
+                                f"https://api.github.com/repos/{item.repo}/branches/{item.release_branch}",
+                                headers=headers,
+                            )
+                            if git_response.status_code == 404:
+                                false_branches.append(item.repo)
                     if len(false_branches):
                         return {
                             "ok": False,
                             "error": {
-                                "detail": ", ".join(false_branches),
+                                "detail": ", ".join(set(false_branches)),
                                 "reason": "branch_not_found",
                             },
                         }
@@ -292,19 +299,26 @@ def update_release(request, form: UpdateReleaseRequest):
         else:
             with transaction.atomic():
                 for item in form.release.items:
-                    if not item.tag:
-                        continue
-                    git_response = requests.get(
-                        f"https://api.github.com/repos/{item.repo}/git/ref/tags/{item.tag}",
-                        headers=headers,
-                    )
-                    if git_response.status_code == 404:
-                        false_branches.append(item.repo)
+                    if item.tag:
+                        git_response = requests.get(
+                            f"https://api.github.com/repos/{item.repo}/git/ref/tags/{item.tag}",
+                            headers=headers,
+                        )
+                        if git_response.status_code == 404:
+                            false_branches.append(item.repo)
+                            continue
+                    if item.release_branch:
+                        git_response = requests.get(
+                            f"https://api.github.com/repos/{item.repo}/branches/{item.release_branch}",
+                            headers=headers,
+                        )
+                        if git_response.status_code == 404:
+                            false_branches.append(item.repo)
                 if len(false_branches):
                     return {
                         "ok": False,
                         "error": {
-                            "detail": ", ".join(false_branches),
+                            "detail": ", ".join(set(false_branches)),
                             "reason": "branch_not_found",
                         },
                     }
@@ -601,11 +615,23 @@ def deploy_release(request, form: SimpleDeployModelSchema):
 
                     headers = {"Authorization": basic_auth()}
                     if item.platform == "azure":
-                        jenkins_url = f"{JENKINS_URL}PEP-Azure/job/{item.repo.split('/')[1]}/view/tags/job/{urllib.parse.quote_plus(item.tag)}/buildWithParameters?azure_env={item.azure_env}&azure_tenant={item.azure_tenant}"
+                        jenkins_url = (
+                            f"{JENKINS_URL}PEP-Azure/job/{item.repo.split('/')[1]}/view/tags/job/{urllib.parse.quote_plus(item.tag)}/buildWithParameters?azure_env={item.azure_env}&azure_tenant={item.azure_tenant}"
+                            if item.tag
+                            else f"{JENKINS_URL}PEP-Azure/job/{item.repo.split('/')[1]}/job/{urllib.parse.quote_plus(item.release_branch)}/buildWithParameters?azure_env={item.azure_env}&azure_tenant={item.azure_tenant}"
+                        )
                     elif item.platform == "onprem":
-                        jenkins_url = f"{JENKINS_URL}PEP-MT/job/{item.repo.split('/')[1]}/view/tags/job/{urllib.parse.quote_plus(item.tag)}/buildWithParameters?releaseenv={item.azure_env}"
+                        jenkins_url = (
+                            f"{JENKINS_URL}PEP-MT/job/{item.repo.split('/')[1]}/view/tags/job/{urllib.parse.quote_plus(item.tag)}/buildWithParameters?releaseenv={item.azure_env}"
+                            if item.tag
+                            else f"{JENKINS_URL}PEP-MT/job/{item.repo.split('/')[1]}/job/{urllib.parse.quote_plus(item.release_branch)}/buildWithParameters?releaseenv={item.azure_env}"
+                        )
                     else:
-                        jenkins_url = f"{JENKINS_URL}OIL/job/{item.repo.split('/')[1]}/view/tags/job/{urllib.parse.quote_plus(item.tag)}/buildWithParameters?environment={item.azure_env}&tenant={item.azure_tenant}"
+                        jenkins_url = (
+                            f"{JENKINS_URL}OIL/job/{item.repo.split('/')[1]}/view/tags/job/{urllib.parse.quote_plus(item.tag)}/buildWithParameters?environment={item.azure_env}&tenant={item.azure_tenant}"
+                            if item.tag
+                            else f"{JENKINS_URL}OIL/job/{item.repo.split('/')[1]}/job/{urllib.parse.quote_plus(item.release_branch)}/buildWithParameters?environment={item.azure_env}&tenant={item.azure_tenant}"
+                        )
 
                     r = requests.post(
                         jenkins_url,
@@ -636,11 +662,23 @@ def get_deployment_status(request, uuid: uuid.UUID):
 
     for item in list(release.items.all()):
         if item.platform == "azure":
-            jenkins_url = f"{JENKINS_URL}PEP-Azure/job/{item.repo.split('/')[1]}/view/tags/job/{urllib.parse.quote_plus(item.tag)}/api/json?tree=builds[number,timestamp,queueId]&depth=2"
+            jenkins_url = (
+                f"{JENKINS_URL}PEP-Azure/job/{item.repo.split('/')[1]}/view/tags/job/{urllib.parse.quote_plus(item.tag)}/api/json?tree=builds[number,timestamp,queueId]&depth=2"
+                if item.tag
+                else f"{JENKINS_URL}PEP-Azure/job/{item.repo.split('/')[1]}/job/{urllib.parse.quote_plus(item.release_branch)}/api/json?tree=builds[number,timestamp,queueId]&depth=2"
+            )
         elif item.platform == "onprem":
-            jenkins_url = f"{JENKINS_URL}PEP-MT/job/{item.repo.split('/')[1]}/view/tags/job/{urllib.parse.quote_plus(item.tag)}/api/json?tree=builds[number,timestamp,queueId]&depth=2"
+            jenkins_url = (
+                f"{JENKINS_URL}PEP-MT/job/{item.repo.split('/')[1]}/view/tags/job/{urllib.parse.quote_plus(item.tag)}/api/json?tree=builds[number,timestamp,queueId]&depth=2"
+                if item.tag
+                else f"{JENKINS_URL}PEP-MT/job/{item.repo.split('/')[1]}/job/{urllib.parse.quote_plus(item.release_branch)}/api/json?tree=builds[number,timestamp,queueId]&depth=2"
+            )
         else:
-            jenkins_url = f"{JENKINS_URL}OIL/job/{item.repo.split('/')[1]}/view/tags/job/{urllib.parse.quote_plus(item.tag)}/api/json?tree=builds[number,timestamp,queueId]&depth=2"
+            jenkins_url = (
+                f"{JENKINS_URL}OIL/job/{item.repo.split('/')[1]}/view/tags/job/{urllib.parse.quote_plus(item.tag)}/api/json?tree=builds[number,timestamp,queueId]&depth=2"
+                if item.tag
+                else f"{JENKINS_URL}OIL/job/{item.repo.split('/')[1]}/job/{urllib.parse.quote_plus(item.release_branch)}/api/json?tree=builds[number,timestamp,queueId]&depth=2"
+            )
 
         try:
             r = requests.get(
@@ -649,56 +687,73 @@ def get_deployment_status(request, uuid: uuid.UUID):
                 verify=False,
             )
         except Exception as e:
-            return {"ok": True}
+            print(e)
+            continue
 
-        if r.status_code == 404:
-            return {"ok": True}
-
-        builds_list = list(
-            filter(
-                lambda build: str(build["queueId"]) == item.queue_id, r.json()["builds"]
+        if r.ok:
+            builds_list = list(
+                filter(
+                    lambda build: str(build["queueId"]) == item.queue_id,
+                    r.json()["builds"],
+                )
             )
-        )
-
-        if not builds_list:
-            return {"ok": True}
-
-        build_number = builds_list[0]["number"]
-
-        if item.platform == "azure":
-            jenkins_url = f"{JENKINS_URL}PEP-Azure/job/{item.repo.split('/')[1]}/view/tags/job/{urllib.parse.quote_plus(item.tag)}/{build_number}/wfapi/describe"
-        elif item.platform == "onprem":
-            jenkins_url = f"{JENKINS_URL}PEP-MT/job/{item.repo.split('/')[1]}/view/tags/job/{urllib.parse.quote_plus(item.tag)}/{build_number}/wfapi/describe"
         else:
-            jenkins_url = f"{JENKINS_URL}OIL/job/{item.repo.split('/')[1]}/view/tags/job/{urllib.parse.quote_plus(item.tag)}/{build_number}/wfapi/describe"
+            print("Something went wrong")
+            continue
 
-        try:
-            response = requests.get(
-                jenkins_url,
-                headers=headers,
-                verify=False,
-            )
-        except Exception as e:
-            return {"ok": True}
+        if builds_list:
+            build_number = builds_list[0]["number"]
 
-        if response.status_code == 404:
-            return {"ok": True}
-
-        item.job_status = response.json()["status"]
-
-        if item.job_status == "FAILED":
-            for stage in response.json()["stages"]:
-                if stage["status"] == "FAILED":
-                    item.job_logs = f"{stage['error']['message']}. Please go to Jenkins for further information. CURRENT_STAGE={stage['name']}"
-                    break
-
-        if item.job_status != "FAILED":
-            if response.json()["stages"]:
-                item.job_logs = f"CURRENT_STAGE={response.json()['stages'][-1]['name']}"
+            if item.platform == "azure":
+                jenkins_url = (
+                    f"{JENKINS_URL}PEP-Azure/job/{item.repo.split('/')[1]}/view/tags/job/{urllib.parse.quote_plus(item.tag)}/{build_number}/wfapi/describe"
+                    if item.tag
+                    else f"{JENKINS_URL}PEP-Azure/job/{item.repo.split('/')[1]}/job/{urllib.parse.quote_plus(item.release_branch)}/{build_number}/wfapi/describe"
+                )
+            elif item.platform == "onprem":
+                jenkins_url = (
+                    f"{JENKINS_URL}PEP-MT/job/{item.repo.split('/')[1]}/view/tags/job/{urllib.parse.quote_plus(item.tag)}/{build_number}/wfapi/describe"
+                    if item.tag
+                    else f"{JENKINS_URL}PEP-MT/job/{item.repo.split('/')[1]}/job/{urllib.parse.quote_plus(item.release_branch)}/{build_number}/wfapi/describe"
+                )
             else:
-                item.job_logs = f"CURRENT_STAGE=Jenkins"
+                jenkins_url = (
+                    f"{JENKINS_URL}OIL/job/{item.repo.split('/')[1]}/view/tags/job/{urllib.parse.quote_plus(item.tag)}/{build_number}/wfapi/describe"
+                    if item.tag
+                    else f"{JENKINS_URL}OIL/job/{item.repo.split('/')[1]}/job/{urllib.parse.quote_plus(item.release_branch)}/{build_number}/wfapi/describe"
+                )
 
-        item.save()
+            try:
+                response = requests.get(
+                    jenkins_url,
+                    headers=headers,
+                    verify=False,
+                )
+            except Exception as e:
+                print(e)
+                continue
+
+            if response.ok:
+                item.job_status = response.json()["status"]
+
+                if item.job_status == "FAILED":
+                    for stage in response.json()["stages"]:
+                        if stage["status"] == "FAILED":
+                            item.job_logs = f"{stage['error']['message']}. Please go to Jenkins for further information. CURRENT_STAGE={stage['name']}"
+                            break
+
+                if item.job_status != "FAILED":
+                    if response.json()["stages"]:
+                        item.job_logs = (
+                            f"CURRENT_STAGE={response.json()['stages'][-1]['name']}"
+                        )
+                    else:
+                        item.job_logs = f"CURRENT_STAGE=Jenkins"
+
+                item.save()
+            else:
+                print("Something went wrong")
+
     return {"ok": True}
 
 

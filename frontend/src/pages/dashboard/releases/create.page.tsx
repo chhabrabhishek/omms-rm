@@ -350,7 +350,7 @@ export default function CreateReleasePage() {
       if (response.error?.reason === "branch_not_found") {
         setFalseBranches(response.error.detail?.split(", ") ?? [])
         toast.error(
-          `Tag you entered in ${response.error.detail} does not exist. Please verify the tags and try again`,
+          `Tag or Release Branch you entered in ${response.error.detail} does not exist. Please verify and try again`,
           { duration: 5000 }
         )
       } else {
@@ -596,8 +596,9 @@ export default function CreateReleasePage() {
 
                     {falseBranches.length > 0 && (
                       <Text color="red.800">
-                        Release branch you entered in <strong>`{falseBranches.join(", ")}`</strong>{" "}
-                        does not exist. Please verify the branches and try again
+                        Tag or Release Branch you entered in{" "}
+                        <strong>`{falseBranches.join(", ")}`</strong> does not exist. Please verify
+                        and try again
                       </Text>
                     )}
 
@@ -930,8 +931,9 @@ export default function CreateReleasePage() {
 
                     {falseBranches.length > 0 && (
                       <Text color="red.800">
-                        Release branch you entered in <strong>`{falseBranches.join(", ")}`</strong>{" "}
-                        does not exist. Please verify the branches and try again
+                        Tag or Release Branch you entered in{" "}
+                        <strong>`{falseBranches.join(", ")}`</strong> does not exist. Please verify
+                        and try again
                       </Text>
                     )}
 
