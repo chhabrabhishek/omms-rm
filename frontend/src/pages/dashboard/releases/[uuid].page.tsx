@@ -210,20 +210,6 @@ export default function ManageReleasePage() {
     }
   )
 
-  const jobStatusMagic = useMagicQueryHooks({
-    autoRefetch: false,
-    onOk(responseData) {
-      query.refetch()
-    },
-  })
-
-  const jobStatus = api.queries.useReleasesApiGetDeploymentStatus(
-    asPath.split("/")[asPath.split("/").length - 1],
-    {
-      ...jobStatusMagic.hooks,
-    }
-  )
-
   const handleBranchTagChange = (eventData: SimpleReleaseItemModelSchema) => {
     const updatedRow = data?.find(
       (item) => item.service == eventData.service && item.repo == eventData.repo
@@ -364,7 +350,6 @@ export default function ManageReleasePage() {
         deletePendingReleaseItemsMutation.mutate({})
       }
     },
-    autoRefetch: false,
   })
 
   const approveMutation = api.mutations.useReleasesApiApproveRelease(
@@ -382,13 +367,21 @@ export default function ManageReleasePage() {
       setApprovedBy(approvedBy.filter((item) => item.group !== 2))
       setPendingBy([2])
     },
-    autoRefetch: false,
   })
 
   const revokeApprovalMutation = api.mutations.useReleasesApiRevokeApproval(
     asPath.split("/")[asPath.split("/").length - 1] as string,
     reason,
     magicQueryHooks.hooks
+  )
+
+  const jobStatusMagic = useMagicQueryHooks({
+    onOk(responseData) {},
+  })
+
+  const jobStatusMutation = api.mutations.useReleasesApiGetDeploymentStatus(
+    asPath.split("/")[asPath.split("/").length - 1] as string,
+    jobStatusMagic.hooks
   )
 
   const deployMutation = useAppMutation(api.mutations.useReleasesApiDeployRelease, {
@@ -675,7 +668,9 @@ export default function ManageReleasePage() {
                           />
                         </AppFormControl>
                         <AppFormControl w={["full", "full", "50%"]} label="Job Status">
-                          <Button>Poll Job Status</Button>
+                          <Button onClick={() => jobStatusMutation.mutate({})}>
+                            Poll Job Status
+                          </Button>
                         </AppFormControl>
                       </SimpleGrid>
                     )}
@@ -1040,6 +1035,7 @@ export default function ManageReleasePage() {
                         items: deployData,
                         uuid: asPath.split("/")[asPath.split("/").length - 1],
                       })
+                      jobStatusMutation.mutate({})
                     }}
                     ml={3}
                   >
@@ -1191,7 +1187,9 @@ function TableSheets(props: {
 
                 <Thead>
                   <Tr>
-                    <Th>Git Repo</Th>
+                    <Th position="sticky" left={0} zIndex={2} bg="white">
+                      Git Repo
+                    </Th>
                     <Th>Tags</Th>
                     <Th>Feature Number</Th>
                     <Th>Release Branches</Th>
@@ -1221,7 +1219,7 @@ function TableSheets(props: {
                     })
                     .map((item, index) => (
                       <Tr key={item.repo + item.service}>
-                        <Td>
+                        <Td position="sticky" left={0} zIndex={2} bg="white">
                           <Tooltip label={`https://github.com/${item.repo}`}>
                             <Text
                               whiteSpace="initial"
@@ -1554,7 +1552,9 @@ function TableSheets(props: {
 
                 <Tfoot>
                   <Tr>
-                    <Th>Git Repo</Th>
+                    <Th position="sticky" left={0} zIndex={2} bg="white">
+                      Git Repo
+                    </Th>
                     <Th>Tags</Th>
                     <Th>Feature Number</Th>
                     <Th>Release Branches</Th>

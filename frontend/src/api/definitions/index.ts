@@ -389,8 +389,6 @@ export const queryKeys = {
   releasesApiGetConstantAndUsers: () => ["releasesApiGetConstantAndUsers"] as const,
   releasesApiGetAllReleases: () => ["releasesApiGetAllReleases"] as const,
   releasesApiGetReleaseWithUuid: (uuid: string) => ["releasesApiGetReleaseWithUuid", uuid] as const,
-  releasesApiGetDeploymentStatus: (uuid: string) =>
-    ["releasesApiGetDeploymentStatus", uuid] as const,
   releasesApiDeploymentSnapshot: () => ["releasesApiDeploymentSnapshot"] as const,
 } as const
 export type QueryKeys = typeof queryKeys
@@ -580,7 +578,7 @@ function makeRequests(axios: AxiosInstance, config?: AxiosConfig) {
     releasesApiGetDeploymentStatus: (uuid: string) =>
       axios
         .request<AckStructuredResponse>({
-          method: "get",
+          method: "post",
           url: `/api/releases/jobstatus`,
           params: {
             uuid,
@@ -738,23 +736,6 @@ function makeQueries(requests: Requests) {
         queryFn: () => requests.releasesApiGetReleaseWithUuid(uuid),
         ...options,
       }),
-    useReleasesApiGetDeploymentStatus: (
-      uuid: string,
-      options?: Omit<
-        UseQueryOptions<
-          Response<"releasesApiGetDeploymentStatus">,
-          unknown,
-          Response<"releasesApiGetDeploymentStatus">,
-          ReturnType<QueryKeys["releasesApiGetDeploymentStatus"]>
-        >,
-        "queryKey" | "queryFn"
-      >
-    ): UseQueryResult<Response<"releasesApiGetDeploymentStatus">, unknown> =>
-      useQuery({
-        queryKey: queryKeys.releasesApiGetDeploymentStatus(uuid),
-        queryFn: () => requests.releasesApiGetDeploymentStatus(uuid),
-        ...options,
-      }),
     useReleasesApiDeploymentSnapshot: (
       options?: Omit<
         UseQueryOptions<
@@ -906,6 +887,12 @@ type MutationConfigs = {
       Parameters<Requests["releasesApiDeployRelease"]>[0],
       unknown
     >,
+    "onSuccess" | "onSettled" | "onError"
+  >
+  useReleasesApiGetDeploymentStatus?: (
+    queryClient: QueryClient
+  ) => Pick<
+    UseMutationOptions<Response<"releasesApiGetDeploymentStatus">, unknown, unknown, unknown>,
     "onSuccess" | "onSettled" | "onError"
   >
   useReleasesApiDeleteSnapshot?: (
@@ -1169,6 +1156,18 @@ function makeMutations(requests: Requests, config?: Config["mutations"]) {
       >(
         (payload) => requests.releasesApiDeployRelease(payload),
         config?.useReleasesApiDeployRelease,
+        options
+      ),
+    useReleasesApiGetDeploymentStatus: (
+      uuid: string,
+      options?: Omit<
+        UseMutationOptions<Response<"releasesApiGetDeploymentStatus">, unknown, unknown, unknown>,
+        "mutationFn"
+      >
+    ) =>
+      useRapiniMutation<Response<"releasesApiGetDeploymentStatus">, unknown, unknown>(
+        () => requests.releasesApiGetDeploymentStatus(uuid),
+        config?.useReleasesApiGetDeploymentStatus,
         options
       ),
     useReleasesApiDeleteSnapshot: (

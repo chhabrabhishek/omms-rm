@@ -692,7 +692,7 @@
       }
     },
     "/api/releases/jobstatus": {
-      "get": {
+      "post": {
         "operationId": "releases_api_get_deployment_status",
         "summary": "Get Deployment Status",
         "parameters": [

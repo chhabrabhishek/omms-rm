@@ -530,7 +530,7 @@ def delete_pending_release_items(request, uuid: uuid.UUID):
     release = Release.objects.get(uuid=uuid)
     release_items = ReleaseItem.objects.filter(release=release)
     for item in release_items:
-        if not item.release_branch:
+        if not item.release_branch and not item.tag:
             item.delete()
 
     return {"ok": True}
@@ -655,7 +655,7 @@ def deploy_release(request, form: SimpleDeployModelSchema):
     }
 
 
-@router.get("/jobstatus", response=AckResponse)
+@router.post("/jobstatus", response=AckResponse)
 def get_deployment_status(request, uuid: uuid.UUID):
     release = Release.objects.get(uuid=uuid)
     jenkins_url = None
