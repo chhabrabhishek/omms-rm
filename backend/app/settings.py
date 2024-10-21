@@ -199,7 +199,7 @@ CSRF_TRUSTED_ORIGINS = ["https://omms-release.optum.com"]
 #     CSRF_TRUSTED_ORIGINS = [f"{SCHEME}://{HOST}"]
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = os.environ.get("EMAIL_HOST", "ctc-smtp-relay-k8s.optum.com")
+EMAIL_HOST = os.environ.get("EMAIL_HOST", "mailo2.uhc.com")
 EMAIL_PORT = int(os.environ.get("EMAIL_PORT", 25))
 EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")

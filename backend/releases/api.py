@@ -211,40 +211,40 @@ def create_release(request, form: CreateReleaseRequest):
                         for item in form.targets:
                             Target.objects.create(target=item, release=release)
 
-                        from_email_string = settings.EMAIL_FROM
+                        # from_email_string = settings.EMAIL_FROM
 
-                        subject = f"{user} created a release, {form.release.name}"
+                        # subject = f"{user} created a release, {form.release.name}"
 
-                        context = {"user": user, "release": form.release.name}
+                        # context = {"user": user, "release": form.release.name}
 
-                        html_content = render_to_string(
-                            "release/release_creation.html", context
-                        )
+                        # html_content = render_to_string(
+                        #     "release/release_creation.html", context
+                        # )
 
-                        text_content = strip_tags(html_content)
+                        # text_content = strip_tags(html_content)
 
-                        msg = EmailMultiAlternatives(
-                            subject,
-                            text_content,
-                            from_email_string,
-                            (
-                                [
-                                    "gopal_shakti@optum.com",
-                                    "mubaid@optum.com",
-                                    "shubham.singh@optum.com",
-                                ]
-                                if [
-                                    x for x in form.targets if x.lower() == "salesforce"
-                                ]
-                                else [
-                                    "OMMSDevOpsTeam_DL@ds.uhc.com",
-                                    "OMMSDevLeads_DL@ds.uhc.com",
-                                    "OMMS_RM@ds.uhc.com",
-                                ]
-                            ),
-                        )
-                        msg.attach_alternative(html_content, "text/html")
-                        msg.send()
+                        # msg = EmailMultiAlternatives(
+                        #     subject,
+                        #     text_content,
+                        #     from_email_string,
+                        #     (
+                        #         [
+                        #             "gopal_shakti@optum.com",
+                        #             "mubaid@optum.com",
+                        #             "shubham.singh@optum.com",
+                        #         ]
+                        #         if [
+                        #             x for x in form.targets if x.lower() == "salesforce"
+                        #         ]
+                        #         else [
+                        #             "OMMSDevOpsTeam_DL@ds.uhc.com",
+                        #             "OMMSDevLeads_DL@ds.uhc.com",
+                        #             "OMMS_RM@ds.uhc.com",
+                        #         ]
+                        #     ),
+                        # )
+                        # msg.attach_alternative(html_content, "text/html")
+                        # msg.send()
 
                 return {"ok": True}
     except Exception as e:
@@ -252,6 +252,7 @@ def create_release(request, form: CreateReleaseRequest):
             "ok": False,
             "error": {
                 "reason": "internal_server_error",
+                "detail": str(e)
             },
         }
     return {
@@ -776,7 +777,7 @@ class GetDeploymentSnapshotResponse(Schema):
 @router.get("/snapshots", response=GetDeploymentSnapshotResponse)
 def deployment_snapshot(request):
     try:
-        snapshot_response = requests.get("http://rn000133847:3000/snapshots")
+        snapshot_response = requests.get("http://deployment-snapshot:3000/snapshots")
     except Exception as e:
         print(e)
 
@@ -793,7 +794,7 @@ class DeleteSnapshotRequest(Schema):
 @router.post("/delete-snapshot", response=AckResponse)
 def delete_snapshot(request, form: DeleteSnapshotRequest):
     try:
-        requests.get(f"http://rn000133847:3000/delete?dockerTag={form.docker_tag}")
+        requests.get(f"http://deployment-snapshot:3000/delete?dockerTag={form.docker_tag}")
     except Exception as e:
         print(e)
 
