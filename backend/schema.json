@@ -1868,6 +1868,28 @@
           "target"
         ]
       },
+      "SimpleRevokeApproverModelSchema": {
+        "title": "SimpleRevokeApproverModelSchema",
+        "type": "object",
+        "properties": {
+          "user": {
+            "$ref": "#/components/schemas/SimpleUserSchema"
+          },
+          "created_at": {
+            "title": "Created At",
+            "type": "string",
+            "format": "date-time"
+          },
+          "reason": {
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "created_at",
+          "reason"
+        ]
+      },
       "SimpleAllReleaseModelSchema": {
         "title": "SimpleAllReleaseModelSchema",
         "type": "object",
@@ -1898,6 +1920,13 @@
           "deployment_status": {
             "title": "Deployment Status",
             "type": "integer"
+          },
+          "revoke_approvers": {
+            "title": "Revoke Approvers",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SimpleRevokeApproverModelSchema"
+            }
           },
           "created_at": {
             "title": "Created At",
@@ -1940,6 +1969,7 @@
           "updated_by",
           "targets",
           "deployment_status",
+          "revoke_approvers",
           "created_at",
           "updated_at",
           "name"
@@ -2005,6 +2035,13 @@
               "$ref": "#/components/schemas/SimpleApproverModelSchema"
             }
           },
+          "revoke_approvers": {
+            "title": "Revoke Approvers",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SimpleRevokeApproverModelSchema"
+            }
+          },
           "targets": {
             "title": "Targets",
             "type": "array",
@@ -2043,6 +2080,7 @@
           "items",
           "talend_items",
           "approvers",
+          "revoke_approvers",
           "targets",
           "deployment_status",
           "name"

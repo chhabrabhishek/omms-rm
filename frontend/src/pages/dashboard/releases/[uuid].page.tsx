@@ -650,6 +650,47 @@ export default function ManageReleasePage() {
                       </AppFormControl>
                     </SimpleGrid>
 
+                    {response.release_data.revoke_approvers.length && (
+                      <SimpleGrid
+                        w="full"
+                        columns={[1, 1, 1]}
+                        spacing={[6, 8]}
+                        display="flex"
+                        flexDirection={["column", "column", "row"]}
+                        alignItems="flex-start"
+                      >
+                        <AppFormControl
+                          w={["full", "full", "full"]}
+                          label={`Revoked Approvals (${response.release_data.revoke_approvers.length})`}
+                        >
+                          <VStack
+                            align="flex-start"
+                            gap={4}
+                            borderWidth="1px"
+                            borderColor="gray.200"
+                            borderRadius="md"
+                            p={4}
+                          >
+                            {response.release_data.revoke_approvers.map((item) => (
+                              <Text
+                                fontSize="md"
+                                borderLeftWidth={2}
+                                borderLeftColor="brand"
+                                pl={4}
+                              >
+                                {item.reason}
+                                <br></br>
+                                <strong>
+                                  - {item.user?.first_name} {item.user?.last_name} (
+                                  {item.created_at})
+                                </strong>
+                              </Text>
+                            ))}
+                          </VStack>
+                        </AppFormControl>
+                      </SimpleGrid>
+                    )}
+
                     {response.release_data.deployed_by && (
                       <SimpleGrid
                         w="full"

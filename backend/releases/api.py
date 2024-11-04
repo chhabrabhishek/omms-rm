@@ -250,10 +250,7 @@ def create_release(request, form: CreateReleaseRequest):
     except Exception as e:
         return {
             "ok": False,
-            "error": {
-                "reason": "internal_server_error",
-                "detail": str(e)
-            },
+            "error": {"reason": "internal_server_error", "detail": str(e)},
         }
     return {
         "ok": False,
@@ -404,6 +401,14 @@ class SimpleTargetModelSchema(ModelSchema):
         include = ("target",)
 
 
+class SimpleRevokeApproverModelSchema(ModelSchema):
+    user: Optional[SimpleUserSchema]
+
+    class Config:
+        model = RevokeApproval
+        include = ("reason", "user", "created_at")
+
+
 class SimpleAllReleaseModelSchema(ModelSchema):
     approvers: list[SimpleApproverModelSchema]
     created_by: SimpleUserSchema
@@ -411,6 +416,7 @@ class SimpleAllReleaseModelSchema(ModelSchema):
     deployed_by: Optional[SimpleUserSchema]
     targets: list[SimpleTargetModelSchema]
     deployment_status: int
+    revoke_approvers: list[SimpleRevokeApproverModelSchema]
 
     class Config:
         model = Release
@@ -457,6 +463,7 @@ class SimpleGetReleaseModelSchema(ModelSchema):
     items: list[SimpleReleaseItemModelSchema]
     talend_items: list[SimpleTalendReleaseItemModelSchema]
     approvers: list[SimpleApproverModelSchema]
+    revoke_approvers: list[SimpleRevokeApproverModelSchema]
     targets: list[SimpleTargetModelSchema]
     deployment_status: int
     deployed_by: Optional[SimpleUserSchema]
@@ -794,7 +801,9 @@ class DeleteSnapshotRequest(Schema):
 @router.post("/delete-snapshot", response=AckResponse)
 def delete_snapshot(request, form: DeleteSnapshotRequest):
     try:
-        requests.get(f"http://deployment-snapshot:3000/delete?dockerTag={form.docker_tag}")
+        requests.get(
+            f"http://deployment-snapshot:3000/delete?dockerTag={form.docker_tag}"
+        )
     except Exception as e:
         print(e)
 

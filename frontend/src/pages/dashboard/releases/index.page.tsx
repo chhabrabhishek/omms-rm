@@ -23,7 +23,7 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react"
-import { IconPlus, IconFileExport, IconMenu, IconTrash } from "@tabler/icons-react"
+import { IconPlus, IconFileExport, IconMenu, IconTrash, IconArrowBack } from "@tabler/icons-react"
 import { useRouter } from "next/router"
 import { Browser, Folder, Mug, Planet } from "react-kawaii"
 import { deploymentStatusOptions } from "./[uuid].page"
@@ -234,6 +234,12 @@ export default function ReleasesPage() {
                                   }}
                                 >
                                   Delete {cell.row.original.name}
+                                </MenuItem>
+                                <MenuItem icon={<Icon as={IconArrowBack} />}>
+                                  {cell.row.original.revoke_approvers.length
+                                    ? cell.row.original.revoke_approvers.length
+                                    : "None"}{" "}
+                                  Approvals Revoked
                                 </MenuItem>
                               </MenuList>
                             </Menu>

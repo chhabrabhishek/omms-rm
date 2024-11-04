@@ -236,6 +236,11 @@ export type SimpleApproverModelSchema = {
 export type SimpleTargetModelSchema = {
   target: string
 }
+export type SimpleRevokeApproverModelSchema = {
+  user?: SimpleUserSchema
+  created_at: string
+  reason: string
+}
 export type SimpleAllReleaseModelSchema = {
   approvers: SimpleApproverModelSchema[]
   created_by: SimpleUserSchema
@@ -243,6 +248,7 @@ export type SimpleAllReleaseModelSchema = {
   deployed_by?: SimpleUserSchema
   targets: SimpleTargetModelSchema[]
   deployment_status: number
+  revoke_approvers: SimpleRevokeApproverModelSchema[]
   created_at: string
   updated_at: string
   uuid?: string
@@ -263,6 +269,7 @@ export type SimpleGetReleaseModelSchema = {
   items: SimpleReleaseItemModelSchema[]
   talend_items: SimpleTalendReleaseItemModelSchema[]
   approvers: SimpleApproverModelSchema[]
+  revoke_approvers: SimpleRevokeApproverModelSchema[]
   targets: SimpleTargetModelSchema[]
   deployment_status: number
   deployed_by?: SimpleUserSchema
