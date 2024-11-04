@@ -650,7 +650,7 @@ export default function ManageReleasePage() {
                       </AppFormControl>
                     </SimpleGrid>
 
-                    {response.release_data.revoke_approvers.length && (
+                    {response.release_data.revoke_approvers.length ? (
                       <SimpleGrid
                         w="full"
                         columns={[1, 1, 1]}
@@ -689,6 +689,8 @@ export default function ManageReleasePage() {
                           </VStack>
                         </AppFormControl>
                       </SimpleGrid>
+                    ) : (
+                      <></>
                     )}
 
                     {response.release_data.deployed_by && (

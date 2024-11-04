@@ -207,6 +207,11 @@ export default function ReleasesPage() {
                           cell.updated_by.last_name
                         } (${toDateTimeString(fromDjangoISO(cell.updated_at))})`,
                     },
+                    revoke_approvers: {
+                      id: "revoke_approvers",
+                      header: "Revoked Approvals",
+                      accessorFn: (cell) => `${cell.revoke_approvers.length} Approvals`,
+                    },
                     actions: JSON.parse(localStorage.getItem("$auth") ?? "").roles.find(
                       (item: SimpleRolesSchema) => item.role === 2
                     )
