@@ -768,6 +768,7 @@ def get_deployment_status(request, uuid: uuid.UUID):
 class SimpleGetDeploymentSnapshotSchema(Schema):
     azure_repo: str
     commit_hash: str
+    branch_name: str
     deployed_by: str
     deployment_date: str
     docker_tag: str

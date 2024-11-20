@@ -311,6 +311,7 @@ export type SimpleDeployModelSchema = {
 export type SimpleGetDeploymentSnapshotSchema = {
   azure_repo: string
   commit_hash: string
+  branch_name: string
   deployed_by: string
   deployment_date: string
   docker_tag: string

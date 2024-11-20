@@ -2238,6 +2238,10 @@
             "title": "Commit Hash",
             "type": "string"
           },
+          "branch_name": {
+            "title": "Branch Name",
+            "type": "string"
+          },
           "deployed_by": {
             "title": "Deployed By",
             "type": "string"
@@ -2266,6 +2270,7 @@
         "required": [
           "azure_repo",
           "commit_hash",
+          "branch_name",
           "deployed_by",
           "deployment_date",
           "docker_tag",

@@ -116,6 +116,11 @@ export default function DeploymentSnapshotPage() {
                       header: "Commit Hash",
                       accessorKey: "commit_hash",
                     },
+                    branch_name: {
+                      id: "branch_name",
+                      header: "Branch Name",
+                      accessorKey: "branch_name",
+                    },
                     target_env: {
                       id: "target_env",
                       header: "Target Env",
@@ -125,7 +130,13 @@ export default function DeploymentSnapshotPage() {
                       id: "azure_repo",
                       header: "Azure Repo",
                       accessorFn: (cell) =>
-                        cell.azure_repo == "crpepshnprdcus001" ? "SGS Non Prod" : "Multi Tenant",
+                        cell.azure_repo == "docker.repo1.uhc.com"
+                          ? "Repo 1"
+                          : cell.azure_repo == "mulerepo"
+                          ? "Mule Repo"
+                          : cell.azure_repo == "crpepshnprdcus001"
+                          ? "SGS Non Prod"
+                          : "Multi Tenant",
                     },
                     tenant_id: {
                       id: "tenant_id",
