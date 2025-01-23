@@ -35,7 +35,7 @@ IS_DEV = DEBUG
 
 ALLOWED_HOSTS = [
     "localhost",
-    "omms-release.optum.com",
+    "rn000172348",
     "localhost:3000",
 ]
 if "HOST" in os.environ:
