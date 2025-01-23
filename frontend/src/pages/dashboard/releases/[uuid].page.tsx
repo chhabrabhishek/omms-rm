@@ -735,13 +735,7 @@ export default function ManageReleasePage() {
                         <VStack w="full" spacing="12">
                           <Card w="full" borderWidth="6px" borderColor="gray.100">
                             <CardHeader>
-                              <Heading size="md">
-                                {response.release_data.targets.find(
-                                  (item) => item.target.toLowerCase() == "salesforce"
-                                )
-                                  ? "Salesforce"
-                                  : "Talend"}
-                              </Heading>
+                              <Heading size="md">Schemaless APIs</Heading>
                             </CardHeader>
 
                             <CardBody>
@@ -751,24 +745,12 @@ export default function ManageReleasePage() {
                                   size="md"
                                   __css={{ "table-layout": "fixed", "width": "100%" }}
                                 >
-                                  <TableCaption>
-                                    {response.release_data.targets.find(
-                                      (item) => item.target.toLowerCase() == "salesforce"
-                                    )
-                                      ? "Salesforce"
-                                      : "Talend"}
-                                  </TableCaption>
+                                  <TableCaption>Schemaless APIs</TableCaption>
 
                                   <Thead>
                                     <Tr>
                                       <Th>Job Name</Th>
-                                      <Th>
-                                        {response.release_data.targets.find(
-                                          (item) => item.target.toLowerCase() == "salesforce"
-                                        )
-                                          ? "Repo URL Location"
-                                          : "Package Location"}
-                                      </Th>
+                                      <Th>Repo URL Location</Th>
                                       <Th>Feature Number</Th>
                                       <Th>Special Notes</Th>
                                     </Tr>
@@ -802,13 +784,7 @@ export default function ManageReleasePage() {
                                           <Input
                                             type="text"
                                             variant="filled"
-                                            placeholder={
-                                              response.release_data.targets.find(
-                                                (item) => item.target.toLowerCase() == "salesforce"
-                                              )
-                                                ? "Enter Repo URL Location"
-                                                : "Enter Package Location"
-                                            }
+                                            placeholder="Enter Repo URL Location"
                                             defaultValue={item.package_location ?? ""}
                                             disabled={sheetsDisabled}
                                             onChange={(e) => {
@@ -902,13 +878,7 @@ export default function ManageReleasePage() {
                                   <Tfoot>
                                     <Tr>
                                       <Th>Job Name</Th>
-                                      <Th>
-                                        {response.release_data.targets.find(
-                                          (item) => item.target.toLowerCase() == "salesforce"
-                                        )
-                                          ? "Repo URL Location"
-                                          : "Package Location"}
-                                      </Th>
+                                      <Th>Repo URL Location</Th>
                                       <Th>Feature Number</Th>
                                       <Th>Special Notes</Th>
                                     </Tr>

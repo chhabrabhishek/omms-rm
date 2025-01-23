@@ -129,24 +129,8 @@ export const rolesOptions: Array<IServiceOptions> = [
     value: "4",
   },
   {
-    label: "PEP",
+    label: "HCEP",
     value: "5",
-  },
-  {
-    label: "Mule",
-    value: "6",
-  },
-  {
-    label: "Talend",
-    value: "7",
-  },
-  {
-    label: "DB",
-    value: "8",
-  },
-  {
-    label: "DC",
-    value: "9",
   },
 ]
 
@@ -162,10 +146,7 @@ function ProfileUpdateSection(props: {
   }
 
   return (
-    <CardSection
-      title="Personal Details"
-      subtitle="Personal and Professional details"
-    >
+    <CardSection title="Personal Details" subtitle="Personal and Professional details">
       <VStack spacing="12" mb="48">
         <SimpleGrid w="full" spacing="6" columns={[1, 1, 2]}>
           <AppFormControl
