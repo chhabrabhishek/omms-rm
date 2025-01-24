@@ -37,7 +37,8 @@ ALLOWED_HOSTS = [
     "localhost",
     "rn000172348",
     "rn000172348.uhc.com",
-    "hcep-release.optum.com" "localhost:3000",
+    "hcep-release.optum.com",
+    "localhost:3000",
 ]
 if "HOST" in os.environ:
     ALLOWED_HOSTS + os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
