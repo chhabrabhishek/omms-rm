@@ -36,7 +36,8 @@ IS_DEV = DEBUG
 ALLOWED_HOSTS = [
     "localhost",
     "rn000172348",
-    "rn000172348.uhc.com" "localhost:3000",
+    "rn000172348.uhc.com",
+    "hcep-release.optum.com" "localhost:3000",
 ]
 if "HOST" in os.environ:
     ALLOWED_HOSTS + os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
@@ -191,6 +192,7 @@ CORS_ALLOW_ALL_ORIGINS = True
 CSRF_TRUSTED_ORIGINS = [
     "http://rn000172348.uhc.com",
     "http://rn000172348",
+    "https://hcep-release.optum.com",
 ]
 
 # CSRF

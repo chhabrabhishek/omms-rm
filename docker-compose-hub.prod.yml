@@ -26,7 +26,7 @@ services:
     env_file:
       - ./frontend/.env.production
     environment:
-      NEXT_PUBLIC_API: https://omms-release.optum.com
+      NEXT_PUBLIC_API: https://hcep-release.optum.com
   db:
     image: postgres:15
     volumes:
