@@ -1205,10 +1205,10 @@ function TableSheets(props: {
   deploymentStarted: boolean
 }) {
   const [platform, setPlatform] = useState<any>({})
-  const [currentJobLogs, setCurrentJobLogs] = useState<any>({})
+  // const [currentJobLogs, setCurrentJobLogs] = useState<any>({})
 
-  const { isOpen, onOpen, onClose } = useDisclosure()
-  const cancelRef = useRef(null)
+  // const { isOpen, onOpen, onClose } = useDisclosure()
+  // const cancelRef = useRef(null)
 
   return (
     <Box w="full">
@@ -1570,12 +1570,13 @@ function TableSheets(props: {
                                             }/job/${encodeURIComponent(item.release_branch ?? "")}`
                                       }
                                     }
-                                    setCurrentJobLogs({
-                                      logs: item.job_logs,
-                                      url: jenkinsUrl,
-                                      status: item.job_status,
-                                    })
-                                    onOpen()
+                                    // setCurrentJobLogs({
+                                    //   logs: item.job_logs,
+                                    //   url: jenkinsUrl,
+                                    //   status: item.job_status,
+                                    // })
+                                    window.open(jenkinsUrl)
+                                    // onOpen()
                                   }}
                                   colorScheme={
                                     item.job_status == "Started"
@@ -1624,7 +1625,7 @@ function TableSheets(props: {
           </CardBody>
         </Card>
       </VStack>
-      <AlertDialog isOpen={isOpen} leastDestructiveRef={cancelRef} onClose={onClose} size="full">
+      {/* <AlertDialog isOpen={isOpen} leastDestructiveRef={cancelRef} onClose={onClose} size="full">
         <AlertDialogOverlay>
           <AlertDialogContent>
             <AlertDialogHeader fontSize="lg" fontWeight="bold">
@@ -1678,7 +1679,7 @@ function TableSheets(props: {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialogOverlay>
-      </AlertDialog>
+      </AlertDialog> */}
     </Box>
   )
 }

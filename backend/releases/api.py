@@ -443,7 +443,7 @@ class AllReleaseResponse(Schema):
 @router.get("/all", response=AllReleaseResponse)
 def get_all_releases(request):
     try:
-        releases_list = Release.objects.order_by("-updated_at").all()
+        releases_list = Release.objects.order_by("-start_window").all()
 
         return {
             "ok": True,
