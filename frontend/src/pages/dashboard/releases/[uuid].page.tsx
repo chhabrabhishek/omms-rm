@@ -35,7 +35,7 @@ import {
   Tag,
   Code,
 } from "@chakra-ui/react"
-import { IconCornerDownRight, IconDrone, IconFileExport } from "@tabler/icons-react"
+import { IconCornerDownRight, IconDrone, IconFileExport, IconJson } from "@tabler/icons-react"
 import { useAppMutation } from "@/hooks/useAppMutation"
 import { api } from "@/api"
 import { useRouter } from "next/router"
@@ -429,6 +429,12 @@ export default function ManageReleasePage() {
               push(reverse.user.exportRelease(asPath.split("/")[asPath.split("/").length - 1])),
           },
         ],
+        callToAction: {
+          label: "Export JSON data",
+          icon: <Icon as={IconJson} />,
+          onClick: () =>
+            push(reverse.user.exportJSON(asPath.split("/")[asPath.split("/").length - 1])),
+        },
       }}
     >
       {data && asPath.split("/")[asPath.split("/").length - 1] != "[uuid]" ? (

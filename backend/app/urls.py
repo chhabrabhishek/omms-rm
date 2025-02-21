@@ -24,6 +24,7 @@ from releases.api import router as releases_router
 from tickets.api import router as tickets_router
 from app.exceptions import init_exception_handlers
 from releases.views import export_release_csv
+from releases.views import export_release_json
 
 api = NinjaAPI()
 
@@ -37,4 +38,5 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/", api.urls),
     path("export/", export_release_csv, name="export_release_csv"),
+    path("exportjson/", export_release_json, name="export_release_json"),
 ]

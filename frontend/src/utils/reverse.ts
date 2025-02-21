@@ -25,6 +25,7 @@ export const reverse = {
     manageRelease: (uuid: string) => join(reverse.user.releases(), `/${uuid}`),
     exportReleases: () => join("/export", "/"),
     exportRelease: (uuid: string) => join(`/export?uuid=${uuid}`, "/"),
+    exportJSON: (uuid: string) => join(`/exportjson?uuid=${uuid}`, "/"),
 
     deploymentSnapshot: () => join(reverse.user.root(), "/deployment-snapshot"),
 

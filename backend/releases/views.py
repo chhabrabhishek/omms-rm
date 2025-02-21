@@ -1,9 +1,9 @@
 import csv
 import json
 from django.http import HttpResponse
-from accounts.models import Account
 from releases.models import Release
 from releases.models import ReleaseItem
+from releases.models import TalendReleaseItem
 
 
 def export_release_csv(request):
@@ -76,3 +76,46 @@ def export_release_csv(request):
             return HttpResponse(
                 json.dumps(response_data), content_type="application/json"
             )
+
+
+def export_release_json(request):
+    uuid = request.GET.get("uuid")
+    response = HttpResponse(content_type="text/json")
+    response["Content-Disposition"] = f'attachment; filename="release_{uuid}.json"'
+    try:
+        release = Release.objects.get(uuid=uuid)
+        release_items = ReleaseItem.objects.filter(release=release).values(
+            "repo",
+            "service",
+            "release_branch",
+            "feature_number",
+            "tag",
+            "special_notes",
+            "devops_notes",
+        )
+        talend_release_items = TalendReleaseItem.objects.filter(release=release).values(
+            "job_name",
+            "package_location",
+            "feature_number",
+            "special_notes",
+        )
+        data = {
+            "release_details": {
+                "uuid": str(release.uuid),
+                "name": release.name,
+                "created_by": release.created_by.email,
+                "updated_by": release.updated_by.email,
+            },
+            "release_items": list(release_items),
+            "talend_items": list(talend_release_items),
+        }
+
+        response.write(json.dumps(data, indent=4))
+        return response
+    except Exception as e:
+        print(e)
+        response_data = {}
+        response_data["error"] = (
+            "Can't find a release with the provided UUID. Please fix the UUID."
+        )
+        return HttpResponse(json.dumps(response_data), content_type="application/json")
