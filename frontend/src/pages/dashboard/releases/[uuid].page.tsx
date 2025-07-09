@@ -551,7 +551,7 @@ export default function ManageReleasePage() {
                       spacing={[6, 8]}
                       display="flex"
                       flexDirection={["column", "column", "row"]}
-                      alignItems={["flex-start", "flex-start", "flex-end"]}
+                      alignItems={["flex-start", "flex-start", "center"]}
                     >
                       <AppFormControl
                         w={["full", "full", "50%"]}
@@ -577,6 +577,13 @@ export default function ManageReleasePage() {
                               .includes(4)
                           }
                         />
+                        <Text fontSize="sm" textAlign="center" fontWeight="bold">
+                          If this release is for OFE, please make sure your Target Envs contains
+                          either of the following values:
+                        </Text>
+                        <Text fontSize="sm" textAlign="center" fontWeight="bold">
+                          [mtpt, mtuat, mtstage, mtprod]
+                        </Text>
                       </AppFormControl>
 
                       <HStack w={["full", "full", "50%"]}>

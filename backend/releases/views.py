@@ -4,6 +4,7 @@ from django.http import HttpResponse
 from releases.models import Release
 from releases.models import ReleaseItem
 from releases.models import TalendReleaseItem
+from releases.models import Target
 
 
 def export_release_csv(request):
@@ -84,6 +85,7 @@ def export_release_json(request):
     response["Content-Disposition"] = f'attachment; filename="release_{uuid}.json"'
     try:
         release = Release.objects.get(uuid=uuid)
+        targets = Target.objects.filter(release=release).values("target")
         release_items = ReleaseItem.objects.filter(release=release).values(
             "repo",
             "service",
@@ -93,6 +95,8 @@ def export_release_json(request):
             "special_notes",
             "devops_notes",
         )
+        for item in list(release_items):
+            item["docker_tag"] = f"{item['repo'].split('/')[1]}-{item['tag']}"
         talend_release_items = TalendReleaseItem.objects.filter(release=release).values(
             "job_name",
             "package_location",
@@ -105,6 +109,7 @@ def export_release_json(request):
                 "name": release.name,
                 "created_by": release.created_by.email,
                 "updated_by": release.updated_by.email,
+                "targets": list(targets),
             },
             "release_items": list(release_items),
             "talend_items": list(talend_release_items),
