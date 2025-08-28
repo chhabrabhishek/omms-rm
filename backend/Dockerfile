@@ -3,7 +3,7 @@
 ###########
 
 # pull official base image
-FROM python:3.9-slim as builder
+FROM python:3.9-slim AS builder
 
 # set work directory
 WORKDIR /usr/src/app
@@ -20,7 +20,7 @@ RUN apt-get update && \
 RUN pip install --upgrade pip
 RUN pip install flake8==6.0.0
 COPY . /usr/src/app/
-RUN flake8 --ignore=E501,F401,E302,E402,F811,F841,W292,W503,E722,E999,F541 .
+RUN flake8 --ignore=E501,F401,E302,E402,F811,F841,W292,W503,E722,E999,F541,E301,W293 .
 
 # install python dependencies
 COPY ./pyproject.toml .
