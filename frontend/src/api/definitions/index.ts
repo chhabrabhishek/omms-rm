@@ -193,6 +193,7 @@ export type ConstantUserStructuredResponse = {
   result?: ConstantUserResponse
 }
 export type SimpleTalendReleaseItemModelSchema = {
+  id?: number
   job_name: string
   package_location: string
   feature_number?: string
@@ -209,6 +210,14 @@ export type CreateReleaseRequest = {
   release: SimpleReleaseModelSchema
   approvers: number[]
   targets: string[]
+}
+export type UpdateReleaseResponse = {
+  talend_items: SimpleTalendReleaseItemModelSchema[]
+}
+export type UpdateReleaseStructuredResponse = {
+  ok: boolean
+  error?: Error
+  result?: UpdateReleaseResponse
 }
 export type SimpleUpdateReleaseModelSchema = {
   items: SimpleReleaseItemModelSchema[]
@@ -509,7 +518,7 @@ function makeRequests(axios: AxiosInstance, config?: AxiosConfig) {
         .then((res) => res.data),
     releasesApiUpdateRelease: (payload: UpdateReleaseRequest) =>
       axios
-        .request<AckStructuredResponse>({
+        .request<UpdateReleaseStructuredResponse>({
           method: "post",
           url: `/api/releases/update`,
           data: payload,

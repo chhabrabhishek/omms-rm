@@ -427,7 +427,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AckStructuredResponse"
+                  "$ref": "#/components/schemas/UpdateReleaseStructuredResponse"
                 }
               }
             }
@@ -1645,6 +1645,10 @@
         "title": "SimpleTalendReleaseItemModelSchema",
         "type": "object",
         "properties": {
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
           "job_name": {
             "title": "Job Name",
             "maxLength": 1024,
@@ -1736,6 +1740,41 @@
           "release",
           "approvers",
           "targets"
+        ]
+      },
+      "UpdateReleaseResponse": {
+        "title": "UpdateReleaseResponse",
+        "type": "object",
+        "properties": {
+          "talend_items": {
+            "title": "Talend Items",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SimpleTalendReleaseItemModelSchema"
+            }
+          }
+        },
+        "required": [
+          "talend_items"
+        ]
+      },
+      "UpdateReleaseStructuredResponse": {
+        "title": "UpdateReleaseStructuredResponse",
+        "type": "object",
+        "properties": {
+          "ok": {
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "error": {
+            "$ref": "#/components/schemas/Error"
+          },
+          "result": {
+            "$ref": "#/components/schemas/UpdateReleaseResponse"
+          }
+        },
+        "required": [
+          "ok"
         ]
       },
       "SimpleUpdateReleaseModelSchema": {

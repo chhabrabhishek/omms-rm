@@ -1510,7 +1510,18 @@ function TableSheets(props: {
                                         "sitdi",
                                       ]
                                     : platform[`${item.repo}${item.service}`] == "onprem"
-                                    ? ["pat", "demo", "mttest", "mttest2", "mtps", "mtsb", "mtdev"]
+                                    ? [
+                                        "pat",
+                                        "mttest",
+                                        "mttest2",
+                                        "mtps",
+                                        "mtsb",
+                                        "mtdev",
+                                        "mtpt",
+                                        "mtuat",
+                                        "mtstage",
+                                        "mtprod",
+                                      ]
                                     : [
                                         "dev",
                                         "test",
@@ -1527,6 +1538,9 @@ function TableSheets(props: {
                                         "ps",
                                         "sb",
                                         "uat",
+                                        "stage",
+                                        "prod",
+                                        "dr",
                                       ]
                                   ).map((item) => (
                                     <option key={item} value={item}>
