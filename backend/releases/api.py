@@ -310,7 +310,7 @@ def update_release(request, form: UpdateReleaseRequest):
         else:
             with transaction.atomic():
                 for item in form.release.items:
-                    if item.tag:
+                    if item.tag and item.tag != "default_value_unique":
                         git_response = requests.get(
                             f"https://api.github.com/repos/{item.repo}/git/ref/tags/{item.tag}",
                             headers=headers,
@@ -318,7 +318,10 @@ def update_release(request, form: UpdateReleaseRequest):
                         if git_response.status_code == 404:
                             false_branches.append(item.repo)
                             continue
-                    if item.release_branch:
+                    if (
+                        item.release_branch
+                        and item.release_branch != "default_value_unique"
+                    ):
                         git_response = requests.get(
                             f"https://api.github.com/repos/{item.repo}/branches/{item.release_branch}",
                             headers=headers,
