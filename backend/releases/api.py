@@ -89,9 +89,10 @@ class SimpleReleaseItemModelSchema(ModelSchema):
 
 
 class SimpleTalendReleaseItemModelSchema(ModelSchema):
+    id: Optional[int]
     class Config:
         model = TalendReleaseItem
-        include = ("job_name", "package_location", "feature_number", "special_notes")
+        include = ("id", "job_name", "package_location", "feature_number", "special_notes")
 
 
 class SimpleAllConstantReleaseModelSchema(ModelSchema):
@@ -281,9 +282,13 @@ class UpdateReleaseRequest(Schema):
     targets: list[str]
     uuid: uuid.UUID
 
+@response_schema
+class UpdateReleaseResponse(Schema):
+    talend_items: list[SimpleTalendReleaseItemModelSchema]
+
 
 # TODO: Add audit fields
-@router.post("/update", response=AckResponse)
+@router.post("/update", response=UpdateReleaseResponse)
 def update_release(request, form: UpdateReleaseRequest):
     user = request.auth
     false_branches = []
@@ -333,33 +338,49 @@ def update_release(request, form: UpdateReleaseRequest):
                             repo=item.repo,
                             service=item.service,
                         )
-                        release_item.release_branch = item.release_branch
-                        release_item.feature_number = item.feature_number
-                        release_item.tag = item.tag
-                        release_item.special_notes = item.special_notes
+                        release_item.release_branch = item.release_branch if item.release_branch != "default_value_unique" else release_item.release_branch
+                        release_item.feature_number = item.feature_number if item.feature_number != "default_value_unique" else release_item.feature_number
+                        release_item.tag = item.tag if item.tag != "default_value_unique" else release_item.tag
+                        release_item.special_notes = item.special_notes if item.special_notes != "default_value_unique" else release_item.special_notes
                         if Roles.Role.DevOps in [
                             role.role for role in list(user.roles.all())
                         ]:
-                            release_item.devops_notes = item.devops_notes
+                            release_item.devops_notes = item.devops_notes if item.devops_notes != "default_value_unique" else release_item.devops_notes
                         release_item.save()
-                    talend_release_items = TalendReleaseItem.objects.filter(
-                        release=release
-                    )
-                    talend_release_items.delete()
                     for item in form.release.talend_items:
-                        TalendReleaseItem.objects.create(
-                            release=release,
-                            job_name=item.job_name,
-                            package_location=item.package_location,
-                            feature_number=item.feature_number,
-                            special_notes=item.special_notes,
-                        )
+                        if item.id:
+                            talend_release_item = TalendReleaseItem.objects.get(
+                                release=release,
+                                id=item.id
+                            )
+                            if item.job_name or item.package_location or item.feature_number or item.special_notes:
+                                talend_release_item.job_name = item.job_name
+                                talend_release_item.package_location = item.package_location
+                                talend_release_item.feature_number = item.feature_number
+                                talend_release_item.special_notes = item.special_notes
+                                talend_release_item.save()
+                            else:
+                                talend_release_item.delete()
+                        else:
+                            TalendReleaseItem.objects.create(
+                                release=release,
+                                job_name=item.job_name,
+                                package_location=item.package_location,
+                                feature_number=item.feature_number,
+                                special_notes=item.special_notes,
+                            )
                     targets = Target.objects.filter(release=release)
                     targets.delete()
                     for item in form.targets:
                         Target.objects.create(target=item, release=release)
-
-            return {"ok": True}
+            
+            talend_items = TalendReleaseItem.objects.filter(
+                release=release
+            )
+            return {
+                "ok": True,
+                "result": {"talend_items": list(talend_items)},
+            }
     return {
         "ok": False,
         "error": {

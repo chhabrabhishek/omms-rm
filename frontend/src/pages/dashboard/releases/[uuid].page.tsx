@@ -300,9 +300,10 @@ export default function ManageReleasePage() {
   }
 
   const updateReleaseMutation = useAppMutation(api.mutations.useReleasesApiUpdateRelease, {
-    onOk() {
+    onOk(response) {
       toast.success("Updated")
       setFalseBranches([])
+      setTalendData(response.result?.talend_items ?? [])
     },
     onNotOk(response) {
       if (response.error?.reason === "branch_not_found") {
@@ -801,6 +802,7 @@ export default function ManageReleasePage() {
                                               const copyArr = [...talendData]
                                               const element = copyArr[index]
                                               const talendObj = {
+                                                id: element.id,
                                                 job_name: e.target.value,
                                                 package_location: element.package_location,
                                                 feature_number: element.feature_number,
@@ -828,6 +830,7 @@ export default function ManageReleasePage() {
                                               const copyArr = [...talendData]
                                               const element = copyArr[index]
                                               const talendObj = {
+                                                id: element.id,
                                                 job_name: element.job_name,
                                                 package_location: e.target.value,
                                                 feature_number: element.feature_number,
@@ -849,6 +852,7 @@ export default function ManageReleasePage() {
                                               const copyArr = [...talendData]
                                               const element = copyArr[index]
                                               const talendObj = {
+                                                id: element.id,
                                                 job_name: element.job_name,
                                                 package_location: element.package_location,
                                                 feature_number: e.target.value,
@@ -870,6 +874,7 @@ export default function ManageReleasePage() {
                                               const copyArr = [...talendData]
                                               const element = copyArr[index]
                                               const talendObj = {
+                                                id: element.id,
                                                 job_name: element.job_name,
                                                 package_location: element.package_location,
                                                 feature_number: element.feature_number,
@@ -1112,12 +1117,69 @@ export default function ManageReleasePage() {
               isLoading={updateReleaseMutation.isLoading}
               loadingText="Saving"
               isDisabled={sheetsDisabled}
-              onClick={() =>
+              onClick={() => {
+                type ChangedItem = {
+                  repo: string
+                  service: string
+                  [key: string]: any
+                }
+
+                function getChangedFieldsWithValues(
+                  obj1List: SimpleReleaseItemModelSchema[],
+                  obj2List: SimpleReleaseItemModelSchema[]
+                ): ChangedItem[] {
+                  const changes: ChangedItem[] = []
+
+                  const defObject = {
+                    repo: "default_value_unique",
+                    service: "default_value_unique",
+                    release_branch: "default_value_unique",
+                    feature_number: "default_value_unique",
+                    tag: "default_value_unique",
+                    special_notes: "default_value_unique",
+                    devops_notes: "default_value_unique",
+                    platform: "default_value_unique",
+                    azure_env: "default_value_unique",
+                    azure_tenant: "default_value_unique",
+                    job_status: "default_value_unique",
+                    job_logs: "default_value_unique",
+                  }
+
+                  obj1List.forEach((obj1) => {
+                    const match = obj2List.find(
+                      (obj2) => obj2.repo === obj1.repo && obj2.service === obj1.service
+                    )
+
+                    if (match) {
+                      const changedItem: ChangedItem = {
+                        repo: obj1.repo,
+                        service: obj1.service,
+                      }
+
+                      ;(Object.keys(obj1) as (keyof SimpleReleaseItemModelSchema)[]).forEach(
+                        (key) => {
+                          if (obj1[key] !== match[key]) {
+                            changedItem[key] = obj1[key]
+                          }
+                        }
+                      )
+
+                      if (Object.keys(changedItem).length > 2) {
+                        changes.push({ ...defObject, ...changedItem })
+                      }
+                    }
+                  })
+
+                  return changes
+                }
+
+                const result = getChangedFieldsWithValues(data, response?.release_data.items ?? [])
+
                 updateReleaseMutation.mutate({
                   release: {
                     name: response?.release_data.name ?? "",
-                    items: data ?? [],
-                    talend_items: talendData.filter((item) => item.job_name),
+                    items: result ?? [],
+                    talend_items: talendData.filter((item) => item.id || item.job_name),
                     start_window: DateTime.fromISO(startWindowDT!.toISOString())
                       .toFormat("yyyy-MM-dd HH:mm:ss")
                       .replace(" ", "T"),
@@ -1130,7 +1192,7 @@ export default function ManageReleasePage() {
                   uuid: asPath.split("/")[asPath.split("/").length - 1],
                   targets: form.getValues().targetEnvs ?? [],
                 })
-              }
+              }}
             >
               Save & Continue
             </Button>
