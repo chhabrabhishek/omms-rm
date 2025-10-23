@@ -21,6 +21,7 @@ from ninja import NinjaAPI
 from accounts.api import router as accounts_router
 from app.api import router as general_router
 from releases.api import router as releases_router
+from chat.api import router as chat_router
 from tickets.api import router as tickets_router
 from app.exceptions import init_exception_handlers
 from releases.views import export_release_csv
@@ -33,6 +34,7 @@ api.add_router("/accounts/", accounts_router)
 api.add_router("/general/", general_router)
 api.add_router("/tickets/", tickets_router)
 api.add_router("/releases/", releases_router)
+api.add_router("/chat/", chat_router)
 
 urlpatterns = [
     path("admin/", admin.site.urls),

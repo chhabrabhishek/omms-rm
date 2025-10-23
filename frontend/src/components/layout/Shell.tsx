@@ -30,6 +30,7 @@ import {
   IconArrowLeft,
   IconThumbUp,
   IconArchive,
+  IconMessageCircle,
 } from "@tabler/icons-react"
 import { isString } from "underscore"
 import Link from "next/link"
@@ -97,6 +98,12 @@ export function Shell(props: {
                     label: "Releases",
                     icon: <Icon as={IconClipboardCheck} />,
                     href: reverse.user.releases(),
+                  },
+                  {
+                    name: "chat",
+                    label: "Chat",
+                    icon: <Icon as={IconMessageCircle} />,
+                    href: reverse.user.chat(),
                   },
                   {
                     name: "deployment-snapshot",

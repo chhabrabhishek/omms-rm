@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     "accounts",
     "tickets",
     "releases",
+    "chat",
 ]
 
 MIDDLEWARE = [

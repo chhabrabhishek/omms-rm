@@ -339,6 +339,65 @@ export type GetDeploymentSnapshotStructuredResponse = {
 export type DeleteSnapshotRequest = {
   docker_tag: string
 }
+export type ChatResponse = {
+  agent_response: string
+  session_id: string
+}
+export type ChatStructuredResponse = {
+  ok: boolean
+  error?: Error
+  result?: ChatResponse
+}
+export type ChatRequest = {
+  session_id?: string
+  user_query: string
+}
+export type SimpleAllChatModelSchema = {
+  created_by: SimpleUserSchema
+  created_at: string
+  updated_at: string
+  session_id?: string
+  title_truncated: string
+}
+export type GetAllChatSessionsResponse = {
+  chat_session_list: SimpleAllChatModelSchema[]
+}
+export type GetAllChatSessionsStructuredResponse = {
+  ok: boolean
+  error?: Error
+  result?: GetAllChatSessionsResponse
+}
+export type SimpleChatMessageModelSchema = {
+  sender_type: number
+  created_at: string
+  text: string
+}
+export type SimpleGetChatModelSchema = {
+  messages: SimpleChatMessageModelSchema[]
+  session_id?: string
+}
+export type GetChatResponse = {
+  chat_data: SimpleGetChatModelSchema
+}
+export type GetChatStructuredResponse = {
+  ok: boolean
+  error?: Error
+  result?: GetChatResponse
+}
+export type GetChatRequest = {
+  session_id: string
+}
+export type DeleteChatResponse = {
+  session_id: string
+}
+export type DeleteChatStructuredResponse = {
+  ok: boolean
+  error?: Error
+  result?: DeleteChatResponse
+}
+export type DeleteChatRequest = {
+  session_id: string
+}
 export type AxiosConfig = {
   paramsSerializer?: AxiosRequestConfig["paramsSerializer"]
 }
@@ -407,6 +466,7 @@ export const queryKeys = {
   releasesApiGetAllReleases: () => ["releasesApiGetAllReleases"] as const,
   releasesApiGetReleaseWithUuid: (uuid: string) => ["releasesApiGetReleaseWithUuid", uuid] as const,
   releasesApiDeploymentSnapshot: () => ["releasesApiDeploymentSnapshot"] as const,
+  chatApiGetAllChatSessions: () => ["chatApiGetAllChatSessions"] as const,
 } as const
 export type QueryKeys = typeof queryKeys
 function makeRequests(axios: AxiosInstance, config?: AxiosConfig) {
@@ -618,6 +678,37 @@ function makeRequests(axios: AxiosInstance, config?: AxiosConfig) {
           data: payload,
         })
         .then((res) => res.data),
+    chatApiChat: (payload: ChatRequest) =>
+      axios
+        .request<ChatStructuredResponse>({
+          method: "post",
+          url: `/api/chat/chat`,
+          data: payload,
+        })
+        .then((res) => res.data),
+    chatApiGetAllChatSessions: () =>
+      axios
+        .request<GetAllChatSessionsStructuredResponse>({
+          method: "get",
+          url: `/api/chat/all`,
+        })
+        .then((res) => res.data),
+    chatApiGetChat: (payload: GetChatRequest) =>
+      axios
+        .request<GetChatStructuredResponse>({
+          method: "post",
+          url: `/api/chat/get-chat`,
+          data: payload,
+        })
+        .then((res) => res.data),
+    chatApiDeleteChat: (payload: DeleteChatRequest) =>
+      axios
+        .request<DeleteChatStructuredResponse>({
+          method: "post",
+          url: `/api/chat/delete`,
+          data: payload,
+        })
+        .then((res) => res.data),
   } as const
 }
 export type Requests = ReturnType<typeof makeRequests>
@@ -767,6 +858,22 @@ function makeQueries(requests: Requests) {
       useQuery({
         queryKey: queryKeys.releasesApiDeploymentSnapshot(),
         queryFn: () => requests.releasesApiDeploymentSnapshot(),
+        ...options,
+      }),
+    useChatApiGetAllChatSessions: (
+      options?: Omit<
+        UseQueryOptions<
+          Response<"chatApiGetAllChatSessions">,
+          unknown,
+          Response<"chatApiGetAllChatSessions">,
+          ReturnType<QueryKeys["chatApiGetAllChatSessions"]>
+        >,
+        "queryKey" | "queryFn"
+      >
+    ): UseQueryResult<Response<"chatApiGetAllChatSessions">, unknown> =>
+      useQuery({
+        queryKey: queryKeys.chatApiGetAllChatSessions(),
+        queryFn: () => requests.chatApiGetAllChatSessions(),
         ...options,
       }),
   } as const
@@ -919,6 +1026,39 @@ type MutationConfigs = {
       Response<"releasesApiDeleteSnapshot">,
       unknown,
       Parameters<Requests["releasesApiDeleteSnapshot"]>[0],
+      unknown
+    >,
+    "onSuccess" | "onSettled" | "onError"
+  >
+  useChatApiChat?: (
+    queryClient: QueryClient
+  ) => Pick<
+    UseMutationOptions<
+      Response<"chatApiChat">,
+      unknown,
+      Parameters<Requests["chatApiChat"]>[0],
+      unknown
+    >,
+    "onSuccess" | "onSettled" | "onError"
+  >
+  useChatApiGetChat?: (
+    queryClient: QueryClient
+  ) => Pick<
+    UseMutationOptions<
+      Response<"chatApiGetChat">,
+      unknown,
+      Parameters<Requests["chatApiGetChat"]>[0],
+      unknown
+    >,
+    "onSuccess" | "onSettled" | "onError"
+  >
+  useChatApiDeleteChat?: (
+    queryClient: QueryClient
+  ) => Pick<
+    UseMutationOptions<
+      Response<"chatApiDeleteChat">,
+      unknown,
+      Parameters<Requests["chatApiDeleteChat"]>[0],
       unknown
     >,
     "onSuccess" | "onSettled" | "onError"
@@ -1207,5 +1347,53 @@ function makeMutations(requests: Requests, config?: Config["mutations"]) {
         config?.useReleasesApiDeleteSnapshot,
         options
       ),
+    useChatApiChat: (
+      options?: Omit<
+        UseMutationOptions<
+          Response<"chatApiChat">,
+          unknown,
+          Parameters<Requests["chatApiChat"]>[0],
+          unknown
+        >,
+        "mutationFn"
+      >
+    ) =>
+      useRapiniMutation<Response<"chatApiChat">, unknown, Parameters<Requests["chatApiChat"]>[0]>(
+        (payload) => requests.chatApiChat(payload),
+        config?.useChatApiChat,
+        options
+      ),
+    useChatApiGetChat: (
+      options?: Omit<
+        UseMutationOptions<
+          Response<"chatApiGetChat">,
+          unknown,
+          Parameters<Requests["chatApiGetChat"]>[0],
+          unknown
+        >,
+        "mutationFn"
+      >
+    ) =>
+      useRapiniMutation<
+        Response<"chatApiGetChat">,
+        unknown,
+        Parameters<Requests["chatApiGetChat"]>[0]
+      >((payload) => requests.chatApiGetChat(payload), config?.useChatApiGetChat, options),
+    useChatApiDeleteChat: (
+      options?: Omit<
+        UseMutationOptions<
+          Response<"chatApiDeleteChat">,
+          unknown,
+          Parameters<Requests["chatApiDeleteChat"]>[0],
+          unknown
+        >,
+        "mutationFn"
+      >
+    ) =>
+      useRapiniMutation<
+        Response<"chatApiDeleteChat">,
+        unknown,
+        Parameters<Requests["chatApiDeleteChat"]>[0]
+      >((payload) => requests.chatApiDeleteChat(payload), config?.useChatApiDeleteChat, options),
   } as const
 }

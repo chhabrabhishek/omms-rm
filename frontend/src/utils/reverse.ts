@@ -30,6 +30,8 @@ export const reverse = {
     deploymentSnapshot: () => join(reverse.user.root(), "/deployment-snapshot"),
 
     dashboard: () => join(reverse.user.root(), "/dashboard"),
+
+    chat: () => join(reverse.user.root(), "/chat"),
   },
 
   roles: {

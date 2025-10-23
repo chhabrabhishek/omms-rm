@@ -783,6 +783,132 @@
           }
         ]
       }
+    },
+    "/api/chat/chat": {
+      "post": {
+        "operationId": "chat_api_chat",
+        "summary": "Chat",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatStructuredResponse"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "CommonBearerTokenAuth": []
+          }
+        ]
+      }
+    },
+    "/api/chat/all": {
+      "get": {
+        "operationId": "chat_api_get_all_chat_sessions",
+        "summary": "Get All Chat Sessions",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAllChatSessionsStructuredResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "CommonBearerTokenAuth": []
+          }
+        ]
+      }
+    },
+    "/api/chat/get-chat": {
+      "post": {
+        "operationId": "chat_api_get_chat",
+        "summary": "Get Chat",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetChatStructuredResponse"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetChatRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "CommonBearerTokenAuth": []
+          }
+        ]
+      }
+    },
+    "/api/chat/delete": {
+      "post": {
+        "operationId": "chat_api_delete_chat",
+        "summary": "Delete Chat",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteChatStructuredResponse"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteChatRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "CommonBearerTokenAuth": []
+          }
+        ]
+      }
     }
   },
   "components": {
@@ -2364,6 +2490,269 @@
         },
         "required": [
           "docker_tag"
+        ]
+      },
+      "ChatResponse": {
+        "title": "ChatResponse",
+        "type": "object",
+        "properties": {
+          "agent_response": {
+            "title": "Agent Response",
+            "type": "string"
+          },
+          "session_id": {
+            "title": "Session Id",
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "agent_response",
+          "session_id"
+        ]
+      },
+      "ChatStructuredResponse": {
+        "title": "ChatStructuredResponse",
+        "type": "object",
+        "properties": {
+          "ok": {
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "error": {
+            "$ref": "#/components/schemas/Error"
+          },
+          "result": {
+            "$ref": "#/components/schemas/ChatResponse"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      },
+      "ChatRequest": {
+        "title": "ChatRequest",
+        "type": "object",
+        "properties": {
+          "session_id": {
+            "title": "Session Id",
+            "type": "string",
+            "format": "uuid"
+          },
+          "user_query": {
+            "title": "User Query",
+            "type": "string"
+          }
+        },
+        "required": [
+          "user_query"
+        ]
+      },
+      "SimpleAllChatModelSchema": {
+        "title": "SimpleAllChatModelSchema",
+        "type": "object",
+        "properties": {
+          "created_by": {
+            "$ref": "#/components/schemas/SimpleUserSchema"
+          },
+          "created_at": {
+            "title": "Created At",
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "title": "Updated At",
+            "type": "string",
+            "format": "date-time"
+          },
+          "session_id": {
+            "title": "Session Id",
+            "type": "string",
+            "format": "uuid"
+          },
+          "title_truncated": {
+            "title": "Title Truncated",
+            "maxLength": 2048,
+            "type": "string"
+          }
+        },
+        "required": [
+          "created_by",
+          "created_at",
+          "updated_at",
+          "title_truncated"
+        ]
+      },
+      "GetAllChatSessionsResponse": {
+        "title": "GetAllChatSessionsResponse",
+        "type": "object",
+        "properties": {
+          "chat_session_list": {
+            "title": "Chat Session List",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SimpleAllChatModelSchema"
+            }
+          }
+        },
+        "required": [
+          "chat_session_list"
+        ]
+      },
+      "GetAllChatSessionsStructuredResponse": {
+        "title": "GetAllChatSessionsStructuredResponse",
+        "type": "object",
+        "properties": {
+          "ok": {
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "error": {
+            "$ref": "#/components/schemas/Error"
+          },
+          "result": {
+            "$ref": "#/components/schemas/GetAllChatSessionsResponse"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      },
+      "SimpleChatMessageModelSchema": {
+        "title": "SimpleChatMessageModelSchema",
+        "type": "object",
+        "properties": {
+          "sender_type": {
+            "title": "Sender Type",
+            "type": "integer"
+          },
+          "created_at": {
+            "title": "Created At",
+            "type": "string",
+            "format": "date-time"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "sender_type",
+          "created_at",
+          "text"
+        ]
+      },
+      "SimpleGetChatModelSchema": {
+        "title": "SimpleGetChatModelSchema",
+        "type": "object",
+        "properties": {
+          "messages": {
+            "title": "Messages",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SimpleChatMessageModelSchema"
+            }
+          },
+          "session_id": {
+            "title": "Session Id",
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "messages"
+        ]
+      },
+      "GetChatResponse": {
+        "title": "GetChatResponse",
+        "type": "object",
+        "properties": {
+          "chat_data": {
+            "$ref": "#/components/schemas/SimpleGetChatModelSchema"
+          }
+        },
+        "required": [
+          "chat_data"
+        ]
+      },
+      "GetChatStructuredResponse": {
+        "title": "GetChatStructuredResponse",
+        "type": "object",
+        "properties": {
+          "ok": {
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "error": {
+            "$ref": "#/components/schemas/Error"
+          },
+          "result": {
+            "$ref": "#/components/schemas/GetChatResponse"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      },
+      "GetChatRequest": {
+        "title": "GetChatRequest",
+        "type": "object",
+        "properties": {
+          "session_id": {
+            "title": "Session Id",
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "session_id"
+        ]
+      },
+      "DeleteChatResponse": {
+        "title": "DeleteChatResponse",
+        "type": "object",
+        "properties": {
+          "session_id": {
+            "title": "Session Id",
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "session_id"
+        ]
+      },
+      "DeleteChatStructuredResponse": {
+        "title": "DeleteChatStructuredResponse",
+        "type": "object",
+        "properties": {
+          "ok": {
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "error": {
+            "$ref": "#/components/schemas/Error"
+          },
+          "result": {
+            "$ref": "#/components/schemas/DeleteChatResponse"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      },
+      "DeleteChatRequest": {
+        "title": "DeleteChatRequest",
+        "type": "object",
+        "properties": {
+          "session_id": {
+            "title": "Session Id",
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "session_id"
         ]
       }
     },
