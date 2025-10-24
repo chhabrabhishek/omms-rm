@@ -7,6 +7,8 @@ import {
   IconMessageCirclePlus,
   IconMessageCircle,
   IconTrash,
+  IconUser,
+  IconRobot,
 } from "@tabler/icons-react"
 import { IconArrowNarrowUp } from "@tabler/icons-react"
 import toast from "react-hot-toast"
@@ -47,6 +49,7 @@ export default function ChatPage() {
 
     textarea.style.height = "auto"
     textarea.style.height = textarea.scrollHeight + "px"
+    textAreaRef.current?.focus()
   }, [messages, input])
 
   const query = useAppQuery(api.queries.useChatApiGetAllChatSessions, {
@@ -217,7 +220,7 @@ export default function ChatPage() {
                     >
                       {chat_session_list.map((sessionObject: SimpleAllChatModelSchema) => (
                         <Button
-                          variant="ghost"
+                          variant={sessionObject.session_id == currentSession ? "solid" : "ghost"}
                           role="group"
                           my={1}
                           w="full"
@@ -249,7 +252,7 @@ export default function ChatPage() {
                               color="muted"
                               textAlign="left"
                             >
-                              {new Date(sessionObject.created_at).toLocaleString("en-IN", {
+                              {new Date(sessionObject.updated_at).toLocaleString("en-IN", {
                                 weekday: "short",
                                 year: "numeric",
                                 month: "short",
@@ -300,39 +303,69 @@ export default function ChatPage() {
                     }}
                   >
                     {messages.length ? (
-                      messages.map((msg, index) => (
-                        <Flex
-                          w="full"
-                          key={index}
-                          justify={msg.sender_type === "user" ? "end" : "start"}
-                        >
+                      <Flex w="full" direction="column">
+                        {messages.map((msg, index) => (
                           <Flex
                             w="full"
-                            align={msg.sender_type === "user" ? "end" : "start"}
-                            direction="column"
-                            gap={1}
+                            key={index}
+                            justify={msg.sender_type === "user" ? "end" : "start"}
                           >
-                            <Text
-                              bg={msg.sender_type === "user" ? "gray.100" : ""}
-                              p={2}
-                              pb={msg.sender_type === "user" ? "2" : "0"}
-                              borderRadius="lg"
-                              maxW="70%"
-                              textAlign="left"
-                              whiteSpace="pre-wrap"
+                            <Flex
+                              w="full"
+                              align={msg.sender_type === "user" ? "end" : "start"}
+                              direction="column"
+                              gap={1}
                             >
-                              {msg.text}
-                            </Text>
-                            <IconButton
-                              aria-label="Enter"
-                              icon={<Icon as={IconCopy} />}
-                              variant="ghost"
-                              color="brand"
-                              onClick={() => handleCopy(msg.text)}
-                            />
+                              <Text
+                                bg={msg.sender_type === "user" ? "gray.100" : ""}
+                                p={2}
+                                pb={msg.sender_type === "user" ? "2" : "0"}
+                                borderRadius="lg"
+                                maxW="70%"
+                                textAlign="left"
+                                whiteSpace="pre-wrap"
+                              >
+                                {msg.text}
+                              </Text>
+                              <Flex
+                                gap={1}
+                                px={2}
+                                align="center"
+                                direction={msg.sender_type === "user" ? "row" : "row-reverse"}
+                              >
+                                <IconButton
+                                  aria-label="Copy"
+                                  icon={<Icon as={IconCopy} />}
+                                  variant="ghost"
+                                  color="brand"
+                                  onClick={() => handleCopy(msg.text)}
+                                />
+                                {msg.sender_type === "user" ? (
+                                  <Icon as={IconUser} color="brand" />
+                                ) : (
+                                  <Icon as={IconRobot} color="brand" />
+                                )}
+                              </Flex>
+                            </Flex>
                           </Flex>
+                        ))}
+                        <Flex
+                          display={chatMutation.isLoading ? "flex" : "none"}
+                          px={2}
+                          w="full"
+                          alignItems="center"
+                          justifyContent="start"
+                        >
+                          <Icon as={IconRobot} color="brand" />
+                          <Button
+                            isLoading
+                            loadingText={`Thinking. Please wait.`}
+                            spinnerPlacement="end"
+                            variant="ghost"
+                            fontWeight="normal"
+                          ></Button>
                         </Flex>
-                      ))
+                      </Flex>
                     ) : (
                       <Flex
                         w="full"
@@ -363,9 +396,11 @@ export default function ChatPage() {
                     justify="space-between"
                   >
                     <Textarea
+                      autoFocus
                       ref={textAreaRef}
                       value={input}
                       onChange={handleInput}
+                      disabled={chatMutation.isLoading}
                       placeholder="beep boop, talk to me ..."
                       border="none"
                       focusBorderColor="transparent"
@@ -389,6 +424,7 @@ export default function ChatPage() {
                       variant="ghost"
                       color="muted"
                       onClick={handleSend}
+                      isLoading={chatMutation.isLoading}
                     />
                   </Flex>
                 </Flex>
